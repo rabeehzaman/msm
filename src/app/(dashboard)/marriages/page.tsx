@@ -38,7 +38,7 @@ export default function MarriagesPage() {
         </div>
         <Dialog>
           <DialogTrigger render={<Button />}><Plus /> Register Nikah</DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader><DialogTitle>Register Nikah</DialogTitle><DialogDescription>Enter complete marriage details</DialogDescription></DialogHeader>
             <div className="flex flex-col gap-4 py-4">
               <p className="text-sm font-semibold">Bride Details</p>

@@ -64,7 +64,7 @@ export default function IncomePage() {
             <Plus />
             Record Income
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Record Income</DialogTitle>
               <DialogDescription>

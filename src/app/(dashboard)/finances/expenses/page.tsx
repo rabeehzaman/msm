@@ -71,7 +71,7 @@ export default function ExpensesPage() {
             <Plus />
             Record Expense
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Record Expense</DialogTitle>
               <DialogDescription>

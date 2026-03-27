@@ -107,14 +107,18 @@ export default function FinancesPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" render={<Link href="/finances/income" />}>
-            <Plus />
-            Record Income
-          </Button>
-          <Button render={<Link href="/finances/expenses" />}>
-            <Plus />
-            Record Expense
-          </Button>
+          <Link href="/finances/income">
+            <Button variant="outline">
+              <Plus />
+              Record Income
+            </Button>
+          </Link>
+          <Link href="/finances/expenses">
+            <Button>
+              <Plus />
+              Record Expense
+            </Button>
+          </Link>
         </div>
       </div>
 

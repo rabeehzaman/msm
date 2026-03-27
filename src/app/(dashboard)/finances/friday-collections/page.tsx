@@ -84,7 +84,7 @@ export default function FridayCollectionsPage() {
             <Plus />
             New Collection Batch
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>New Friday Collection Batch</DialogTitle>
               <DialogDescription>

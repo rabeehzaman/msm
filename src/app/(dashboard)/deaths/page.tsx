@@ -30,7 +30,7 @@ export default function DeathsPage() {
           <Button variant="destructive"><Bell /> Emergency Notify</Button>
           <Dialog>
             <DialogTrigger render={<Button />}><Plus /> Register Death</DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl">
               <DialogHeader><DialogTitle>Register Death</DialogTitle><DialogDescription>This will update member status, trigger Khairat fund, and coordinate Janazah</DialogDescription></DialogHeader>
               <div className="flex flex-col gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">

@@ -72,14 +72,18 @@ export default function MadrasaPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" render={<Link href="/madrasa/attendance" />}>
-            <Clock />
-            Mark Attendance
-          </Button>
-          <Button render={<Link href="/madrasa/students" />}>
-            <Users />
-            Students
-          </Button>
+          <Link href="/madrasa/attendance">
+            <Button variant="outline">
+              <Clock />
+              Mark Attendance
+            </Button>
+          </Link>
+          <Link href="/madrasa/students">
+            <Button>
+              <Users />
+              Students
+            </Button>
+          </Link>
         </div>
       </div>
 

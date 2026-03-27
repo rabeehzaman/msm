@@ -49,7 +49,7 @@ export default function QardHasanPage() {
         </div>
         <Dialog>
           <DialogTrigger render={<Button />}><Plus /> New Loan Application</DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Qard Hasan Loan Application</DialogTitle>
               <DialogDescription>Submit an interest-free loan request</DialogDescription>
