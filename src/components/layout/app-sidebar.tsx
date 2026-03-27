@@ -213,7 +213,12 @@ export function AppSidebar() {
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    const { signOut } = await import("@/lib/actions/auth");
+                    await signOut();
+                  }}
+                >
                   <LogOut />
                   Sign out
                 </DropdownMenuItem>
