@@ -54,8 +54,8 @@ export const qardHasanLoans = pgTable("qard_hasan_loans", {
   guarantor2Name: text("guarantor2_name"),
   repaymentMonths: integer("repayment_months").default(12),
   monthlyInstallment: numeric("monthly_installment", { precision: 10, scale: 2 }),
-  totalRepaid: numeric("total_repaid", { precision: 10, scale: 2 }).default("0"),
-  outstandingBalance: numeric("outstanding_balance", { precision: 10, scale: 2 }),
+  totalRepaid: numeric("total_repaid", { precision: 10, scale: 2 }).default("0").notNull(),
+  outstandingBalance: numeric("outstanding_balance", { precision: 10, scale: 2 }).default("0").notNull(),
   status: loanStatusEnum("status").default("application").notNull(),
   reviewedBy: uuid("reviewed_by").references(() => members.id),
   approvedBy: uuid("approved_by").references(() => members.id),
@@ -76,6 +76,7 @@ export const qardHasanRepayments = pgTable("qard_hasan_repayments", {
   date: date("date").notNull(),
   receiptNumber: text("receipt_number"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // --- ZAKAT DISTRIBUTIONS ---
@@ -104,26 +105,28 @@ export const zakatDistributions = pgTable("zakat_distributions", {
   approvedBy: uuid("approved_by").references(() => members.id),
   disbursedAt: timestamp("disbursed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // --- BLOOD DONORS ---
 export const bloodDonors = pgTable("blood_donors", {
   id: uuid("id").primaryKey().defaultRandom(),
   tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
-  memberId: uuid("member_id").notNull().references(() => members.id),
+  memberId: uuid("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   bloodGroup: text("blood_group").notNull(),
   lastDonationDate: date("last_donation_date"),
   isAvailable: boolean("is_available").default(true),
   healthStatus: text("health_status"),
   phone: text("phone"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // --- PROFESSIONAL DIRECTORY ---
 export const professionalDirectory = pgTable("professional_directory", {
   id: uuid("id").primaryKey().defaultRandom(),
   tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
-  memberId: uuid("member_id").notNull().references(() => members.id),
+  memberId: uuid("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   profession: text("profession").notNull(),
   businessName: text("business_name"),
   specialization: text("specialization"),
@@ -131,16 +134,18 @@ export const professionalDirectory = pgTable("professional_directory", {
   phone: text("phone"),
   isAvailable: boolean("is_available").default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // --- VOLUNTEER REGISTRY ---
 export const volunteerRegistry = pgTable("volunteer_registry", {
   id: uuid("id").primaryKey().defaultRandom(),
   tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
-  memberId: uuid("member_id").notNull().references(() => members.id),
+  memberId: uuid("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   skills: jsonb("skills").default([]),
   availability: text("availability"),
   interests: jsonb("interests").default([]),
   hoursContributed: integer("hours_contributed").default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

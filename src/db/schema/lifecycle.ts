@@ -88,7 +88,7 @@ export const deaths = pgTable("deaths", {
   placeOfDeath: text("place_of_death"),
   informerName: text("informer_name"),
   informerRelation: text("informer_relation"),
-  burialPlotId: uuid("burial_plot_id"),
+  burialPlotId: uuid("burial_plot_id"), // FK to cemetery_plots enforced at app level (circular ref)
   burialDate: date("burial_date"),
   janazahTime: text("janazah_time"),
   janazahLocation: text("janazah_location"),
@@ -113,11 +113,12 @@ export const cemeteryPlots = pgTable("cemetery_plots", {
   gpsLatitude: numeric("gps_latitude"),
   gpsLongitude: numeric("gps_longitude"),
   status: plotStatusEnum("status").default("available").notNull(),
-  occupantDeathId: uuid("occupant_death_id"),
+  occupantDeathId: uuid("occupant_death_id"), // FK to deaths enforced at app level (circular ref)
   occupantName: text("occupant_name"),
   burialDate: date("burial_date"),
   reservedForId: uuid("reserved_for_id").references(() => members.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // --- CERTIFICATES ---
@@ -248,6 +249,7 @@ export const announcements = pgTable("announcements", {
   createdBy: uuid("created_by").references(() => members.id),
   isPublished: boolean("is_published").default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // --- GOVERNANCE ---
@@ -260,14 +262,18 @@ export const committees = pgTable("committees", {
   termEnd: date("term_end"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const committeeMembers = pgTable("committee_members", {
   id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
   committeeId: uuid("committee_id").notNull().references(() => committees.id, { onDelete: "cascade" }),
-  memberId: uuid("member_id").notNull().references(() => members.id),
+  memberId: uuid("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
   role: text("role").notNull(),
   joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const meetings = pgTable("meetings", {

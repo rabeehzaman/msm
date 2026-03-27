@@ -36,6 +36,9 @@ export const roles = pgTable("roles", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const userRoles = pgTable("user_roles", {
@@ -52,5 +55,5 @@ export const userRoles = pgTable("user_roles", {
   assignedAt: timestamp("assigned_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-  assignedBy: uuid("assigned_by"),
+  assignedBy: uuid("assigned_by").references(() => members.id),
 });

@@ -83,7 +83,7 @@ export const expenseEntries = pgTable("expense_entries", {
   description: text("description"),
   paymentMethod: paymentMethodEnum("payment_method").default("cash").notNull(),
   referenceNumber: text("reference_number"),
-  budgetLineId: uuid("budget_line_id"),
+  budgetLineId: uuid("budget_line_id").references(() => budgets.id),
   status: expenseStatusEnum("status").default("draft").notNull(),
   requestedBy: uuid("requested_by").references(() => members.id),
   approvedBy: uuid("approved_by").references(() => members.id),
@@ -128,8 +128,8 @@ export const subscriptions = pgTable("subscriptions", {
   startDate: date("start_date").notNull(),
   nextDueDate: date("next_due_date").notNull(),
   lastPaidDate: date("last_paid_date"),
-  totalPaid: numeric("total_paid", { precision: 12, scale: 2 }).default("0"),
-  totalDue: numeric("total_due", { precision: 12, scale: 2 }).default("0"),
+  totalPaid: numeric("total_paid", { precision: 12, scale: 2 }).default("0").notNull(),
+  totalDue: numeric("total_due", { precision: 12, scale: 2 }).default("0").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -146,10 +146,10 @@ export const subscriptionPayments = pgTable("subscription_payments", {
     .references(() => tenants.id, { onDelete: "cascade" }),
   subscriptionId: uuid("subscription_id")
     .notNull()
-    .references(() => subscriptions.id),
+    .references(() => subscriptions.id, { onDelete: "cascade" }),
   householdId: uuid("household_id")
     .notNull()
-    .references(() => households.id),
+    .references(() => households.id, { onDelete: "cascade" }),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   paymentMethod: paymentMethodEnum("payment_method").default("cash").notNull(),
   referenceNumber: text("reference_number"),
@@ -158,6 +158,9 @@ export const subscriptionPayments = pgTable("subscription_payments", {
   period: text("period"),
   date: date("date").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -180,7 +183,7 @@ export const fridayCollections = pgTable("friday_collections", {
   fundId: uuid("fund_id").references(() => funds.id),
   date: date("date").notNull(),
   denominations: jsonb("denominations").default({}),
-  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).default("0"),
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).default("0").notNull(),
   counter1Id: uuid("counter1_id").references(() => members.id),
   counter2Id: uuid("counter2_id").references(() => members.id),
   verifiedBy: uuid("verified_by").references(() => members.id),
@@ -235,6 +238,9 @@ export const journalEntries = pgTable("journal_entries", {
   date: date("date").notNull(),
   isLocked: boolean("is_locked").default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
