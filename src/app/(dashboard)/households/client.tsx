@@ -16,8 +16,12 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Download, Trash2 } from "lucide-react";
+import { Plus, Search, Download, Trash2, Loader2 } from "lucide-react";
 import { createHousehold, deleteHousehold } from "@/lib/actions/households";
 import { toast } from "sonner";
 
@@ -51,6 +55,9 @@ export function HouseholdsClient({
   const [search, setSearch] = useState("");
   const [wardFilter, setWardFilter] = useState("all");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = households.filter((h) => {
     const matchesSearch =
@@ -64,22 +71,29 @@ export function HouseholdsClient({
   });
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createHousehold(formData);
       toast.success("Household added successfully");
       setOpen(false);
     } catch {
       toast.error("Failed to add household");
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete household "${name}"? This will also delete all members.`)) return;
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
     try {
-      await deleteHousehold(id);
+      await deleteHousehold(deleteTarget.id);
       toast.success("Household deleted");
+      setDeleteTarget(null);
     } catch {
       toast.error("Failed to delete household");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -149,7 +163,7 @@ export function HouseholdsClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit"><Plus /> Add Household</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Plus />} {loading ? "Saving..." : "Add Household"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -233,9 +247,10 @@ export function HouseholdsClient({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(h.id, h.familyName)}
+                          onClick={() => setDeleteTarget({ id: h.id, name: h.familyName })}
+                          disabled={deletingId === h.id}
                         >
-                          <Trash2 className="size-4 text-red-500" />
+                          {deletingId === h.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-red-500" />}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -246,6 +261,24 @@ export function HouseholdsClient({
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Household</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &ldquo;{deleteTarget?.name}&rdquo;? This will also delete all members in this household. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!deletingId}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={!!deletingId}>
+              {deletingId ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              {deletingId ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

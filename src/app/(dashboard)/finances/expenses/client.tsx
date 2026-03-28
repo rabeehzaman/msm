@@ -36,7 +36,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, FileCheck } from "lucide-react";
+import { Plus, Search, FileCheck, Loader2 } from "lucide-react";
 import { createExpenseEntry } from "@/lib/actions/finance";
 import { toast } from "sonner";
 
@@ -79,6 +79,7 @@ export function ExpensesClient({
   const [statusFilter, setStatusFilter] = useState("all");
   const [fundFilter, setFundFilter] = useState("all");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = entries.filter((e) => {
     const matchesSearch =
@@ -95,12 +96,15 @@ export function ExpensesClient({
   const pendingCount = entries.filter((e) => e.status === "pending_approval").length;
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createExpenseEntry(formData);
       toast.success("Expense entry submitted successfully");
       setOpen(false);
     } catch {
       toast.error("Failed to record expense");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -201,9 +205,9 @@ export function ExpensesClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">
-                  <FileCheck />
-                  Submit for Approval
+                <Button type="submit" disabled={loading}>
+                  {loading ? <Loader2 className="size-4 animate-spin" /> : <FileCheck />}
+                  {loading ? "Submitting..." : "Submit for Approval"}
                 </Button>
               </DialogFooter>
             </form>

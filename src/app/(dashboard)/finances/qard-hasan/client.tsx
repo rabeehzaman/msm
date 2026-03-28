@@ -17,7 +17,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Handshake, IndianRupee, TrendingUp, AlertTriangle } from "lucide-react";
+import { Plus, Search, Handshake, IndianRupee, TrendingUp, AlertTriangle, Loader2 } from "lucide-react";
 import { createExpenseEntry } from "@/lib/actions/finance";
 import { toast } from "sonner";
 
@@ -46,6 +46,7 @@ export function QardHasanClient({
 }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = disbursements.filter((d) => {
     return !search ||
@@ -56,6 +57,7 @@ export function QardHasanClient({
   const totalDisbursed = disbursements.reduce((s, e) => s + Number(e.amount), 0);
 
   async function handleSubmit(formData: FormData) {
+    setLoading(true);
     try {
       if (qardFund) {
         formData.set("fundId", qardFund.id);
@@ -66,6 +68,8 @@ export function QardHasanClient({
       setOpen(false);
     } catch {
       toast.error("Failed to record loan");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -110,7 +114,7 @@ export function QardHasanClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">Record Disbursement</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Plus />} {loading ? "Saving..." : "Record Disbursement"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

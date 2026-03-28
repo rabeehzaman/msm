@@ -12,7 +12,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { CheckCircle2, XCircle, Clock, AlertTriangle, Save } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, AlertTriangle, Save, Loader2 } from "lucide-react";
 import { saveAttendance } from "@/lib/actions/madrasa";
 import { toast } from "sonner";
 
@@ -48,6 +48,7 @@ export function AttendanceClient({
   const [selectedClass, setSelectedClass] = useState<string>(classes[0]?.id || "");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>({});
+  const [loading, setLoading] = useState(false);
 
   const classStudents = students.filter((s) => s.classId === selectedClass);
 
@@ -76,6 +77,7 @@ export function AttendanceClient({
       toast.error("No students to mark attendance for");
       return;
     }
+    setLoading(true);
     try {
       const records = classStudents.map((s) => ({
         studentId: s.id,
@@ -87,6 +89,8 @@ export function AttendanceClient({
       toast.success("Attendance saved successfully");
     } catch {
       toast.error("Failed to save attendance");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -97,9 +101,9 @@ export function AttendanceClient({
           <h1 className="text-3xl font-bold tracking-tight">Attendance</h1>
           <p className="text-muted-foreground">Quick attendance marking - tap to toggle status</p>
         </div>
-        <Button onClick={handleSave}>
-          <Save />
-          Save Attendance
+        <Button onClick={handleSave} disabled={loading}>
+          {loading ? <Loader2 className="size-4 animate-spin" /> : <Save />}
+          {loading ? "Saving..." : "Save Attendance"}
         </Button>
       </div>
 

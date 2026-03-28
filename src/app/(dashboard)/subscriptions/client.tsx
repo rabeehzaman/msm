@@ -41,6 +41,7 @@ import {
   Download,
   Bell,
   CreditCard,
+  Loader2,
 } from "lucide-react";
 import { createSubscription } from "@/lib/actions/finance";
 import { toast } from "sonner";
@@ -64,6 +65,7 @@ export function SubscriptionsClient({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = subscriptions.filter((s) => {
     const matchesSearch =
@@ -78,12 +80,15 @@ export function SubscriptionsClient({
   const activeCount = subscriptions.filter((s) => s.status === "active").length;
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createSubscription(formData);
       toast.success("Subscription created successfully");
       setOpen(false);
     } catch {
       toast.error("Failed to create subscription");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -151,7 +156,7 @@ export function SubscriptionsClient({
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button type="submit">Create Subscription</Button>
+                  <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <CreditCard />} {loading ? "Saving..." : "Create Subscription"}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>

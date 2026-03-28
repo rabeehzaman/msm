@@ -29,7 +29,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, IndianRupee, CheckCircle2 } from "lucide-react";
+import { Plus, IndianRupee, CheckCircle2, Loader2 } from "lucide-react";
 import { createFridayCollection } from "@/lib/actions/finance";
 import { toast } from "sonner";
 
@@ -56,6 +56,7 @@ export function FridayCollectionsClient({
   collections: FridayCollection[];
 }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const totalThisMonth = collections
     .filter((c) => {
@@ -71,12 +72,15 @@ export function FridayCollectionsClient({
     : 0;
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createFridayCollection(formData);
       toast.success("Friday collection recorded successfully");
       setOpen(false);
     } catch {
       toast.error("Failed to record collection");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -118,9 +122,9 @@ export function FridayCollectionsClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">
-                  <CheckCircle2 />
-                  Submit Collection
+                <Button type="submit" disabled={loading}>
+                  {loading ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 />}
+                  {loading ? "Saving..." : "Submit Collection"}
                 </Button>
               </DialogFooter>
             </form>

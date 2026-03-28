@@ -17,7 +17,11 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, Search, Trash2, Loader2 } from "lucide-react";
 import { createMember, deleteMember } from "@/lib/actions/members";
 import { toast } from "sonner";
 
@@ -65,6 +69,9 @@ export function MembersClient({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = members.filter((m) => {
     const matchesSearch =
@@ -77,22 +84,29 @@ export function MembersClient({
   });
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createMember(formData);
       toast.success("Member added successfully");
       setOpen(false);
     } catch {
       toast.error("Failed to add member");
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete member "${name}"?`)) return;
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
     try {
-      await deleteMember(id);
+      await deleteMember(deleteTarget.id);
       toast.success("Member deleted");
+      setDeleteTarget(null);
     } catch {
       toast.error("Failed to delete member");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -180,7 +194,7 @@ export function MembersClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit"><Plus /> Add Member</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Plus />} {loading ? "Saving..." : "Add Member"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -261,8 +275,8 @@ export function MembersClient({
                       <TableCell className="text-muted-foreground text-sm">{m.phone ?? "-"}</TableCell>
                       <TableCell><Badge variant={m.status === "active" ? "default" : "secondary"}>{m.status}</Badge></TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(m.id, m.fullName)}>
-                          <Trash2 className="size-4 text-red-500" />
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteTarget({ id: m.id, name: m.fullName })} disabled={deletingId === m.id}>
+                          {deletingId === m.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-red-500" />}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -273,6 +287,24 @@ export function MembersClient({
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &ldquo;{deleteTarget?.name}&rdquo;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!deletingId}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={!!deletingId}>
+              {deletingId ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              {deletingId ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

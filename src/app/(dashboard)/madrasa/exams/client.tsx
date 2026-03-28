@@ -16,7 +16,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, Loader2 } from "lucide-react";
 import { createExam } from "@/lib/actions/madrasa";
 import { toast } from "sonner";
 
@@ -43,14 +43,18 @@ export function ExamsClient({
   classes: ClassInfo[];
 }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createExam(formData);
       toast.success("Exam created successfully");
       setOpen(false);
     } catch {
       toast.error("Failed to create exam");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -115,7 +119,7 @@ export function ExamsClient({
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button type="submit">Create Exam</Button>
+                  <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Plus />} {loading ? "Saving..." : "Create Exam"}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>

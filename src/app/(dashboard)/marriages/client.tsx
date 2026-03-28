@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import { registerMarriage } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
 
@@ -34,6 +34,7 @@ export function MarriagesClient({
 }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = marriages.filter((m) => {
     return !search ||
@@ -43,12 +44,17 @@ export function MarriagesClient({
   });
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
-      await registerMarriage(formData);
-      toast.success("Nikah registered successfully");
-      setOpen(false);
-    } catch {
-      toast.error("Failed to register nikah");
+      try {
+        await registerMarriage(formData);
+        toast.success("Nikah registered successfully");
+        setOpen(false);
+      } catch {
+        toast.error("Failed to register nikah");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -94,7 +100,7 @@ export function MarriagesClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">Register & Generate Certificate</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : null} {loading ? "Saving..." : "Register & Generate Certificate"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

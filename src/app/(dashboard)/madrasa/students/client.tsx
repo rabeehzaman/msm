@@ -17,7 +17,11 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, Search, Trash2, Loader2 } from "lucide-react";
 import { createStudent, deleteStudent } from "@/lib/actions/madrasa";
 import { toast } from "sonner";
 
@@ -53,6 +57,9 @@ export function StudentsClient({
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = students.filter((s) => {
     const matchesSearch =
@@ -66,22 +73,29 @@ export function StudentsClient({
   const activeCount = students.filter(s => s.status === "active").length;
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createStudent(formData);
       toast.success("Student enrolled successfully");
       setOpen(false);
     } catch {
       toast.error("Failed to enroll student");
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Remove student "${name}"?`)) return;
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
     try {
-      await deleteStudent(id);
+      await deleteStudent(deleteTarget.id);
       toast.success("Student removed");
+      setDeleteTarget(null);
     } catch {
       toast.error("Failed to remove student");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -129,7 +143,7 @@ export function StudentsClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit"><Plus /> Enroll Student</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Plus />} {loading ? "Saving..." : "Enroll Student"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -205,8 +219,8 @@ export function StudentsClient({
                         <Badge variant={s.status === "active" ? "default" : "secondary"}>{s.status || "active"}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(s.id, s.fullName)}>
-                          <Trash2 className="size-4 text-red-500" />
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteTarget({ id: s.id, name: s.fullName })} disabled={deletingId === s.id}>
+                          {deletingId === s.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-red-500" />}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -217,6 +231,24 @@ export function StudentsClient({
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Student</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove &ldquo;{deleteTarget?.name}&rdquo; from the Madrasa? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!deletingId}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={!!deletingId}>
+              {deletingId ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              {deletingId ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Calculator } from "lucide-react";
+import { Plus, Calculator, Loader2 } from "lucide-react";
 import { createIncomeEntry, createExpenseEntry } from "@/lib/actions/finance";
 import { toast } from "sonner";
 
@@ -57,12 +57,14 @@ export function ZakatClient({
   expenses: ExpenseEntry[];
 }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const totalCollected = income.reduce((s, e) => s + Number(e.amount), 0);
   const totalDisbursed = expenses.reduce((s, e) => s + Number(e.amount), 0);
   const balance = totalCollected - totalDisbursed;
 
   async function handleRecordDistribution(formData: FormData) {
+    setLoading(true);
     try {
       if (zakatFund) {
         formData.set("fundId", zakatFund.id);
@@ -73,6 +75,8 @@ export function ZakatClient({
       setOpen(false);
     } catch {
       toast.error("Failed to record distribution");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -163,7 +167,7 @@ export function ZakatClient({
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button type="submit">Record Distribution</Button>
+                  <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Plus />} {loading ? "Saving..." : "Record Distribution"}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>

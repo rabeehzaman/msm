@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, Bell, Clock } from "lucide-react";
+import { Loader2, Plus, Search, Bell, Clock } from "lucide-react";
 import { createAnnouncement } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ export function AnnouncementsClient({
 }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = announcements.filter((a) => {
     return !search ||
@@ -42,12 +43,17 @@ export function AnnouncementsClient({
   const publishedCount = announcements.filter(a => a.isPublished).length;
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
-      await createAnnouncement(formData);
-      toast.success("Announcement published successfully");
-      setOpen(false);
-    } catch {
-      toast.error("Failed to create announcement");
+      try {
+        await createAnnouncement(formData);
+        toast.success("Announcement published successfully");
+        setOpen(false);
+      } catch {
+        toast.error("Failed to create announcement");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -82,7 +88,7 @@ export function AnnouncementsClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">Publish Announcement</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : null} {loading ? "Publishing..." : "Publish Announcement"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

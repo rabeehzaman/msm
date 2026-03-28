@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import { registerDeath } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
 
@@ -31,6 +31,7 @@ export function DeathsClient({
 }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = deaths.filter((d) => {
     return !search ||
@@ -39,12 +40,17 @@ export function DeathsClient({
   });
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
-      await registerDeath(formData);
-      toast.success("Death registered and community notified");
-      setOpen(false);
-    } catch {
-      toast.error("Failed to register death");
+      try {
+        await registerDeath(formData);
+        toast.success("Death registered and community notified");
+        setOpen(false);
+      } catch {
+        toast.error("Failed to register death");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -78,7 +84,7 @@ export function DeathsClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">Register & Notify Community</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : null} {loading ? "Saving..." : "Register & Notify Community"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

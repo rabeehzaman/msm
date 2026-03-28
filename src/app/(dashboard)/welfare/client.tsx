@@ -17,7 +17,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Heart, Users, IndianRupee, FileCheck } from "lucide-react";
+import { Loader2, Plus, Search, Heart, Users, IndianRupee, FileCheck } from "lucide-react";
 import { submitWelfareApplication } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
 
@@ -50,6 +50,7 @@ export function WelfareClient({
   const [search, setSearch] = useState("");
   const [schemeFilter, setSchemeFilter] = useState("all");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = applications.filter((a) => {
     const matchesSearch =
@@ -63,12 +64,17 @@ export function WelfareClient({
   const pendingCount = applications.filter(a => a.status === "submitted" || a.status === "under_review").length;
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
-      await submitWelfareApplication(formData);
-      toast.success("Welfare application submitted");
-      setOpen(false);
-    } catch {
-      toast.error("Failed to submit application");
+      try {
+        await submitWelfareApplication(formData);
+        toast.success("Welfare application submitted");
+        setOpen(false);
+      } catch {
+        toast.error("Failed to submit application");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -112,7 +118,7 @@ export function WelfareClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit"><FileCheck /> Submit Application</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <FileCheck />} {loading ? "Saving..." : "Submit Application"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

@@ -10,7 +10,11 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, MapPin, Home, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, MapPin, Home, Trash2, Loader2 } from "lucide-react";
 import { createWard, deleteWard } from "@/lib/actions/wards";
 import { toast } from "sonner";
 
@@ -24,24 +28,34 @@ type Ward = {
 
 export function WardsClient({ wards }: { wards: Ward[] }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createWard(formData);
       toast.success("Ward added");
       setOpen(false);
     } catch {
       toast.error("Failed to add ward");
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete ward "${name}"?`)) return;
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
     try {
-      await deleteWard(id);
+      await deleteWard(deleteTarget.id);
       toast.success("Ward deleted");
+      setDeleteTarget(null);
     } catch {
       toast.error("Failed to delete ward");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -76,7 +90,7 @@ export function WardsClient({ wards }: { wards: Ward[] }) {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit"><Plus /> Add Ward</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Plus />} {loading ? "Saving..." : "Add Ward"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -108,8 +122,8 @@ export function WardsClient({ wards }: { wards: Ward[] }) {
                     </div>
                     <CardTitle className="text-base">{w.name}</CardTitle>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(w.id, w.name)}>
-                    <Trash2 className="size-4 text-red-500" />
+                  <Button variant="ghost" size="sm" onClick={() => setDeleteTarget({ id: w.id, name: w.name })} disabled={deletingId === w.id}>
+                    {deletingId === w.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-red-500" />}
                   </Button>
                 </div>
               </CardHeader>
@@ -124,6 +138,24 @@ export function WardsClient({ wards }: { wards: Ward[] }) {
           ))}
         </div>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Ward</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &ldquo;{deleteTarget?.name}&rdquo;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!deletingId}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={!!deletingId}>
+              {deletingId ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              {deletingId ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

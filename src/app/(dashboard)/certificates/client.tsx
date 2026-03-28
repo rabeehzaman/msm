@@ -16,7 +16,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import { issueCertificate } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
 
@@ -49,6 +49,7 @@ export function CertificatesClient({
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = certificates.filter((c) => {
     const matchesSearch =
@@ -62,12 +63,17 @@ export function CertificatesClient({
   const pendingCount = certificates.filter(c => c.status === "requested" || c.status === "under_review").length;
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
-      await issueCertificate(formData);
-      toast.success("Certificate request submitted");
-      setOpen(false);
-    } catch {
-      toast.error("Failed to submit certificate request");
+      try {
+        await issueCertificate(formData);
+        toast.success("Certificate request submitted");
+        setOpen(false);
+      } catch {
+        toast.error("Failed to submit certificate request");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -109,7 +115,7 @@ export function CertificatesClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">Submit Request</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : null} {loading ? "Saving..." : "Submit Request"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

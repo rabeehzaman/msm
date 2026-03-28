@@ -37,7 +37,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Search, Download, Receipt } from "lucide-react";
+import { Plus, Search, Download, Receipt, Loader2 } from "lucide-react";
 import { createIncomeEntry } from "@/lib/actions/finance";
 import { toast } from "sonner";
 
@@ -71,6 +71,7 @@ export function IncomeClient({
   const [search, setSearch] = useState("");
   const [fundFilter, setFundFilter] = useState("all");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const filtered = entries.filter((e) => {
     const matchesSearch =
@@ -85,12 +86,15 @@ export function IncomeClient({
   const totalAmount = entries.reduce((sum, e) => sum + Number(e.amount), 0);
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
       await createIncomeEntry(formData);
       toast.success("Income entry recorded successfully");
       setOpen(false);
     } catch {
       toast.error("Failed to record income entry");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -196,9 +200,9 @@ export function IncomeClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">
-                  <Receipt />
-                  Save & Generate Receipt
+                <Button type="submit" disabled={loading}>
+                  {loading ? <Loader2 className="size-4 animate-spin" /> : <Receipt />}
+                  {loading ? "Saving..." : "Save & Generate Receipt"}
                 </Button>
               </DialogFooter>
             </form>

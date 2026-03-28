@@ -14,7 +14,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Clock, MapPin } from "lucide-react";
+import { Loader2, Plus, Clock, MapPin } from "lucide-react";
 import { createEvent } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
 
@@ -38,6 +38,7 @@ export function EventsClient({
   events: Event[];
 }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const upcoming = events.filter(e => {
     if (!e.date) return true;
@@ -50,12 +51,17 @@ export function EventsClient({
   });
 
   async function handleCreate(formData: FormData) {
+    setLoading(true);
     try {
-      await createEvent(formData);
-      toast.success("Event created successfully");
-      setOpen(false);
-    } catch {
-      toast.error("Failed to create event");
+      try {
+        await createEvent(formData);
+        toast.success("Event created successfully");
+        setOpen(false);
+      } catch {
+        toast.error("Failed to create event");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -112,7 +118,7 @@ export function EventsClient({
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit">Create Event</Button>
+                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : null} {loading ? "Saving..." : "Create Event"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
