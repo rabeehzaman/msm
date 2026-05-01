@@ -24,6 +24,7 @@ import {
 import { Plus, Search, Trash2, Loader2 } from "lucide-react";
 import { createMember, deleteMember } from "@/lib/actions/members";
 import { toast } from "sonner";
+import Link from "next/link";
 
 type Member = {
   id: string;
@@ -128,7 +129,7 @@ export function MembersClient({
               <div className="flex flex-col gap-4 py-4">
                 <div className="flex flex-col gap-2">
                   <label htmlFor="householdId" className="text-sm font-medium">Household *</label>
-                  <Select name="householdId" required>
+                  <Select name="householdId" required disabled={households.length === 0}>
                     <SelectTrigger id="householdId"><SelectValue placeholder="Select household" /></SelectTrigger>
                     <SelectContent>
                       {households.map((h) => (
@@ -136,6 +137,11 @@ export function MembersClient({
                       ))}
                     </SelectContent>
                   </Select>
+                  {households.length === 0 && (
+                    <p className="text-muted-foreground text-xs">
+                      Add a household first to attach this member.
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
@@ -232,7 +238,18 @@ export function MembersClient({
             </Select>
           </div>
 
-          {filtered.length === 0 ? (
+          {households.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-muted-foreground text-lg">No households created yet</p>
+              <p className="text-muted-foreground text-sm">Add a household before adding members.</p>
+              <Link href="/households" className="mt-4">
+                <Button>
+                  <Plus />
+                  Add Household
+                </Button>
+              </Link>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <p className="text-muted-foreground text-lg">No members found</p>
               <p className="text-muted-foreground text-sm">

@@ -8,13 +8,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Users,
   Home,
   Wallet,
   GraduationCap,
-  TrendingUp,
 } from "lucide-react";
 
 type DashboardStats = {

@@ -5,7 +5,6 @@ import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -20,7 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Calculator, Loader2 } from "lucide-react";
-import { createIncomeEntry, createExpenseEntry } from "@/lib/actions/finance";
+import { createExpenseEntry } from "@/lib/actions/finance";
 import { toast } from "sonner";
 
 type IncomeEntry = {

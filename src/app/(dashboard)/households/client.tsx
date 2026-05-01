@@ -21,7 +21,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Download, Trash2, Loader2 } from "lucide-react";
+import { Plus, Search, Trash2, Loader2 } from "lucide-react";
 import { createHousehold, deleteHousehold } from "@/lib/actions/households";
 import { toast } from "sonner";
 

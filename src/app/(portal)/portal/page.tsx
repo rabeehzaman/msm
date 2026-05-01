@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   CreditCard, GraduationCap, FileText, Bell, Heart,
-  ChevronRight, IndianRupee, Clock, CheckCircle2,
+  ChevronRight, IndianRupee, CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -42,7 +41,7 @@ export default function FamilyPortalHome() {
             <p className="text-sm font-medium">Next Due: April 2025</p>
             <p className="text-xl font-bold">Rs. 500</p>
           </div>
-          <Button>
+          <Button nativeButton={false} render={<Link href="/portal/payments" />}>
             <IndianRupee className="size-4" />
             Pay Now
           </Button>
@@ -109,7 +108,7 @@ export default function FamilyPortalHome() {
           { label: "Payment History", href: "/portal/payments", icon: CreditCard, color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600" },
           { label: "Certificates", href: "/portal/certificates", icon: FileText, color: "bg-green-100 dark:bg-green-900/30 text-green-600" },
           { label: "Madrasa Progress", href: "/portal/madrasa", icon: GraduationCap, color: "bg-purple-100 dark:bg-purple-900/30 text-purple-600" },
-          { label: "Welfare", href: "/portal/certificates", icon: Heart, color: "bg-pink-100 dark:bg-pink-900/30 text-pink-600" },
+          { label: "Welfare", href: "/portal/welfare", icon: Heart, color: "bg-pink-100 dark:bg-pink-900/30 text-pink-600" },
         ].map(link => (
           <Link key={link.label} href={link.href}>
             <Card className="cursor-pointer transition-colors hover:bg-accent">

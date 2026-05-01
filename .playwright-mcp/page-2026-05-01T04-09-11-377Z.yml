@@ -1,0 +1,290 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - list [ref=e7]:
+        - listitem [ref=e8]:
+          - link [ref=e334] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e10]: M
+            - generic [ref=e11]:
+              - generic [ref=e12]: Mahallu Smart Manager
+              - generic [ref=e13]: Community ERP
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Overview
+          - list [ref=e18]:
+            - listitem [ref=e19]:
+              - link [ref=e335] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e21]
+                - generic [ref=e26]: Dashboard
+        - generic [ref=e27]:
+          - generic [ref=e28]: Community
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link [ref=e336] [cursor=pointer]:
+                - /url: /households
+                - img [ref=e33]
+                - generic [ref=e36]: Households
+            - listitem [ref=e37]:
+              - link [ref=e337] [cursor=pointer]:
+                - /url: /members
+                - img [ref=e39]
+                - generic [ref=e44]: Members
+            - listitem [ref=e45]:
+              - link [ref=e338] [cursor=pointer]:
+                - /url: /wards
+                - img [ref=e47]
+                - generic [ref=e50]: Wards
+        - generic [ref=e51]:
+          - generic [ref=e52]: Finance
+          - list [ref=e54]:
+            - listitem [ref=e55]:
+              - link [ref=e339] [cursor=pointer]:
+                - /url: /finances
+                - img [ref=e57]
+                - generic [ref=e60]: Finance Overview
+            - listitem [ref=e61]:
+              - link [ref=e340] [cursor=pointer]:
+                - /url: /finances/income
+                - img [ref=e63]
+                - generic [ref=e66]: Income
+            - listitem [ref=e67]:
+              - link [ref=e341] [cursor=pointer]:
+                - /url: /finances/expenses
+                - img [ref=e69]
+                - generic [ref=e71]: Expenses
+            - listitem [ref=e72]:
+              - link [ref=e342] [cursor=pointer]:
+                - /url: /finances/friday-collections
+                - img [ref=e74]
+                - generic [ref=e76]: Friday Collections
+            - listitem [ref=e77]:
+              - link [ref=e343] [cursor=pointer]:
+                - /url: /subscriptions
+                - img [ref=e79]
+                - generic [ref=e82]: Subscriptions
+            - listitem [ref=e83]:
+              - link [ref=e344] [cursor=pointer]:
+                - /url: /finances/zakat
+                - img [ref=e85]
+                - generic [ref=e87]: Zakat
+            - listitem [ref=e88]:
+              - link [ref=e345] [cursor=pointer]:
+                - /url: /finances/qard-hasan
+                - img [ref=e90]
+                - generic [ref=e95]: Qard Hasan
+        - generic [ref=e96]:
+          - generic [ref=e97]: Education
+          - list [ref=e99]:
+            - listitem [ref=e100]:
+              - link [ref=e346] [cursor=pointer]:
+                - /url: /madrasa
+                - img [ref=e102]
+                - generic [ref=e105]: Madrasa Overview
+            - listitem [ref=e106]:
+              - link [ref=e347] [cursor=pointer]:
+                - /url: /madrasa/classes
+                - img [ref=e108]
+                - generic [ref=e110]: Classes
+            - listitem [ref=e111]:
+              - link [ref=e348] [cursor=pointer]:
+                - /url: /madrasa/students
+                - img [ref=e113]
+                - generic [ref=e115]: Students
+            - listitem [ref=e116]:
+              - link [ref=e349] [cursor=pointer]:
+                - /url: /madrasa/attendance
+                - img [ref=e118]
+                - generic [ref=e122]: Attendance
+            - listitem [ref=e123]:
+              - link [ref=e350] [cursor=pointer]:
+                - /url: /madrasa/hifz
+                - img [ref=e125]
+                - generic [ref=e128]: Hifz Tracker
+            - listitem [ref=e129]:
+              - link [ref=e351] [cursor=pointer]:
+                - /url: /madrasa/exams
+                - img [ref=e131]
+                - generic [ref=e134]: Exams & Results
+        - generic [ref=e135]:
+          - generic [ref=e136]: Lifecycle
+          - list [ref=e138]:
+            - listitem [ref=e139]:
+              - link [ref=e352] [cursor=pointer]:
+                - /url: /marriages
+                - img [ref=e141]
+                - generic [ref=e143]: Marriages
+            - listitem [ref=e144]:
+              - link [ref=e353] [cursor=pointer]:
+                - /url: /deaths
+                - img [ref=e146]
+                - generic [ref=e149]: Deaths & Janazah
+            - listitem [ref=e150]:
+              - link [ref=e354] [cursor=pointer]:
+                - /url: /cemetery
+                - img [ref=e152]
+                - generic [ref=e155]: Cemetery
+            - listitem [ref=e156]:
+              - link [ref=e355] [cursor=pointer]:
+                - /url: /hajj
+                - img [ref=e158]
+                - generic [ref=e160]: Hajj & Umrah
+        - generic [ref=e161]:
+          - generic [ref=e162]: Services
+          - list [ref=e164]:
+            - listitem [ref=e165]:
+              - link [ref=e356] [cursor=pointer]:
+                - /url: /welfare
+                - img [ref=e167]
+                - generic [ref=e172]: Welfare
+            - listitem [ref=e173]:
+              - link [ref=e357] [cursor=pointer]:
+                - /url: /certificates
+                - img [ref=e175]
+                - generic [ref=e178]: Certificates
+            - listitem [ref=e179]:
+              - link [ref=e358] [cursor=pointer]:
+                - /url: /events
+                - img [ref=e181]
+                - generic [ref=e183]: Events
+            - listitem [ref=e184]:
+              - link [ref=e359] [cursor=pointer]:
+                - /url: /directory/blood-donors
+                - img [ref=e186]
+                - generic [ref=e189]: Blood Donors
+            - listitem [ref=e190]:
+              - link [ref=e360] [cursor=pointer]:
+                - /url: /directory/professionals
+                - img [ref=e192]
+                - generic [ref=e195]: Professionals
+        - generic [ref=e196]:
+          - generic [ref=e197]: Operations
+          - list [ref=e199]:
+            - listitem [ref=e200]:
+              - link [ref=e361] [cursor=pointer]:
+                - /url: /announcements
+                - img [ref=e202]
+                - generic [ref=e205]: Announcements
+            - listitem [ref=e206]:
+              - link [ref=e362] [cursor=pointer]:
+                - /url: /assets
+                - img [ref=e208]
+                - generic [ref=e212]: Assets
+            - listitem [ref=e213]:
+              - link [ref=e363] [cursor=pointer]:
+                - /url: /governance
+                - img [ref=e215]
+                - generic [ref=e217]: Governance
+            - listitem [ref=e218]:
+              - link [ref=e364] [cursor=pointer]:
+                - /url: /reports
+                - img [ref=e220]
+                - generic [ref=e222]: Reports
+            - listitem [ref=e223]:
+              - link [ref=e365] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e225]
+                - generic [ref=e228]: Settings
+      - list [ref=e230]:
+        - listitem [ref=e231]:
+          - button [ref=e366]:
+            - generic [ref=e234]: AD
+            - generic [ref=e235]:
+              - generic [ref=e236]: Admin User
+              - generic [ref=e237]: admin@mahallu.app
+            - img [ref=e238]
+      - button [ref=e367]
+    - main [ref=e241]:
+      - generic [ref=e242]:
+        - button [ref=e368]:
+          - img
+          - generic [ref=e244]: Toggle Sidebar
+        - separator [ref=e245]
+        - navigation [ref=e369]:
+          - list [ref=e247]:
+            - listitem [ref=e248]:
+              - link [disabled] [ref=e370]: Events
+        - generic [ref=e250]:
+          - button [ref=e371]:
+            - img
+            - generic [ref=e252]: Search
+          - button [ref=e372]:
+            - img
+            - generic [ref=e254]: "3"
+            - generic [ref=e255]: Notifications
+          - button [ref=e373]:
+            - img
+            - generic [ref=e257]: Toggle theme
+      - main [ref=e258]:
+        - generic [ref=e374]:
+          - generic [ref=e375]:
+            - generic [ref=e376]:
+              - heading [level=1] [ref=e377]: Events & Programs
+              - paragraph [ref=e378]: Manage community events and programs
+            - button [expanded] [ref=e379]:
+              - img
+              - text: Create Event
+          - generic [ref=e380]:
+            - generic [ref=e382]:
+              - paragraph [ref=e383]: Total Events
+              - paragraph [ref=e384]: "0"
+            - generic [ref=e386]:
+              - paragraph [ref=e387]: Upcoming
+              - paragraph [ref=e388]: "0"
+            - generic [ref=e390]:
+              - paragraph [ref=e391]: Past
+              - paragraph [ref=e392]: "0"
+            - generic [ref=e394]:
+              - paragraph [ref=e395]: Scheduled
+              - paragraph [ref=e396]: "0"
+          - generic [ref=e397]:
+            - generic [ref=e398]:
+              - generic [ref=e399]: All Events
+              - generic [ref=e400]: Scheduled programs and activities
+            - generic [ref=e402]:
+              - paragraph [ref=e403]: No events yet
+              - paragraph [ref=e404]: Create your first event to get started.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e410] [cursor=pointer]:
+    - img [ref=e411]
+  - alert [ref=e414]
+  - dialog "Create New Event" [ref=e418]:
+    - generic [ref=e419]:
+      - heading "Create New Event" [level=2] [ref=e420]
+      - paragraph [ref=e421]: Schedule a community event or program
+    - generic [ref=e422]:
+      - generic [ref=e423]:
+        - generic [ref=e424]:
+          - generic [ref=e425]: Title *
+          - textbox "Event title" [ref=e426]: QA Event MOME3JMW
+        - generic [ref=e427]:
+          - generic [ref=e428]:
+            - generic [ref=e429]: Type *
+            - generic [ref=e430]:
+              - combobox [ref=e431]:
+                - option "Type" [disabled]
+                - option "Religious"
+                - option "Education"
+                - option "Community" [selected]
+                - option "Youth"
+                - option "Ramadan"
+                - option "Marriage"
+                - option "Competition"
+                - option "Other"
+              - img
+          - generic [ref=e432]:
+            - generic [ref=e433]: Date *
+            - textbox [ref=e434]: 2026-05-01
+        - generic [ref=e435]:
+          - generic [ref=e436]: Venue
+          - textbox "Location" [active] [ref=e437]: QA Hall
+        - generic [ref=e438]:
+          - generic [ref=e439]: Description
+          - textbox "Event details..." [ref=e440]
+      - generic [ref=e441]:
+        - button "Cancel" [ref=e442]
+        - button "Create Event" [ref=e443]
+    - button "Close" [ref=e444]:
+      - img
+      - generic [ref=e445]: Close

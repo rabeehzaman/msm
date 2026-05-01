@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
@@ -29,6 +32,19 @@ donors.forEach(d => { bloodGroupCounts[d.bloodGroup] = (bloodGroupCounts[d.blood
 function getInitials(name: string) { return name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase(); }
 
 export default function BloodDonorsPage() {
+  const [search, setSearch] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("all");
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredDonors = donors.filter((donor) => {
+    const matchesSearch =
+      !normalizedSearch ||
+      donor.name.toLowerCase().includes(normalizedSearch) ||
+      donor.ward.toLowerCase().includes(normalizedSearch) ||
+      donor.bloodGroup.toLowerCase().includes(normalizedSearch);
+    const matchesBloodGroup = bloodGroup === "all" || donor.bloodGroup === bloodGroup;
+    return matchesSearch && matchesBloodGroup;
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -36,7 +52,9 @@ export default function BloodDonorsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Blood Donor Directory</h1>
           <p className="text-muted-foreground">Find and alert compatible donors during emergencies</p>
         </div>
-        <Button variant="destructive"><AlertCircle /> Emergency Alert</Button>
+        <Button variant="destructive" disabled title="Emergency broadcasts are not configured yet">
+          <AlertCircle /> Emergency Alert
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -67,8 +85,8 @@ export default function BloodDonorsPage() {
         <CardHeader><CardTitle>Donor Registry</CardTitle><CardDescription>Search and contact blood donors</CardDescription></CardHeader>
         <CardContent>
           <div className="mb-4 flex gap-4">
-            <div className="relative flex-1"><Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" /><Input placeholder="Search donors..." className="pl-9" /></div>
-            <Select defaultValue="all">
+            <div className="relative flex-1"><Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" /><Input placeholder="Search donors..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
+            <Select value={bloodGroup} onValueChange={(value) => setBloodGroup(value)}>
               <SelectTrigger className="w-[120px]"><SelectValue placeholder="Blood Group" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
@@ -77,7 +95,7 @@ export default function BloodDonorsPage() {
             </Select>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            {donors.map(d => (
+            {filteredDonors.map(d => (
               <div key={d.id} className="flex items-center gap-4 rounded-lg border p-4">
                 <Avatar className="size-10"><AvatarFallback className="text-xs">{getInitials(d.name)}</AvatarFallback></Avatar>
                 <div className="flex-1">
@@ -88,9 +106,14 @@ export default function BloodDonorsPage() {
                   <p className="text-muted-foreground text-xs">{d.ward} | Last: {d.lastDonation ? new Date(d.lastDonation).toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : "Never"}</p>
                 </div>
                 <Badge variant="outline" className="font-mono text-sm font-bold">{d.bloodGroup}</Badge>
-                <Button variant="ghost" size="sm"><Phone className="size-4" /></Button>
+                <Button variant="ghost" size="sm" nativeButton={false} render={<a href={`tel:${d.phone}`} aria-label={`Call ${d.name}`} />}>
+                  <Phone className="size-4" />
+                </Button>
               </div>
             ))}
+            {filteredDonors.length === 0 && (
+              <p className="text-muted-foreground py-8 text-center text-sm">No donors match the current filters.</p>
+            )}
           </div>
         </CardContent>
       </Card>

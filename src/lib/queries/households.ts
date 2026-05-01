@@ -1,9 +1,9 @@
 import { db } from "@/db";
 import { households, members, wards } from "@/db/schema";
-import { eq, ilike, or, sql, count, desc } from "drizzle-orm";
+import { eq, sql, count, desc } from "drizzle-orm";
 import { ensureTenant } from "./auth";
 
-export async function getHouseholds(search?: string) {
+export async function getHouseholds() {
   const tenant = await ensureTenant();
 
   const query = db

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -16,9 +16,10 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, FileText, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { createExam } from "@/lib/actions/madrasa";
 import { toast } from "sonner";
+import Link from "next/link";
 
 type Exam = {
   id: string;
@@ -85,23 +86,30 @@ export function ExamsClient({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium">Class</label>
-                      <Select name="classId">
+                      <Select name="classId" disabled={classes.length === 0}>
                         <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
                         <SelectContent>
-                          {classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                          <SelectGroup>
+                            {classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
+                      {classes.length === 0 && (
+                        <p className="text-muted-foreground text-xs">Create a class first to assign this exam.</p>
+                      )}
                     </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium">Type</label>
                       <Select name="type">
                         <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="monthly_test">Monthly Test</SelectItem>
-                          <SelectItem value="term_exam">Term Exam</SelectItem>
-                          <SelectItem value="oral_recitation">Oral Recitation</SelectItem>
-                          <SelectItem value="written_exam">Written Exam</SelectItem>
-                          <SelectItem value="final_exam">Final Exam</SelectItem>
+                          <SelectGroup>
+                            <SelectItem value="monthly_test">Monthly Test</SelectItem>
+                            <SelectItem value="term_exam">Term Exam</SelectItem>
+                            <SelectItem value="oral_recitation">Oral Recitation</SelectItem>
+                            <SelectItem value="written_exam">Written Exam</SelectItem>
+                            <SelectItem value="final_exam">Final Exam</SelectItem>
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
                     </div>
@@ -148,7 +156,17 @@ export function ExamsClient({
           {exams.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <p className="text-muted-foreground text-lg">No exams created yet</p>
-              <p className="text-muted-foreground text-sm">Create your first exam to get started.</p>
+              <p className="text-muted-foreground text-sm">
+                {classes.length === 0 ? "Create classes first, then set up exams." : "Create your first exam to get started."}
+              </p>
+              {classes.length === 0 && (
+                <Link href="/madrasa/classes" className="mt-4">
+                  <Button>
+                    <Plus />
+                    Create Class
+                  </Button>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="rounded-md border">

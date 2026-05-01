@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { students, studentAttendance, exams, examResults, hifzProgress, classes, teachers, subjects } from "@/db/schema";
+import { students, exams, classes, teachers } from "@/db/schema";
 import { eq, desc, count } from "drizzle-orm";
 import { ensureTenant } from "./auth";
 
@@ -61,7 +61,6 @@ export async function getExams() {
 }
 
 export async function getStudentsByClass(classId: string) {
-  const tenant = await ensureTenant();
   return db
     .select()
     .from(students)

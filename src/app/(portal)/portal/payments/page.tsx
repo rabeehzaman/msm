@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { IndianRupee, Download, CheckCircle2, Clock, ArrowUpRight } from "lucide-react";
+import { IndianRupee, Download, CheckCircle2 } from "lucide-react";
 
 const transactions = [
   { id: "REC-2451", type: "Subscription", period: "March 2025", amount: 500, date: "2025-03-01", status: "paid", method: "UPI" },
@@ -42,7 +42,7 @@ export default function PaymentsPage() {
             <p className="text-muted-foreground text-sm">Next subscription due</p>
             <p className="text-lg font-bold">Rs. 500 - April 2025</p>
           </div>
-          <Button><IndianRupee className="size-4" /> Pay</Button>
+          <Button disabled title="Online payment gateway is not configured yet"><IndianRupee className="size-4" /> Pay</Button>
         </CardContent>
       </Card>
 
@@ -66,7 +66,7 @@ export default function PaymentsPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold">Rs. {tx.amount.toLocaleString("en-IN")}</p>
-                  <button className="text-primary flex items-center gap-1 text-xs"><Download className="size-3" /> Receipt</button>
+                  <button className="text-muted-foreground flex cursor-not-allowed items-center gap-1 text-xs" disabled title="Receipt download is not configured yet"><Download className="size-3" /> Receipt</button>
                 </div>
               </div>
             </div>

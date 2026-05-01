@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 import { BookOpen, Award } from "lucide-react";
 
 type Student = {
@@ -34,9 +35,9 @@ export function HifzClient({
           <h1 className="text-3xl font-bold tracking-tight">Hifz Tracker</h1>
           <p className="text-muted-foreground">Quran memorization progress for all students</p>
         </div>
-        <Button>
+        <Button nativeButton={false} render={<Link href="/madrasa/students" />}>
           <BookOpen />
-          Log Progress
+          Manage Students
         </Button>
       </div>
 

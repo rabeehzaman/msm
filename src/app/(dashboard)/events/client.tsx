@@ -14,7 +14,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Clock, MapPin } from "lucide-react";
+import { Loader2, Plus, MapPin } from "lucide-react";
 import { createEvent } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
 

@@ -16,6 +16,10 @@ export async function createFund(formData: FormData) {
     isRestricted: formData.get("isRestricted") === "true",
   });
   revalidatePath("/finances");
+  revalidatePath("/finances/income");
+  revalidatePath("/finances/expenses");
+  revalidatePath("/finances/zakat");
+  revalidatePath("/finances/qard-hasan");
   return { success: true };
 }
 

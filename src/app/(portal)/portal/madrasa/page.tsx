@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, XCircle, Clock, BookOpen, Star, Flame } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Flame } from "lucide-react";
 
 const children = [
   {

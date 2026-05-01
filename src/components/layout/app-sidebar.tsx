@@ -85,6 +85,7 @@ const navGroups = [
     label: "Education",
     items: [
       { title: "Madrasa Overview", url: "/madrasa", icon: GraduationCap },
+      { title: "Classes", url: "/madrasa/classes", icon: BookOpen },
       { title: "Students", url: "/madrasa/students", icon: BookOpen },
       { title: "Attendance", url: "/madrasa/attendance", icon: ClipboardCheck },
       { title: "Hifz Tracker", url: "/madrasa/hifz", icon: BookMarked },

@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { wards, households, members } from "@/db/schema";
-import { eq, count, sql } from "drizzle-orm";
+import { wards, households } from "@/db/schema";
+import { eq, count } from "drizzle-orm";
 import { ensureTenant } from "./auth";
 
 export async function getWards() {

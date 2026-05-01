@@ -1,0 +1,335 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e29]:
+    - generic [ref=e32]:
+      - list [ref=e34]:
+        - listitem [ref=e35]:
+          - link "M Mahallu Smart Manager Community ERP" [ref=e36] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e37]: M
+            - generic [ref=e38]:
+              - generic [ref=e39]: Mahallu Smart Manager
+              - generic [ref=e40]: Community ERP
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic [ref=e43]: Overview
+          - list [ref=e45]:
+            - listitem [ref=e46]:
+              - link "Dashboard" [ref=e47] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e48]
+                - generic [ref=e53]: Dashboard
+        - generic [ref=e54]:
+          - generic [ref=e55]: Community
+          - list [ref=e57]:
+            - listitem [ref=e58]:
+              - link "Households" [ref=e59] [cursor=pointer]:
+                - /url: /households
+                - img [ref=e60]
+                - generic [ref=e63]: Households
+            - listitem [ref=e64]:
+              - link "Members" [ref=e65] [cursor=pointer]:
+                - /url: /members
+                - img [ref=e66]
+                - generic [ref=e71]: Members
+            - listitem [ref=e72]:
+              - link "Wards" [ref=e73] [cursor=pointer]:
+                - /url: /wards
+                - img [ref=e74]
+                - generic [ref=e77]: Wards
+        - generic [ref=e78]:
+          - generic [ref=e79]: Finance
+          - list [ref=e81]:
+            - listitem [ref=e82]:
+              - link "Finance Overview" [ref=e83] [cursor=pointer]:
+                - /url: /finances
+                - img [ref=e84]
+                - generic [ref=e87]: Finance Overview
+            - listitem [ref=e88]:
+              - link "Income" [ref=e89] [cursor=pointer]:
+                - /url: /finances/income
+                - img [ref=e90]
+                - generic [ref=e93]: Income
+            - listitem [ref=e94]:
+              - link "Expenses" [ref=e95] [cursor=pointer]:
+                - /url: /finances/expenses
+                - img [ref=e96]
+                - generic [ref=e98]: Expenses
+            - listitem [ref=e99]:
+              - link "Friday Collections" [ref=e100] [cursor=pointer]:
+                - /url: /finances/friday-collections
+                - img [ref=e101]
+                - generic [ref=e103]: Friday Collections
+            - listitem [ref=e104]:
+              - link "Subscriptions" [ref=e105] [cursor=pointer]:
+                - /url: /subscriptions
+                - img [ref=e106]
+                - generic [ref=e109]: Subscriptions
+            - listitem [ref=e110]:
+              - link "Zakat" [ref=e111] [cursor=pointer]:
+                - /url: /finances/zakat
+                - img [ref=e112]
+                - generic [ref=e114]: Zakat
+            - listitem [ref=e115]:
+              - link "Qard Hasan" [ref=e116] [cursor=pointer]:
+                - /url: /finances/qard-hasan
+                - img [ref=e117]
+                - generic [ref=e122]: Qard Hasan
+        - generic [ref=e123]:
+          - generic [ref=e124]: Education
+          - list [ref=e126]:
+            - listitem [ref=e127]:
+              - link "Madrasa Overview" [ref=e128] [cursor=pointer]:
+                - /url: /madrasa
+                - img [ref=e129]
+                - generic [ref=e132]: Madrasa Overview
+            - listitem [ref=e133]:
+              - link "Classes" [ref=e134] [cursor=pointer]:
+                - /url: /madrasa/classes
+                - img [ref=e135]
+                - generic [ref=e137]: Classes
+            - listitem [ref=e138]:
+              - link "Students" [ref=e139] [cursor=pointer]:
+                - /url: /madrasa/students
+                - img [ref=e140]
+                - generic [ref=e142]: Students
+            - listitem [ref=e143]:
+              - link "Attendance" [ref=e144] [cursor=pointer]:
+                - /url: /madrasa/attendance
+                - img [ref=e145]
+                - generic [ref=e149]: Attendance
+            - listitem [ref=e150]:
+              - link "Hifz Tracker" [ref=e151] [cursor=pointer]:
+                - /url: /madrasa/hifz
+                - img [ref=e152]
+                - generic [ref=e155]: Hifz Tracker
+            - listitem [ref=e156]:
+              - link "Exams & Results" [ref=e157] [cursor=pointer]:
+                - /url: /madrasa/exams
+                - img [ref=e158]
+                - generic [ref=e161]: Exams & Results
+        - generic [ref=e162]:
+          - generic [ref=e163]: Lifecycle
+          - list [ref=e165]:
+            - listitem [ref=e166]:
+              - link "Marriages" [ref=e167] [cursor=pointer]:
+                - /url: /marriages
+                - img [ref=e168]
+                - generic [ref=e170]: Marriages
+            - listitem [ref=e171]:
+              - link "Deaths & Janazah" [ref=e172] [cursor=pointer]:
+                - /url: /deaths
+                - img [ref=e173]
+                - generic [ref=e176]: Deaths & Janazah
+            - listitem [ref=e177]:
+              - link "Cemetery" [ref=e178] [cursor=pointer]:
+                - /url: /cemetery
+                - img [ref=e179]
+                - generic [ref=e182]: Cemetery
+            - listitem [ref=e183]:
+              - link "Hajj & Umrah" [ref=e184] [cursor=pointer]:
+                - /url: /hajj
+                - img [ref=e185]
+                - generic [ref=e187]: Hajj & Umrah
+        - generic [ref=e188]:
+          - generic [ref=e189]: Services
+          - list [ref=e191]:
+            - listitem [ref=e192]:
+              - link "Welfare" [ref=e193] [cursor=pointer]:
+                - /url: /welfare
+                - img [ref=e194]
+                - generic [ref=e199]: Welfare
+            - listitem [ref=e200]:
+              - link "Certificates" [ref=e201] [cursor=pointer]:
+                - /url: /certificates
+                - img [ref=e202]
+                - generic [ref=e205]: Certificates
+            - listitem [ref=e206]:
+              - link "Events" [ref=e207] [cursor=pointer]:
+                - /url: /events
+                - img [ref=e208]
+                - generic [ref=e210]: Events
+            - listitem [ref=e211]:
+              - link "Blood Donors" [ref=e212] [cursor=pointer]:
+                - /url: /directory/blood-donors
+                - img [ref=e213]
+                - generic [ref=e216]: Blood Donors
+            - listitem [ref=e217]:
+              - link "Professionals" [ref=e218] [cursor=pointer]:
+                - /url: /directory/professionals
+                - img [ref=e219]
+                - generic [ref=e222]: Professionals
+        - generic [ref=e223]:
+          - generic [ref=e224]: Operations
+          - list [ref=e226]:
+            - listitem [ref=e227]:
+              - link "Announcements" [ref=e228] [cursor=pointer]:
+                - /url: /announcements
+                - img [ref=e229]
+                - generic [ref=e232]: Announcements
+            - listitem [ref=e233]:
+              - link "Assets" [ref=e234] [cursor=pointer]:
+                - /url: /assets
+                - img [ref=e235]
+                - generic [ref=e239]: Assets
+            - listitem [ref=e240]:
+              - link "Governance" [ref=e241] [cursor=pointer]:
+                - /url: /governance
+                - img [ref=e242]
+                - generic [ref=e244]: Governance
+            - listitem [ref=e245]:
+              - link "Reports" [ref=e246] [cursor=pointer]:
+                - /url: /reports
+                - img [ref=e247]
+                - generic [ref=e249]: Reports
+            - listitem [ref=e250]:
+              - link "Settings" [ref=e251] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e252]
+                - generic [ref=e255]: Settings
+      - list [ref=e257]:
+        - listitem [ref=e258]:
+          - button "AD Admin User admin@mahallu.app" [ref=e259]:
+            - generic [ref=e261]: AD
+            - generic [ref=e262]:
+              - generic [ref=e263]: Admin User
+              - generic [ref=e264]: admin@mahallu.app
+            - img [ref=e265]
+      - button "Toggle Sidebar" [ref=e267]
+    - main [ref=e268]:
+      - generic [ref=e269]:
+        - button "Toggle Sidebar" [ref=e270]:
+          - img
+          - generic [ref=e271]: Toggle Sidebar
+        - separator [ref=e272]
+        - navigation "breadcrumb" [ref=e273]:
+          - list [ref=e274]:
+            - listitem [ref=e275]:
+              - link "Dashboard" [disabled] [ref=e276]
+        - generic [ref=e277]:
+          - button "Search" [ref=e278]:
+            - img
+            - generic [ref=e279]: Search
+          - button "3 Notifications" [ref=e280]:
+            - img
+            - generic [ref=e281]: "3"
+            - generic [ref=e282]: Notifications
+          - button "Toggle theme" [ref=e283]:
+            - img
+            - generic [ref=e284]: Toggle theme
+      - main [ref=e285]:
+        - generic [ref=e286]:
+          - generic [ref=e287]:
+            - heading "Dashboard" [level=1] [ref=e288]
+            - paragraph [ref=e289]: Welcome back. Here's an overview of your Mahallu.
+          - generic [ref=e290]:
+            - generic [ref=e291]:
+              - generic [ref=e292]:
+                - generic [ref=e293]: Total Households
+                - img [ref=e294]
+              - generic [ref=e297]:
+                - generic [ref=e298]: "3"
+                - generic [ref=e299]: registered families
+            - generic [ref=e300]:
+              - generic [ref=e301]:
+                - generic [ref=e302]: Total Members
+                - img [ref=e303]
+              - generic [ref=e308]:
+                - generic [ref=e309]: "6"
+                - generic [ref=e310]: community members
+            - generic [ref=e311]:
+              - generic [ref=e312]:
+                - generic [ref=e313]: Total Income
+                - img [ref=e314]
+              - generic [ref=e317]:
+                - generic [ref=e318]: Rs. 1,234
+                - generic [ref=e319]: 1 entries
+            - generic [ref=e320]:
+              - generic [ref=e321]:
+                - generic [ref=e322]: Madrasa Students
+                - img [ref=e323]
+              - generic [ref=e326]:
+                - generic [ref=e327]: "2"
+                - generic [ref=e328]: enrolled
+          - generic [ref=e329]:
+            - generic [ref=e330]:
+              - generic [ref=e331]:
+                - generic [ref=e332]: Financial Summary
+                - generic [ref=e333]: Income vs Expenses overview
+              - generic [ref=e335]:
+                - generic [ref=e336]:
+                  - generic [ref=e337]: Total Income
+                  - generic [ref=e338]: Rs. 1,234
+                - generic [ref=e339]:
+                  - generic [ref=e340]: Total Expenses
+                  - generic [ref=e341]: Rs. 321
+                - generic [ref=e342]:
+                  - generic [ref=e343]: Net Surplus
+                  - generic [ref=e344]: Rs. 913
+            - generic [ref=e345]:
+              - generic [ref=e346]:
+                - generic [ref=e347]: Community Overview
+                - generic [ref=e348]: Key metrics at a glance
+              - generic [ref=e350]:
+                - generic [ref=e351]:
+                  - generic [ref=e352]:
+                    - img [ref=e354]
+                    - generic [ref=e357]: Households
+                  - generic [ref=e358]: "3"
+                - generic [ref=e359]:
+                  - generic [ref=e360]:
+                    - img [ref=e362]
+                    - generic [ref=e367]: Members
+                  - generic [ref=e368]: "6"
+                - generic [ref=e369]:
+                  - generic [ref=e370]:
+                    - img [ref=e372]
+                    - generic [ref=e375]: Madrasa Students
+                  - generic [ref=e376]: "2"
+                - generic [ref=e377]:
+                  - generic [ref=e378]:
+                    - img [ref=e380]
+                    - generic [ref=e383]: Active Funds
+                  - generic [ref=e384]: "10"
+          - generic [ref=e385]:
+            - generic [ref=e386]:
+              - generic [ref=e387]: Fund Overview
+              - generic [ref=e388]: Current balance across all fund types
+            - generic [ref=e390]:
+              - generic [ref=e391]:
+                - generic [ref=e392]:
+                  - generic [ref=e393]: Building Fund
+                  - generic [ref=e394]: Restricted
+                - generic [ref=e395]: Rs. 0
+              - generic [ref=e396]:
+                - generic [ref=e397]:
+                  - generic [ref=e398]: Death/Janazah Fund
+                  - generic [ref=e399]: Restricted
+                - generic [ref=e400]: Rs. 0
+              - generic [ref=e401]:
+                - generic [ref=e403]: General Fund
+                - generic [ref=e404]: Rs. 0
+              - generic [ref=e405]:
+                - generic [ref=e407]: Madrasa Fund
+                - generic [ref=e408]: Rs. 0
+              - generic [ref=e409]:
+                - generic [ref=e410]:
+                  - generic [ref=e411]: Marriage Assistance Fund
+                  - generic [ref=e412]: Restricted
+                - generic [ref=e413]: Rs. 0
+              - generic [ref=e414]:
+                - generic [ref=e415]:
+                  - generic [ref=e416]: Qard Hasan Fund
+                  - generic [ref=e417]: Restricted
+                - generic [ref=e418]: Rs. 0
+              - generic [ref=e419]:
+                - generic [ref=e420]:
+                  - generic [ref=e421]: Ramadan Special Fund
+                  - generic [ref=e422]: Restricted
+                - generic [ref=e423]: Rs. 0
+              - generic [ref=e424]:
+                - generic [ref=e426]: Sadaqah Fund
+                - generic [ref=e427]: Rs. 0
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e24] [cursor=pointer]:
+    - img [ref=e25]
+  - alert [ref=e28]

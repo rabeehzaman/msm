@@ -1,8 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { marriages, marriageNocs, deaths, certificates, welfareApplications, events, announcements, cemeteryPlots } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { marriages, deaths, certificates, welfareApplications, events, announcements } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { ensureTenant } from "@/lib/queries/auth";
 

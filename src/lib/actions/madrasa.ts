@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { students, studentAttendance, exams, examResults, hifzProgress, classes, teachers, subjects } from "@/db/schema";
+import { students, studentAttendance, exams, classes, teachers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { ensureTenant } from "@/lib/queries/auth";
@@ -69,6 +69,10 @@ export async function createClass(formData: FormData) {
     capacity: parseInt(formData.get("capacity") as string) || 40,
   });
   revalidatePath("/madrasa");
+  revalidatePath("/madrasa/classes");
+  revalidatePath("/madrasa/students");
+  revalidatePath("/madrasa/attendance");
+  revalidatePath("/madrasa/exams");
   return { success: true };
 }
 

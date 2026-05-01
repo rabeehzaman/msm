@@ -1,0 +1,21 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: M
+      - generic [ref=e6]: Mahallu Smart Manager
+      - generic [ref=e7]: Sign in to manage your Mahallu community
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Email
+        - textbox "Email" [ref=e12]:
+          - /placeholder: admin@mahallu.app
+      - generic [ref=e13]:
+        - generic [ref=e14]: Password
+        - textbox "Password" [ref=e15]:
+          - /placeholder: Enter your password
+      - button "Sign In" [ref=e16]
+      - separator [ref=e17]
+      - button "Create Account" [ref=e18]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e24] [cursor=pointer]:
+    - img [ref=e25]

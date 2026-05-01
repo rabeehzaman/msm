@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Plane, MapPin, Users } from "lucide-react";
 
 const hajjRecords = [
@@ -25,7 +24,7 @@ export default function HajjPage() {
           <h1 className="text-3xl font-bold tracking-tight">Hajj & Umrah</h1>
           <p className="text-muted-foreground">Pilgrimage records, document tracking, and group coordination</p>
         </div>
-        <Button><Plus /> Add Record</Button>
+        <Button disabled title="Pilgrimage record creation is not configured yet"><Plus /> Add Record</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

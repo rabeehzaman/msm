@@ -1,6 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
+const tableRowWidths = [72, 104, 88, 116, 96, 64, 108, 80];
+
 function HeaderSkeleton({ hasAction = true }: { hasAction?: boolean }) {
   return (
     <div className="flex items-center justify-between">
@@ -55,7 +57,7 @@ function TableRowSkeleton({ cols = 6 }: { cols?: number }) {
         <Skeleton
           key={i}
           className="h-4"
-          style={{ width: `${Math.floor(60 + Math.random() * 60)}px` }}
+          style={{ width: `${tableRowWidths[i % tableRowWidths.length]}px` }}
         />
       ))}
     </div>

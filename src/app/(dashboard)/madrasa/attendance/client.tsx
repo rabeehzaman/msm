@@ -7,14 +7,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { CheckCircle2, XCircle, Clock, AlertTriangle, Save, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, AlertTriangle, Save, Loader2, BookOpen } from "lucide-react";
 import { saveAttendance } from "@/lib/actions/madrasa";
 import { toast } from "sonner";
+import Link from "next/link";
 
 type AttendanceStatus = "present" | "absent" | "late" | "excused";
 
@@ -101,7 +102,7 @@ export function AttendanceClient({
           <h1 className="text-3xl font-bold tracking-tight">Attendance</h1>
           <p className="text-muted-foreground">Quick attendance marking - tap to toggle status</p>
         </div>
-        <Button onClick={handleSave} disabled={loading}>
+        <Button onClick={handleSave} disabled={loading || classes.length === 0}>
           {loading ? <Loader2 className="size-4 animate-spin" /> : <Save />}
           {loading ? "Saving..." : "Save Attendance"}
         </Button>
@@ -109,14 +110,16 @@ export function AttendanceClient({
 
       {/* Controls */}
       <div className="flex flex-col gap-4 sm:flex-row">
-        <Select value={selectedClass} onValueChange={(v) => setSelectedClass(v ?? "")}>
+        <Select value={selectedClass} onValueChange={(v) => setSelectedClass(v ?? "")} disabled={classes.length === 0}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select Class" />
           </SelectTrigger>
           <SelectContent>
-            {classes.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-            ))}
+            <SelectGroup>
+              {classes.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
         <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-[200px]" />
@@ -149,6 +152,12 @@ export function AttendanceClient({
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <p className="text-muted-foreground text-lg">No classes created yet</p>
               <p className="text-muted-foreground text-sm">Create classes first to start marking attendance.</p>
+              <Link href="/madrasa/classes" className="mt-4">
+                <Button>
+                  <BookOpen />
+                  Create Class
+                </Button>
+              </Link>
             </div>
           ) : classStudents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">

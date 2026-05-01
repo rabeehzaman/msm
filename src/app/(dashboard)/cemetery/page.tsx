@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +27,17 @@ const totalOccupied = sections.reduce((s, sec) => s + sec.occupied, 0);
 const totalAvailable = sections.reduce((s, sec) => s + sec.available, 0);
 
 export default function CemeteryPage() {
+  const [search, setSearch] = useState("");
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredBurials = recentBurials.filter((burial) => {
+    return (
+      !normalizedSearch ||
+      burial.name.toLowerCase().includes(normalizedSearch) ||
+      burial.house.toLowerCase().includes(normalizedSearch) ||
+      burial.plot.toLowerCase().includes(normalizedSearch)
+    );
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -31,7 +45,7 @@ export default function CemeteryPage() {
           <h1 className="text-3xl font-bold tracking-tight">Cemetery (Qabristan)</h1>
           <p className="text-muted-foreground">Plot management, burial records, and capacity tracking</p>
         </div>
-        <Button><Plus /> Reserve Plot</Button>
+        <Button disabled title="Plot reservation workflow is not configured yet"><Plus /> Reserve Plot</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -76,9 +90,9 @@ export default function CemeteryPage() {
       <Card>
         <CardHeader><CardTitle>Grave Finder</CardTitle><CardDescription>Search burial records by name</CardDescription></CardHeader>
         <CardContent>
-          <div className="mb-4 relative"><Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" /><Input placeholder="Search by name to locate a grave..." className="pl-9" /></div>
+          <div className="mb-4 relative"><Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" /><Input placeholder="Search by name to locate a grave..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
           <div className="flex flex-col gap-3">
-            {recentBurials.map(b => (
+            {filteredBurials.map(b => (
               <div key={b.plot} className="flex items-center gap-4 rounded-lg border p-3">
                 <div className="flex size-10 items-center justify-center rounded-lg bg-muted"><MapPin className="text-muted-foreground size-5" /></div>
                 <div className="flex-1">
@@ -88,6 +102,9 @@ export default function CemeteryPage() {
                 <Badge variant="outline" className="font-mono">{b.plot}</Badge>
               </div>
             ))}
+            {filteredBurials.length === 0 && (
+              <p className="text-muted-foreground py-8 text-center text-sm">No burial records match the search.</p>
+            )}
           </div>
         </CardContent>
       </Card>

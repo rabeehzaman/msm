@@ -1,0 +1,293 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - list [ref=e7]:
+        - listitem [ref=e8]:
+          - link [ref=e350] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e10]: M
+            - generic [ref=e11]:
+              - generic [ref=e12]: Mahallu Smart Manager
+              - generic [ref=e13]: Community ERP
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Overview
+          - list [ref=e18]:
+            - listitem [ref=e19]:
+              - link [ref=e351] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e21]
+                - generic [ref=e26]: Dashboard
+        - generic [ref=e27]:
+          - generic [ref=e28]: Community
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link [ref=e352] [cursor=pointer]:
+                - /url: /households
+                - img [ref=e33]
+                - generic [ref=e36]: Households
+            - listitem [ref=e37]:
+              - link [ref=e353] [cursor=pointer]:
+                - /url: /members
+                - img [ref=e39]
+                - generic [ref=e44]: Members
+            - listitem [ref=e45]:
+              - link [ref=e354] [cursor=pointer]:
+                - /url: /wards
+                - img [ref=e47]
+                - generic [ref=e50]: Wards
+        - generic [ref=e51]:
+          - generic [ref=e52]: Finance
+          - list [ref=e54]:
+            - listitem [ref=e55]:
+              - link [ref=e355] [cursor=pointer]:
+                - /url: /finances
+                - img [ref=e57]
+                - generic [ref=e60]: Finance Overview
+            - listitem [ref=e61]:
+              - link [ref=e356] [cursor=pointer]:
+                - /url: /finances/income
+                - img [ref=e63]
+                - generic [ref=e66]: Income
+            - listitem [ref=e67]:
+              - link [ref=e357] [cursor=pointer]:
+                - /url: /finances/expenses
+                - img [ref=e69]
+                - generic [ref=e71]: Expenses
+            - listitem [ref=e72]:
+              - link [ref=e358] [cursor=pointer]:
+                - /url: /finances/friday-collections
+                - img [ref=e74]
+                - generic [ref=e76]: Friday Collections
+            - listitem [ref=e77]:
+              - link [ref=e359] [cursor=pointer]:
+                - /url: /subscriptions
+                - img [ref=e79]
+                - generic [ref=e82]: Subscriptions
+            - listitem [ref=e83]:
+              - link [ref=e360] [cursor=pointer]:
+                - /url: /finances/zakat
+                - img [ref=e85]
+                - generic [ref=e87]: Zakat
+            - listitem [ref=e88]:
+              - link [ref=e361] [cursor=pointer]:
+                - /url: /finances/qard-hasan
+                - img [ref=e90]
+                - generic [ref=e95]: Qard Hasan
+        - generic [ref=e96]:
+          - generic [ref=e97]: Education
+          - list [ref=e99]:
+            - listitem [ref=e100]:
+              - link [ref=e362] [cursor=pointer]:
+                - /url: /madrasa
+                - img [ref=e102]
+                - generic [ref=e105]: Madrasa Overview
+            - listitem [ref=e106]:
+              - link [ref=e363] [cursor=pointer]:
+                - /url: /madrasa/classes
+                - img [ref=e108]
+                - generic [ref=e110]: Classes
+            - listitem [ref=e111]:
+              - link [ref=e364] [cursor=pointer]:
+                - /url: /madrasa/students
+                - img [ref=e113]
+                - generic [ref=e115]: Students
+            - listitem [ref=e116]:
+              - link [ref=e365] [cursor=pointer]:
+                - /url: /madrasa/attendance
+                - img [ref=e118]
+                - generic [ref=e122]: Attendance
+            - listitem [ref=e123]:
+              - link [ref=e366] [cursor=pointer]:
+                - /url: /madrasa/hifz
+                - img [ref=e125]
+                - generic [ref=e128]: Hifz Tracker
+            - listitem [ref=e129]:
+              - link [ref=e367] [cursor=pointer]:
+                - /url: /madrasa/exams
+                - img [ref=e131]
+                - generic [ref=e134]: Exams & Results
+        - generic [ref=e135]:
+          - generic [ref=e136]: Lifecycle
+          - list [ref=e138]:
+            - listitem [ref=e139]:
+              - link [ref=e368] [cursor=pointer]:
+                - /url: /marriages
+                - img [ref=e141]
+                - generic [ref=e143]: Marriages
+            - listitem [ref=e144]:
+              - link [ref=e369] [cursor=pointer]:
+                - /url: /deaths
+                - img [ref=e146]
+                - generic [ref=e149]: Deaths & Janazah
+            - listitem [ref=e150]:
+              - link [ref=e370] [cursor=pointer]:
+                - /url: /cemetery
+                - img [ref=e152]
+                - generic [ref=e155]: Cemetery
+            - listitem [ref=e156]:
+              - link [ref=e371] [cursor=pointer]:
+                - /url: /hajj
+                - img [ref=e158]
+                - generic [ref=e160]: Hajj & Umrah
+        - generic [ref=e161]:
+          - generic [ref=e162]: Services
+          - list [ref=e164]:
+            - listitem [ref=e165]:
+              - link [ref=e372] [cursor=pointer]:
+                - /url: /welfare
+                - img [ref=e167]
+                - generic [ref=e172]: Welfare
+            - listitem [ref=e173]:
+              - link [ref=e373] [cursor=pointer]:
+                - /url: /certificates
+                - img [ref=e175]
+                - generic [ref=e178]: Certificates
+            - listitem [ref=e179]:
+              - link [ref=e374] [cursor=pointer]:
+                - /url: /events
+                - img [ref=e181]
+                - generic [ref=e183]: Events
+            - listitem [ref=e184]:
+              - link [ref=e375] [cursor=pointer]:
+                - /url: /directory/blood-donors
+                - img [ref=e186]
+                - generic [ref=e189]: Blood Donors
+            - listitem [ref=e190]:
+              - link [ref=e376] [cursor=pointer]:
+                - /url: /directory/professionals
+                - img [ref=e192]
+                - generic [ref=e195]: Professionals
+        - generic [ref=e196]:
+          - generic [ref=e197]: Operations
+          - list [ref=e199]:
+            - listitem [ref=e200]:
+              - link [ref=e377] [cursor=pointer]:
+                - /url: /announcements
+                - img [ref=e202]
+                - generic [ref=e205]: Announcements
+            - listitem [ref=e206]:
+              - link [ref=e378] [cursor=pointer]:
+                - /url: /assets
+                - img [ref=e208]
+                - generic [ref=e212]: Assets
+            - listitem [ref=e213]:
+              - link [ref=e379] [cursor=pointer]:
+                - /url: /governance
+                - img [ref=e215]
+                - generic [ref=e217]: Governance
+            - listitem [ref=e218]:
+              - link [ref=e380] [cursor=pointer]:
+                - /url: /reports
+                - img [ref=e220]
+                - generic [ref=e222]: Reports
+            - listitem [ref=e223]:
+              - link [ref=e381] [cursor=pointer]:
+                - /url: /settings
+                - img [ref=e225]
+                - generic [ref=e228]: Settings
+      - list [ref=e230]:
+        - listitem [ref=e231]:
+          - button [ref=e382]:
+            - generic [ref=e234]: AD
+            - generic [ref=e235]:
+              - generic [ref=e236]: Admin User
+              - generic [ref=e237]: admin@mahallu.app
+            - img [ref=e238]
+      - button [ref=e383]
+    - main [ref=e241]:
+      - generic [ref=e242]:
+        - button [ref=e384]:
+          - img
+          - generic [ref=e244]: Toggle Sidebar
+        - separator [ref=e245]
+        - navigation [ref=e385]:
+          - list [ref=e247]:
+            - listitem [ref=e248]:
+              - link [disabled] [ref=e386]: Certificates
+        - generic [ref=e250]:
+          - button [ref=e387]:
+            - img
+            - generic [ref=e252]: Search
+          - button [ref=e388]:
+            - img
+            - generic [ref=e254]: "3"
+            - generic [ref=e255]: Notifications
+          - button [ref=e389]:
+            - img
+            - generic [ref=e257]: Toggle theme
+      - main [ref=e258]:
+        - generic [ref=e390]:
+          - generic [ref=e391]:
+            - generic [ref=e392]:
+              - heading [level=1] [ref=e393]: Certificates
+              - paragraph [ref=e394]: Issue and manage community certificates
+            - button [expanded] [ref=e395]:
+              - img
+              - text: New Certificate Request
+          - generic [ref=e396]:
+            - generic [ref=e398]:
+              - paragraph [ref=e399]: Total Issued
+              - paragraph [ref=e400]: "0"
+            - generic [ref=e402]:
+              - paragraph [ref=e403]: Pending
+              - paragraph [ref=e404]: "0"
+            - generic [ref=e406]:
+              - paragraph [ref=e407]: Delivered
+              - paragraph [ref=e408]: "0"
+            - generic [ref=e410]:
+              - paragraph [ref=e411]: Showing
+              - paragraph [ref=e412]: "0"
+          - generic [ref=e413]:
+            - generic [ref=e416]:
+              - generic [ref=e417]: Certificate Register
+              - generic [ref=e418]: All certificate requests and issuances
+            - generic [ref=e419]:
+              - generic [ref=e420]:
+                - generic [ref=e421]:
+                  - img [ref=e422]
+                  - textbox [ref=e425]:
+                    - /placeholder: Search by name, serial number...
+                - generic [ref=e426]:
+                  - combobox [ref=e427]
+                  - img
+              - generic [ref=e428]:
+                - paragraph [ref=e429]: No certificates found
+                - paragraph [ref=e430]: Submit your first certificate request.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e436] [cursor=pointer]:
+    - img [ref=e437]
+  - alert [ref=e440]
+  - dialog "New Certificate Request" [ref=e444]:
+    - generic [ref=e445]:
+      - heading "New Certificate Request" [level=2] [ref=e446]
+      - paragraph [ref=e447]: Submit a certificate request
+    - generic [ref=e448]:
+      - generic [ref=e449]:
+        - generic [ref=e450]:
+          - generic [ref=e451]: Certificate Type *
+          - generic [ref=e452]:
+            - combobox [ref=e453]:
+              - option "Select type" [disabled] [selected]
+              - option "Nikah Certificate"
+              - option "Death Certificate"
+              - option "Character Certificate"
+              - option "Noc"
+              - option "Transfer Certificate"
+              - option "Membership Certificate"
+              - option "Madrasa Completion"
+              - option "Hifz Completion"
+              - option "Clearance Certificate"
+            - img
+        - generic [ref=e454]:
+          - generic [ref=e455]: Member Name *
+          - textbox "Full name" [active] [ref=e456]: QA Cert MOME3JMW
+        - generic [ref=e457]:
+          - generic [ref=e458]: Purpose
+          - textbox "Purpose of the certificate" [ref=e459]
+      - generic [ref=e460]:
+        - button "Cancel" [ref=e461]
+        - button "Submit Request" [ref=e462]
+    - button "Close" [ref=e463]:
+      - img
+      - generic [ref=e464]: Close

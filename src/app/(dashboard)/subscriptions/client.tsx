@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -38,8 +37,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Search,
-  Download,
-  Bell,
   CreditCard,
   Loader2,
 } from "lucide-react";

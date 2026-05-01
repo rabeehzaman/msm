@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { marriages, marriageNocs, deaths, certificates, welfareApplications, events, announcements, cemeteryPlots, committees, committeeMembers, meetings, households, members, students } from "@/db/schema";
+import { marriages, deaths, certificates, welfareApplications, events, announcements, cemeteryPlots, committees, meetings, households, members, students } from "@/db/schema";
 import { eq, desc, count } from "drizzle-orm";
 import { ensureTenant } from "./auth";
 

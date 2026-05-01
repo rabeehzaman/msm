@@ -37,7 +37,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Search, Download, Receipt, Loader2 } from "lucide-react";
+import { Plus, Search, Receipt, Loader2 } from "lucide-react";
 import { createIncomeEntry } from "@/lib/actions/finance";
 import { toast } from "sonner";
 

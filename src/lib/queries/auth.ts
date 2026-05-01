@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getCurrentUser() {
   const supabase = await createClient();

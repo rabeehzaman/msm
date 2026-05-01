@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +25,21 @@ const professionals = [
 function getInitials(name: string) { return name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase(); }
 
 export default function ProfessionalsPage() {
+  const [search, setSearch] = useState("");
+  const [profession, setProfession] = useState("all");
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredProfessionals = professionals.filter((person) => {
+    const matchesSearch =
+      !normalizedSearch ||
+      person.name.toLowerCase().includes(normalizedSearch) ||
+      person.profession.toLowerCase().includes(normalizedSearch) ||
+      person.specialization.toLowerCase().includes(normalizedSearch) ||
+      person.business.toLowerCase().includes(normalizedSearch) ||
+      person.ward.toLowerCase().includes(normalizedSearch);
+    const matchesProfession = profession === "all" || person.profession.toLowerCase() === profession;
+    return matchesSearch && matchesProfession;
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -29,7 +47,7 @@ export default function ProfessionalsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Professional Directory</h1>
           <p className="text-muted-foreground">Community members&apos; skills and business services</p>
         </div>
-        <Button><Plus /> Add Listing</Button>
+        <Button disabled title="Professional listing creation is not configured yet"><Plus /> Add Listing</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -42,11 +60,11 @@ export default function ProfessionalsPage() {
         <CardHeader><CardTitle>Directory</CardTitle><CardDescription>Search community professionals and services</CardDescription></CardHeader>
         <CardContent>
           <div className="mb-4 flex gap-4">
-            <div className="relative flex-1"><Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" /><Input placeholder="Search by name, profession, or skill..." className="pl-9" /></div>
-            <Select defaultValue="all"><SelectTrigger className="w-[180px]"><SelectValue placeholder="Profession" /></SelectTrigger><SelectContent><SelectItem value="all">All Professions</SelectItem><SelectItem value="doctor">Doctor</SelectItem><SelectItem value="lawyer">Lawyer</SelectItem><SelectItem value="teacher">Teacher</SelectItem><SelectItem value="electrician">Electrician</SelectItem><SelectItem value="plumber">Plumber</SelectItem></SelectContent></Select>
+            <div className="relative flex-1"><Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" /><Input placeholder="Search by name, profession, or skill..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
+            <Select value={profession} onValueChange={(value) => setProfession(value)}><SelectTrigger className="w-[180px]"><SelectValue placeholder="Profession" /></SelectTrigger><SelectContent><SelectItem value="all">All Professions</SelectItem><SelectItem value="doctor">Doctor</SelectItem><SelectItem value="lawyer">Lawyer</SelectItem><SelectItem value="teacher">Teacher</SelectItem><SelectItem value="electrician">Electrician</SelectItem><SelectItem value="plumber">Plumber</SelectItem></SelectContent></Select>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            {professionals.map(p => (
+            {filteredProfessionals.map(p => (
               <div key={p.name} className="flex items-center gap-4 rounded-lg border p-4">
                 <Avatar className="size-10"><AvatarFallback className="text-xs">{getInitials(p.name)}</AvatarFallback></Avatar>
                 <div className="flex-1">
@@ -57,9 +75,14 @@ export default function ProfessionalsPage() {
                   <div className="flex items-center gap-2 text-sm"><Briefcase className="text-muted-foreground size-3" /><span className="text-primary">{p.profession}</span><span className="text-muted-foreground">- {p.specialization}</span></div>
                   {p.business !== "-" && <p className="text-muted-foreground text-xs">{p.business} | {p.ward}</p>}
                 </div>
-                <Button variant="ghost" size="sm"><Phone className="size-4" /></Button>
+                <Button variant="ghost" size="sm" nativeButton={false} render={<a href={`tel:${p.phone}`} aria-label={`Call ${p.name}`} />}>
+                  <Phone className="size-4" />
+                </Button>
               </div>
             ))}
+            {filteredProfessionals.length === 0 && (
+              <p className="text-muted-foreground py-8 text-center text-sm md:col-span-2">No professionals match the current filters.</p>
+            )}
           </div>
         </CardContent>
       </Card>

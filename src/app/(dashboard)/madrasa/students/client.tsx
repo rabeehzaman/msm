@@ -12,7 +12,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
@@ -24,6 +24,7 @@ import {
 import { Plus, Search, Trash2, Loader2 } from "lucide-react";
 import { createStudent, deleteStudent } from "@/lib/actions/madrasa";
 import { toast } from "sonner";
+import Link from "next/link";
 
 type Student = {
   id: string;
@@ -121,14 +122,21 @@ export function StudentsClient({
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium">Class</label>
-                  <Select name="classId">
+                  <Select name="classId" disabled={classes.length === 0}>
                     <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
                     <SelectContent>
-                      {classes.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {classes.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
+                  {classes.length === 0 && (
+                    <p className="text-muted-foreground text-xs">
+                      Create a class first to assign this student.
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
@@ -175,13 +183,28 @@ export function StudentsClient({
             <Select value={classFilter} onValueChange={(v) => setClassFilter(v ?? "all")}>
               <SelectTrigger className="w-[150px]"><SelectValue placeholder="Class" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Classes</SelectItem>
-                {classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                <SelectGroup>
+                  <SelectItem value="all">All Classes</SelectItem>
+                  {classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
 
-          {filtered.length === 0 ? (
+          {classes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-muted-foreground text-lg">No classes created yet</p>
+              <p className="text-muted-foreground text-sm">
+                Create classes before enrolling students.
+              </p>
+              <Link href="/madrasa/classes" className="mt-4">
+                <Button>
+                  <Plus />
+                  Create Class
+                </Button>
+              </Link>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <p className="text-muted-foreground text-lg">No students found</p>
               <p className="text-muted-foreground text-sm">

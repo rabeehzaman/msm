@@ -18,8 +18,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  ArrowUpRight,
-  ArrowDownRight,
   TrendingUp,
   Receipt,
   Plus,

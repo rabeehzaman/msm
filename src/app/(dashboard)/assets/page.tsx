@@ -40,7 +40,7 @@ export default function AssetsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Assets & Property</h1>
           <p className="text-muted-foreground">Manage properties, assets, inventory, and rentals</p>
         </div>
-        <Button><Plus /> Add Asset</Button>
+        <Button disabled title="Asset creation is not configured yet"><Plus /> Add Asset</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

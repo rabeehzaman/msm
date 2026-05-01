@@ -2,7 +2,6 @@ import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Download, BarChart3, FileText, Users, GraduationCap, Calendar, TrendingUp } from "lucide-react";
 
 const reportCategories = [
@@ -125,7 +124,7 @@ export default function ReportsPage() {
                     <FileText className="text-muted-foreground size-4" />
                     <span className="text-sm font-medium">{report}</span>
                   </div>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" disabled title="Report export is not configured yet">
                     <Download className="size-4" />
                   </Button>
                 </div>

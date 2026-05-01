@@ -1,10 +1,35 @@
 import { db } from "@/db";
-import { funds, incomeEntries, expenseEntries, subscriptions, subscriptionPayments, fridayCollections } from "@/db/schema";
-import { eq, desc, count, sum, sql } from "drizzle-orm";
+import { funds, incomeEntries, expenseEntries, subscriptions, fridayCollections } from "@/db/schema";
+import { eq, desc, count, sum } from "drizzle-orm";
 import { ensureTenant } from "./auth";
 
 export async function getFunds() {
   const tenant = await ensureTenant();
+  const existingFunds = await db
+    .select()
+    .from(funds)
+    .where(eq(funds.tenantId, tenant.id))
+    .orderBy(funds.name);
+
+  if (existingFunds.length > 0) {
+    return existingFunds;
+  }
+
+  const defaultFunds = [
+    { type: "general" as const, name: "General Fund", isRestricted: false },
+    { type: "zakat" as const, name: "Zakat Fund", isRestricted: true },
+    { type: "sadaqah" as const, name: "Sadaqah Fund", isRestricted: false },
+    { type: "madrasa" as const, name: "Madrasa Fund", isRestricted: false },
+    { type: "building" as const, name: "Building Fund", isRestricted: true },
+    { type: "death_janazah" as const, name: "Death/Janazah Fund", isRestricted: true },
+    { type: "marriage_assistance" as const, name: "Marriage Assistance Fund", isRestricted: true },
+    { type: "scholarship" as const, name: "Scholarship Fund", isRestricted: true },
+    { type: "qard_hasan" as const, name: "Qard Hasan Fund", isRestricted: true },
+    { type: "ramadan_special" as const, name: "Ramadan Special Fund", isRestricted: true },
+  ];
+
+  await db.insert(funds).values(defaultFunds.map((fund) => ({ tenantId: tenant.id, ...fund })));
+
   return db.select().from(funds).where(eq(funds.tenantId, tenant.id)).orderBy(funds.name);
 }
 
@@ -99,10 +124,7 @@ export async function getFinanceDashboardStats() {
     .from(expenseEntries)
     .where(eq(expenseEntries.tenantId, tenant.id));
 
-  const fundBalances = await db
-    .select()
-    .from(funds)
-    .where(eq(funds.tenantId, tenant.id));
+  const fundBalances = await getFunds();
 
   return {
     totalIncome: Number(incomeTotal?.total ?? 0),

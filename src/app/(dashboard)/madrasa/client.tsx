@@ -14,6 +14,7 @@ import {
   BookOpen,
   Clock,
   ArrowUpRight,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -48,6 +49,12 @@ export function MadrasaClient({
           </p>
         </div>
         <div className="flex gap-2">
+          <Link href="/madrasa/classes">
+            <Button variant="outline">
+              <BookOpen />
+              Classes
+            </Button>
+          </Link>
           <Link href="/madrasa/attendance">
             <Button variant="outline">
               <Clock />
@@ -135,10 +142,10 @@ export function MadrasaClient({
       {/* Quick Links */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[
+          { title: "Classes", desc: `${stats.classes} active`, href: "/madrasa/classes", icon: BookOpen },
           { title: "Students", desc: `${stats.students} enrolled`, href: "/madrasa/students", icon: Users },
           { title: "Attendance", desc: "Mark today's attendance", href: "/madrasa/attendance", icon: Clock },
           { title: "Hifz Tracker", desc: "Memorization progress", href: "/madrasa/hifz", icon: BookOpen },
-          { title: "Exams & Results", desc: "Manage exams", href: "/madrasa/exams", icon: GraduationCap },
         ].map((link) => (
           <Card key={link.title} className="cursor-pointer transition-colors hover:bg-accent">
             <Link href={link.href}>
@@ -163,6 +170,12 @@ export function MadrasaClient({
           <p className="text-muted-foreground text-sm">
             Start by creating classes and enrolling students.
           </p>
+          <Link href="/madrasa/classes" className="mt-4">
+            <Button>
+              <Plus />
+              Create Class
+            </Button>
+          </Link>
         </div>
       )}
     </div>

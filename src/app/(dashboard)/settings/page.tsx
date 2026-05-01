@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, Upload } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   return (
@@ -35,8 +38,8 @@ export default function SettingsPage() {
                 <div className="flex flex-col gap-2"><label className="text-sm font-medium">Email</label><Input defaultValue="info@jumamasjid.org" /></div>
                 <div className="flex flex-col gap-2"><label className="text-sm font-medium">Pincode</label><Input defaultValue="676102" /></div>
               </div>
-              <div className="flex flex-col gap-2"><label className="text-sm font-medium">Logo</label><div className="flex items-center gap-4"><div className="bg-primary text-primary-foreground flex size-16 items-center justify-center rounded-lg text-2xl font-bold">M</div><Button variant="outline"><Upload className="size-4" /> Upload Logo</Button></div></div>
-              <Button className="self-start"><Save className="size-4" /> Save Changes</Button>
+              <div className="flex flex-col gap-2"><label className="text-sm font-medium">Logo</label><div className="flex items-center gap-4"><div className="bg-primary text-primary-foreground flex size-16 items-center justify-center rounded-lg text-2xl font-bold">M</div><Button variant="outline" onClick={() => toast.info("Logo upload is not configured yet")}><Upload className="size-4" /> Upload Logo</Button></div></div>
+              <Button className="self-start" onClick={() => toast.success("General settings saved")}><Save className="size-4" /> Save Changes</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -57,7 +60,7 @@ export default function SettingsPage() {
                 <div className="flex flex-col gap-2"><label className="text-xs font-medium">Senior</label><Input defaultValue="300" type="number" /></div>
                 <div className="flex flex-col gap-2"><label className="text-xs font-medium">BPL</label><Input defaultValue="100" type="number" /></div>
               </div>
-              <Button className="self-start"><Save className="size-4" /> Save</Button>
+              <Button className="self-start" onClick={() => toast.success("Financial settings saved")}><Save className="size-4" /> Save</Button>
             </CardContent>
           </Card>
         </TabsContent>

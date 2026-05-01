@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Download, Plus, Clock, CheckCircle2 } from "lucide-react";
+import { FileText, Download, Plus, Clock } from "lucide-react";
 
 const myCertificates = [
   { id: "CC-2025-045", type: "Character Certificate", date: "2025-03-20", status: "delivered" },
@@ -27,7 +27,7 @@ export default function PortalCertificatesPage() {
     <div className="mx-auto flex max-w-lg flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Certificates</h1>
-        <Button size="sm"><Plus className="size-4" /> Request</Button>
+        <Button size="sm" disabled title="Portal certificate requests are not configured yet"><Plus className="size-4" /> Request</Button>
       </div>
 
       {/* Pending */}
@@ -66,7 +66,7 @@ export default function PortalCertificatesPage() {
                     {cert.id} | {new Date(cert.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                   </p>
                 </div>
-                <Button variant="ghost" size="sm"><Download className="size-4" /></Button>
+                <Button variant="ghost" size="sm" disabled title="Certificate download is not configured yet"><Download className="size-4" /></Button>
               </div>
             </div>
           ))}
@@ -83,7 +83,7 @@ export default function PortalCertificatesPage() {
                 <FileText className="text-muted-foreground size-4" />
                 <span className="text-sm font-medium">{type}</span>
               </div>
-              <Button variant="outline" size="sm">Request</Button>
+              <Button variant="outline" size="sm" disabled title="Portal certificate requests are not configured yet">Request</Button>
             </div>
           ))}
         </CardContent>
