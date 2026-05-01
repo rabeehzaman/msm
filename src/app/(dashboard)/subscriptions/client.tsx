@@ -40,6 +40,7 @@ import {
   CreditCard,
   Loader2,
 } from "lucide-react";
+import Link from "next/link";
 import { createSubscription } from "@/lib/actions/finance";
 import { toast } from "sonner";
 
@@ -54,10 +55,18 @@ type Subscription = {
   status: string | null;
 };
 
+type Household = {
+  id: string;
+  houseNumber: string;
+  familyName: string;
+};
+
 export function SubscriptionsClient({
   subscriptions,
+  households,
 }: {
   subscriptions: Subscription[];
+  households: Household[];
 }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -114,8 +123,24 @@ export function SubscriptionsClient({
               <form action={handleCreate}>
                 <div className="flex flex-col gap-4 py-4">
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">Household ID *</label>
-                    <Input name="householdId" placeholder="Household ID" required />
+                    <label className="text-sm font-medium">Household *</label>
+                    <Select name="householdId" required disabled={households.length === 0}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select household" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {households.map((household) => (
+                          <SelectItem key={household.id} value={household.id}>
+                            {household.houseNumber} - {household.familyName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {households.length === 0 && (
+                      <p className="text-muted-foreground text-xs">
+                        Add a household before creating subscriptions.
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium">Plan Name *</label>
@@ -153,7 +178,7 @@ export function SubscriptionsClient({
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <CreditCard />} {loading ? "Saving..." : "Create Subscription"}</Button>
+                  <Button type="submit" disabled={loading || households.length === 0}>{loading ? <Loader2 className="size-4 animate-spin" /> : <CreditCard />} {loading ? "Saving..." : "Create Subscription"}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -229,6 +254,11 @@ export function SubscriptionsClient({
               <p className="text-muted-foreground text-sm">
                 {subscriptions.length === 0 ? "Create your first subscription to get started." : "Try adjusting your search or filters."}
               </p>
+              {households.length === 0 && (
+                <Button className="mt-4" nativeButton={false} render={<Link href="/households" />}>
+                  Add Household
+                </Button>
+              )}
             </div>
           ) : (
             <div className="rounded-md border">

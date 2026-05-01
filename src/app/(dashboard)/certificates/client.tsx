@@ -36,9 +36,9 @@ const statusColors: Record<string, "default" | "secondary" | "outline" | "destru
 };
 
 const certificateTypes = [
-  "nikah_certificate", "death_certificate", "character_certificate",
-  "noc", "transfer_certificate", "membership_certificate",
-  "madrasa_completion", "hifz_completion", "clearance_certificate",
+  "nikah", "death", "character",
+  "noc", "property", "transfer", "membership",
+  "madrasa_completion", "hifz_completion", "clearance", "divorce",
 ];
 
 export function CertificatesClient({

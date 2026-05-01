@@ -1,6 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function hasSupabaseSessionCookie(request: NextRequest) {
+  return request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("auth-token"));
+}
+
+function isLocalDevelopment(request: NextRequest) {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    ["localhost", "127.0.0.1", "::1"].includes(request.nextUrl.hostname)
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -29,9 +42,25 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  let authUnavailable = false;
+
+  try {
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
+    user = currentUser;
+  } catch (error) {
+    authUnavailable = true;
+    console.warn("Supabase auth check failed in middleware", error);
+  }
+
+  if (
+    authUnavailable &&
+    (hasSupabaseSessionCookie(request) || isLocalDevelopment(request))
+  ) {
+    return supabaseResponse;
+  }
 
   if (
     !user &&
