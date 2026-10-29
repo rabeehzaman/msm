@@ -40,18 +40,18 @@ export function GovernanceClient({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Governance</h1>
-          <p className="text-muted-foreground">Committee management, meetings, and resolutions</p>
+          <h1 className="page-title">Governance</h1>
+          <p className="page-subtitle">Committee management, meetings, and resolutions</p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30"><Shield className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Committees</p><p className="text-2xl font-bold">{committees.length}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><FileText className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Meetings</p><p className="text-2xl font-bold">{meetings.length}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><Calendar className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Approved Minutes</p><p className="text-2xl font-bold">{meetings.filter(m => m.status === "minutes_approved").length}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><Users className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Draft Minutes</p><p className="text-2xl font-bold">{meetings.filter(m => m.status === "minutes_draft").length}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon stat-icon-lagoon"><Shield className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Committees</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{committees.length}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><FileText className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Meetings</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{meetings.length}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><Calendar className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Approved Minutes</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{meetings.filter(m => m.status === "minutes_approved").length}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><Users className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Draft Minutes</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{meetings.filter(m => m.status === "minutes_draft").length}</p></div></CardContent></Card>
       </div>
 
       <Tabs defaultValue="committees">
@@ -65,7 +65,7 @@ export function GovernanceClient({
             <CardHeader><CardTitle>Committees</CardTitle><CardDescription>All governing committees</CardDescription></CardHeader>
             <CardContent>
               {committees.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="empty-state">
                   <p className="text-muted-foreground text-lg">No committees set up yet</p>
                   <p className="text-muted-foreground text-sm">Committee data will appear here once configured.</p>
                 </div>
@@ -98,12 +98,12 @@ export function GovernanceClient({
             <CardHeader><CardTitle>Meeting Register</CardTitle><CardDescription>All meetings with minutes status</CardDescription></CardHeader>
             <CardContent>
               {meetings.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="empty-state">
                   <p className="text-muted-foreground text-lg">No meetings recorded yet</p>
                   <p className="text-muted-foreground text-sm">Meeting records will appear here.</p>
                 </div>
               ) : (
-                <div className="rounded-md border">
+                <div className="table-shell">
                   <Table>
                     <TableHeader><TableRow>
                       <TableHead>Title</TableHead><TableHead>Date</TableHead><TableHead>Minutes</TableHead>

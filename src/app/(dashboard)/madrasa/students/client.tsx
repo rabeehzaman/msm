@@ -102,10 +102,10 @@ export function StudentsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Students</h1>
-          <p className="text-muted-foreground">Manage Madrasa student enrollment and profiles</p>
+          <h1 className="page-title">Students</h1>
+          <p className="page-subtitle">Manage Madrasa student enrollment and profiles</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> New Admission</DialogTrigger>
@@ -159,10 +159,10 @@ export function StudentsClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Enrolled</p><p className="text-2xl font-bold">{students.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Active</p><p className="text-2xl font-bold">{activeCount}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Classes</p><p className="text-2xl font-bold">{classes.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Showing</p><p className="text-2xl font-bold">{filtered.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Enrolled</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{students.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Active</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{activeCount}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Classes</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{classes.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Showing</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p></CardContent></Card>
       </div>
 
       <Card>
@@ -192,7 +192,7 @@ export function StudentsClient({
           </div>
 
           {classes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No classes created yet</p>
               <p className="text-muted-foreground text-sm">
                 Create classes before enrolling students.
@@ -205,14 +205,14 @@ export function StudentsClient({
               </Link>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No students found</p>
               <p className="text-muted-foreground text-sm">
                 {students.length === 0 ? "Enroll your first student to get started." : "Try adjusting your search or filters."}
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -243,7 +243,7 @@ export function StudentsClient({
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm" onClick={() => setDeleteTarget({ id: s.id, name: s.fullName })} disabled={deletingId === s.id}>
-                          {deletingId === s.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-red-500" />}
+                          {deletingId === s.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-destructive" />}
                         </Button>
                       </TableCell>
                     </TableRow>

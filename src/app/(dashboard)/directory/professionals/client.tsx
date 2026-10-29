@@ -44,18 +44,18 @@ export function ProfessionalsClient({ professionals }: { professionals: Professi
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Professional Directory</h1>
-          <p className="text-muted-foreground">Community members&apos; skills and business services</p>
+          <h1 className="page-title">Professional Directory</h1>
+          <p className="page-subtitle">Community members&apos; skills and business services</p>
         </div>
         <Button disabled title="Professional listing creation is not configured yet"><Plus /> Add Listing</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Listings</p><p className="text-2xl font-bold">{professionals.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Professions</p><p className="text-2xl font-bold">{professionCount}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Businesses</p><p className="text-2xl font-bold">{businessCount}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Listings</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{professionals.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Professions</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{professionCount}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Businesses</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{businessCount}</p></CardContent></Card>
       </div>
 
       <Card>
@@ -83,7 +83,7 @@ export function ProfessionalsClient({ professionals }: { professionals: Professi
               </div>
             ))}
             {filteredProfessionals.length === 0 && (
-              <p className="text-muted-foreground py-8 text-center text-sm md:col-span-2">{professionals.length === 0 ? "No professional listings yet." : "No professionals match the current filters."}</p>
+              <p className="empty-state text-muted-foreground text-sm md:col-span-2">{professionals.length === 0 ? "No professional listings yet." : "No professionals match the current filters."}</p>
             )}
           </div>
         </CardContent>

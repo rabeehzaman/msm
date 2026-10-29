@@ -34,7 +34,7 @@ type ClassInfo = {
 
 const statusConfig: Record<AttendanceStatus, { icon: typeof CheckCircle2; color: string; label: string }> = {
   present: { icon: CheckCircle2, color: "text-green-500", label: "Present" },
-  absent: { icon: XCircle, color: "text-red-500", label: "Absent" },
+  absent: { icon: XCircle, color: "text-destructive", label: "Absent" },
   late: { icon: Clock, color: "text-yellow-500", label: "Late" },
   excused: { icon: AlertTriangle, color: "text-blue-500", label: "Excused" },
 };
@@ -97,10 +97,10 @@ export function AttendanceClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Attendance</h1>
-          <p className="text-muted-foreground">Quick attendance marking - tap to toggle status</p>
+          <h1 className="page-title">Attendance</h1>
+          <p className="page-subtitle">Quick attendance marking - tap to toggle status</p>
         </div>
         <Button onClick={handleSave} disabled={loading || classes.length === 0}>
           {loading ? <Loader2 className="size-4 animate-spin" /> : <Save />}
@@ -149,7 +149,7 @@ export function AttendanceClient({
         </CardHeader>
         <CardContent>
           {classes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No classes created yet</p>
               <p className="text-muted-foreground text-sm">Create classes first to start marking attendance.</p>
               <Link href="/madrasa/classes" className="mt-4">
@@ -160,12 +160,12 @@ export function AttendanceClient({
               </Link>
             </div>
           ) : classStudents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No students in this class</p>
               <p className="text-muted-foreground text-sm">Enroll students in this class to mark attendance.</p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -211,13 +211,13 @@ export function AttendanceClient({
           const Icon = cfg.icon;
           return (
             <Card key={s}>
-              <CardContent className="flex items-center gap-4 pt-6">
-                <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+              <CardContent className="flex items-center gap-4">
+                <div className="stat-icon">
                   <Icon className={`size-5 ${cfg.color}`} />
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm capitalize">{cfg.label}</p>
-                  <p className="text-2xl font-bold">{counts[s] || 0}</p>
+                  <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{counts[s] || 0}</p>
                 </div>
               </CardContent>
             </Card>

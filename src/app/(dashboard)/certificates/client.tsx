@@ -79,10 +79,10 @@ export function CertificatesClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Certificates</h1>
-          <p className="text-muted-foreground">Issue and manage community certificates</p>
+          <h1 className="page-title">Certificates</h1>
+          <p className="page-subtitle">Issue and manage community certificates</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> New Certificate Request</DialogTrigger>
@@ -124,10 +124,10 @@ export function CertificatesClient({
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Issued</p><p className="text-2xl font-bold">{certificates.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Pending</p><p className="text-2xl font-bold text-yellow-600">{pendingCount}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Delivered</p><p className="text-2xl font-bold">{certificates.filter(c => c.status === "delivered").length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Showing</p><p className="text-2xl font-bold">{filtered.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Issued</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{certificates.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Pending</p><p className="text-2xl font-bold text-yellow-600">{pendingCount}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Delivered</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{certificates.filter(c => c.status === "delivered").length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Showing</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p></CardContent></Card>
       </div>
 
       {/* Register Table */}
@@ -153,12 +153,12 @@ export function CertificatesClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No certificates found</p>
               <p className="text-muted-foreground text-sm">{certificates.length === 0 ? "Submit your first certificate request." : "Try adjusting your search."}</p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader><TableRow>
                   <TableHead>Serial #</TableHead><TableHead>Type</TableHead><TableHead>Member</TableHead><TableHead>Purpose</TableHead><TableHead>Date</TableHead><TableHead>Status</TableHead>

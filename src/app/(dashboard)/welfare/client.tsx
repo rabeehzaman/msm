@@ -80,10 +80,10 @@ export function WelfareClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welfare</h1>
-          <p className="text-muted-foreground">Community welfare schemes and applications</p>
+          <h1 className="page-title">Welfare</h1>
+          <p className="page-subtitle">Community welfare schemes and applications</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> New Application</DialogTrigger>
@@ -128,27 +128,27 @@ export function WelfareClient({
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-pink-100 dark:bg-pink-900/30"><Heart className="size-5 text-pink-600" /></div>
-            <div><p className="text-muted-foreground text-sm">Total Applications</p><p className="text-2xl font-bold">{applications.length}</p></div>
+          <CardContent className="flex items-center gap-4">
+            <div className="stat-icon stat-icon-rose"><Heart className="size-5 text-pink-600" /></div>
+            <div><p className="text-muted-foreground text-sm">Total Applications</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{applications.length}</p></div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30"><IndianRupee className="size-5 text-green-600" /></div>
-            <div><p className="text-muted-foreground text-sm">Total Requested</p><p className="text-2xl font-bold">Rs. {totalAmount.toLocaleString("en-IN")}</p></div>
+          <CardContent className="flex items-center gap-4">
+            <div className="stat-icon"><IndianRupee className="size-5 text-success" /></div>
+            <div><p className="text-muted-foreground text-sm">Total Requested</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalAmount.toLocaleString("en-IN")}</p></div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-muted flex size-10 items-center justify-center rounded-lg"><Users className="text-muted-foreground size-5" /></div>
-            <div><p className="text-muted-foreground text-sm">Pending Review</p><p className="text-2xl font-bold">{pendingCount}</p></div>
+          <CardContent className="flex items-center gap-4">
+            <div className="stat-icon"><Users className="text-muted-foreground size-5" /></div>
+            <div><p className="text-muted-foreground text-sm">Pending Review</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{pendingCount}</p></div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-muted flex size-10 items-center justify-center rounded-lg"><Heart className="text-muted-foreground size-5" /></div>
-            <div><p className="text-muted-foreground text-sm">Disbursed</p><p className="text-2xl font-bold">{applications.filter(a => a.status === "disbursed").length}</p></div>
+          <CardContent className="flex items-center gap-4">
+            <div className="stat-icon"><Heart className="text-muted-foreground size-5" /></div>
+            <div><p className="text-muted-foreground text-sm">Disbursed</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{applications.filter(a => a.status === "disbursed").length}</p></div>
           </CardContent>
         </Card>
       </div>
@@ -176,12 +176,12 @@ export function WelfareClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No applications found</p>
               <p className="text-muted-foreground text-sm">{applications.length === 0 ? "Submit your first welfare application." : "Try adjusting your search."}</p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader><TableRow>
                   <TableHead>Applicant</TableHead><TableHead>Scheme</TableHead><TableHead>Description</TableHead><TableHead>Date</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Amount</TableHead>

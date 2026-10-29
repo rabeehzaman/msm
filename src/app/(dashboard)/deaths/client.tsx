@@ -55,14 +55,14 @@ export function DeathsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Death & Janazah</h1>
-          <p className="text-muted-foreground">Death registration and funeral coordination</p>
+          <h1 className="page-title">Death & Janazah</h1>
+          <p className="page-subtitle">Death registration and funeral coordination</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> Register Death</DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader><DialogTitle>Register Death</DialogTitle><DialogDescription>Register a death and coordinate Janazah</DialogDescription></DialogHeader>
             <form action={handleCreate}>
               <div className="flex flex-col gap-4 py-4">
@@ -91,10 +91,10 @@ export function DeathsClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Deaths</p><p className="text-2xl font-bold">{deaths.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">With Certificates</p><p className="text-2xl font-bold">{deaths.filter(d => d.certificateNumber).length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">With Janazah Info</p><p className="text-2xl font-bold">{deaths.filter(d => d.janazahTime).length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Showing</p><p className="text-2xl font-bold">{filtered.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Deaths</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{deaths.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">With Certificates</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{deaths.filter(d => d.certificateNumber).length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">With Janazah Info</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{deaths.filter(d => d.janazahTime).length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Showing</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p></CardContent></Card>
       </div>
 
       <Card>
@@ -108,12 +108,12 @@ export function DeathsClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No deaths registered</p>
               <p className="text-muted-foreground text-sm">{deaths.length === 0 ? "No records yet." : "Try adjusting your search."}</p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table><TableHeader><TableRow>
                 <TableHead>Certificate #</TableHead><TableHead>Name</TableHead><TableHead>Date</TableHead><TableHead>Cause</TableHead><TableHead>Janazah</TableHead><TableHead>Informer</TableHead>
               </TableRow></TableHeader><TableBody>

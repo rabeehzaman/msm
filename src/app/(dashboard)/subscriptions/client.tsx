@@ -100,10 +100,10 @@ export function SubscriptionsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Subscriptions</h1>
-          <p className="text-muted-foreground">
+          <h1 className="page-title">Subscriptions</h1>
+          <p className="page-subtitle">
             Manage household subscription plans and collection
           </p>
         </div>
@@ -189,27 +189,27 @@ export function SubscriptionsClient({
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Total Subscriptions</p>
-            <p className="text-2xl font-bold">{subscriptions.length}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{subscriptions.length}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Active</p>
-            <p className="text-2xl font-bold text-green-600">{activeCount}</p>
+            <p className="text-2xl font-bold text-success">{activeCount}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Expected (per cycle)</p>
-            <p className="text-2xl font-bold">Rs. {totalExpected.toLocaleString("en-IN")}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalExpected.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Showing</p>
-            <p className="text-2xl font-bold">{filtered.length}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -249,7 +249,7 @@ export function SubscriptionsClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No subscriptions found</p>
               <p className="text-muted-foreground text-sm">
                 {subscriptions.length === 0 ? "Create your first subscription to get started." : "Try adjusting your search or filters."}
@@ -261,7 +261,7 @@ export function SubscriptionsClient({
               )}
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>

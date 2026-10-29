@@ -100,10 +100,10 @@ export function IncomeClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Income</h1>
-          <p className="text-muted-foreground">
+          <h1 className="page-title">Income</h1>
+          <p className="page-subtitle">
             Record and manage all income entries
           </p>
         </div>
@@ -112,7 +112,7 @@ export function IncomeClient({
             <Plus />
             Record Income
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Record Income</DialogTitle>
               <DialogDescription>
@@ -213,27 +213,27 @@ export function IncomeClient({
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Total Income</p>
-            <p className="text-2xl font-bold">Rs. {totalAmount.toLocaleString("en-IN")}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalAmount.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Total Entries</p>
-            <p className="text-2xl font-bold">{entries.length}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{entries.length}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Funds</p>
-            <p className="text-2xl font-bold">{funds.length}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{funds.length}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Showing</p>
-            <p className="text-2xl font-bold">{filtered.length}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -273,14 +273,14 @@ export function IncomeClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No income entries found</p>
               <p className="text-muted-foreground text-sm">
                 {entries.length === 0 ? "Record your first income entry to get started." : "Try adjusting your search or filters."}
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -306,7 +306,7 @@ export function IncomeClient({
                         <Badge variant="outline">{entry.fundName || "-"}</Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">{entry.paymentMethod || "-"}</TableCell>
-                      <TableCell className="text-right font-medium text-green-600">
+                      <TableCell className="text-right font-medium text-success">
                         Rs. {Number(entry.amount).toLocaleString("en-IN")}
                       </TableCell>
                     </TableRow>

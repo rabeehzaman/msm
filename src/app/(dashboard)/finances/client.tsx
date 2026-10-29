@@ -102,10 +102,10 @@ export function FinancesClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Finances</h1>
-          <p className="text-muted-foreground">
+          <h1 className="page-title">Finances</h1>
+          <p className="page-subtitle">
             Complete financial overview across all funds
           </p>
         </div>
@@ -129,11 +129,11 @@ export function FinancesClient({
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">Total Income</CardTitle>
             <IndianRupee className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rs. {stats.totalIncome.toLocaleString("en-IN")}</div>
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {stats.totalIncome.toLocaleString("en-IN")}</div>
             <div className="text-muted-foreground text-xs">
               {stats.incomeCount} entries
             </div>
@@ -141,11 +141,11 @@ export function FinancesClient({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">Total Expenses</CardTitle>
             <CreditCard className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rs. {stats.totalExpenses.toLocaleString("en-IN")}</div>
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {stats.totalExpenses.toLocaleString("en-IN")}</div>
             <div className="text-muted-foreground text-xs">
               {stats.expenseCount} entries
             </div>
@@ -153,11 +153,11 @@ export function FinancesClient({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Net Surplus</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">Net Surplus</CardTitle>
             <TrendingUp className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${netSurplus >= 0 ? "text-green-600" : "text-red-500"}`}>
+            <div className={`text-2xl font-bold ${netSurplus >= 0 ? "text-success" : "text-destructive"}`}>
               Rs. {netSurplus.toLocaleString("en-IN")}
             </div>
             <p className="text-muted-foreground text-xs">Across all funds</p>
@@ -165,11 +165,11 @@ export function FinancesClient({
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Funds</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">Active Funds</CardTitle>
             <Receipt className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.funds.length}</div>
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{stats.funds.length}</div>
             <p className="text-muted-foreground text-xs">{stats.funds.filter(f => f.isRestricted).length} restricted</p>
           </CardContent>
         </Card>
@@ -219,14 +219,14 @@ export function FinancesClient({
         </CardHeader>
         <CardContent>
           {recentTransactions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No transactions yet</p>
               <p className="text-muted-foreground text-sm">
                 Record your first income or expense to get started.
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -249,7 +249,7 @@ export function FinancesClient({
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">{tx.method}</TableCell>
                       <TableCell className="text-right font-medium">
-                        <span className={tx.type === "income" ? "text-green-600" : "text-red-500"}>
+                        <span className={tx.type === "income" ? "text-success" : "text-destructive"}>
                           {tx.type === "income" ? "+" : "-"} Rs. {tx.amount.toLocaleString("en-IN")}
                         </span>
                       </TableCell>

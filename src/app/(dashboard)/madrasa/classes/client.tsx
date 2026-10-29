@@ -65,10 +65,10 @@ export function ClassesClient({ classes }: { classes: ClassInfo[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Classes</h1>
-          <p className="text-muted-foreground">Create and manage Madrasa class divisions</p>
+          <h1 className="page-title">Classes</h1>
+          <p className="page-subtitle">Create and manage Madrasa class divisions</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}>
@@ -123,35 +123,35 @@ export function ClassesClient({ classes }: { classes: ClassInfo[] }) {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
+          <CardContent className="flex items-center gap-4">
             <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
               <BookOpen className="text-primary" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">Classes</p>
-              <p className="text-2xl font-bold">{classes.length}</p>
+              <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{classes.length}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
+          <CardContent className="flex items-center gap-4">
             <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
               <Users className="text-primary" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">Students Assigned</p>
-              <p className="text-2xl font-bold">{totalStudents}</p>
+              <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{totalStudents}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
+          <CardContent className="flex items-center gap-4">
             <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
               <DoorOpen className="text-primary" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">Capacity</p>
-              <p className="text-2xl font-bold">{totalCapacity || "-"}</p>
+              <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{totalCapacity || "-"}</p>
             </div>
           </CardContent>
         </Card>
@@ -164,7 +164,7 @@ export function ClassesClient({ classes }: { classes: ClassInfo[] }) {
         </CardHeader>
         <CardContent>
           {classes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No classes created yet</p>
               <p className="text-muted-foreground text-sm">Create your first class to unlock student admission.</p>
               <Button className="mt-4" onClick={() => setOpen(true)}>
@@ -173,7 +173,7 @@ export function ClassesClient({ classes }: { classes: ClassInfo[] }) {
               </Button>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>

@@ -60,10 +60,10 @@ export function WardsClient({ wards }: { wards: Ward[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Wards</h1>
-          <p className="text-muted-foreground">Geographic ward management</p>
+          <h1 className="page-title">Wards</h1>
+          <p className="page-subtitle">Geographic ward management</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> Add Ward</DialogTrigger>
@@ -97,8 +97,8 @@ export function WardsClient({ wards }: { wards: Ward[] }) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30"><MapPin className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Total Wards</p><p className="text-2xl font-bold">{wards.length}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><Home className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Total Households</p><p className="text-2xl font-bold">{wards.reduce((s, w) => s + w.householdCount, 0)}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon stat-icon-lagoon"><MapPin className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Total Wards</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{wards.length}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><Home className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Total Households</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{wards.reduce((s, w) => s + w.householdCount, 0)}</p></div></CardContent></Card>
       </div>
 
       {wards.length === 0 ? (
@@ -122,7 +122,7 @@ export function WardsClient({ wards }: { wards: Ward[] }) {
                     <CardTitle className="text-base">{w.name}</CardTitle>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setDeleteTarget({ id: w.id, name: w.name })} disabled={deletingId === w.id}>
-                    {deletingId === w.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-red-500" />}
+                    {deletingId === w.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-destructive" />}
                   </Button>
                 </div>
               </CardHeader>

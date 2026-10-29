@@ -9,19 +9,19 @@ import { Plus, Building2, Package, Wrench, IndianRupee } from "lucide-react";
 export default function AssetsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Assets & Property</h1>
-          <p className="text-muted-foreground">Manage properties, assets, inventory, and rentals</p>
+          <h1 className="page-title">Assets & Property</h1>
+          <p className="page-subtitle">Manage properties, assets, inventory, and rentals</p>
         </div>
         <Button disabled title="Asset creation is not configured yet"><Plus /> Add Asset</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30"><Building2 className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Properties</p><p className="text-2xl font-bold">0</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><Package className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Asset Items</p><p className="text-2xl font-bold">0</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><IndianRupee className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Rental Income (MTD)</p><p className="text-2xl font-bold">Rs. 0</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><Wrench className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Maintenance Due</p><p className="text-2xl font-bold">0</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon stat-icon-lagoon"><Building2 className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Properties</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">0</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><Package className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Asset Items</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">0</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><IndianRupee className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Rental Income (MTD)</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. 0</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><Wrench className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Maintenance Due</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">0</p></div></CardContent></Card>
       </div>
 
       <Tabs defaultValue="properties">

@@ -82,17 +82,17 @@ const reportCategories = [
 export default function ReportsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
-          <p className="text-muted-foreground">37+ standard reports across all modules</p>
+          <h1 className="page-title">Reports</h1>
+          <p className="page-subtitle">37+ standard reports across all modules</p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">
         {reportCategories.map(cat => (
           <Card key={cat.title}>
-            <CardContent className="flex items-center gap-4 pt-6">
+            <CardContent className="flex items-center gap-4">
               <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
                 <cat.icon className="text-primary size-5" />
               </div>

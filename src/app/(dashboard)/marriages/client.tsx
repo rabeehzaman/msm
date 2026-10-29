@@ -60,14 +60,14 @@ export function MarriagesClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Marriages & Nikah</h1>
-          <p className="text-muted-foreground">Marriage registration and Mehr tracking</p>
+          <h1 className="page-title">Marriages & Nikah</h1>
+          <p className="page-subtitle">Marriage registration and Mehr tracking</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> Register Nikah</DialogTrigger>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="sm:max-w-3xl">
             <DialogHeader><DialogTitle>Register Nikah</DialogTitle><DialogDescription>Enter complete marriage details</DialogDescription></DialogHeader>
             <form action={handleCreate}>
               <div className="flex flex-col gap-4 py-4">
@@ -108,10 +108,10 @@ export function MarriagesClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Nikahs</p><p className="text-2xl font-bold">{marriages.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Registered</p><p className="text-2xl font-bold">{marriages.filter(m => m.status === "registered").length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">With Certificates</p><p className="text-2xl font-bold">{marriages.filter(m => m.certificateNumber).length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Showing</p><p className="text-2xl font-bold">{filtered.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Nikahs</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{marriages.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Registered</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{marriages.filter(m => m.status === "registered").length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">With Certificates</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{marriages.filter(m => m.certificateNumber).length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Showing</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p></CardContent></Card>
       </div>
 
       <Card>
@@ -125,12 +125,12 @@ export function MarriagesClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No marriages registered yet</p>
               <p className="text-muted-foreground text-sm">{marriages.length === 0 ? "Register your first nikah to get started." : "Try adjusting your search."}</p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table><TableHeader><TableRow>
                 <TableHead>Certificate #</TableHead><TableHead>Bride</TableHead><TableHead>Groom</TableHead><TableHead>Date</TableHead><TableHead>Mehr</TableHead><TableHead>Qazi</TableHead><TableHead>Status</TableHead>
               </TableRow></TableHeader><TableBody>

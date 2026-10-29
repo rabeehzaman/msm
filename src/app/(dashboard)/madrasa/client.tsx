@@ -41,10 +41,10 @@ export function MadrasaClient({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Madrasa</h1>
-          <p className="text-muted-foreground">
+          <h1 className="page-title">Madrasa</h1>
+          <p className="page-subtitle">
             Manage students, classes, attendance, and academic progress
           </p>
         </div>
@@ -74,41 +74,41 @@ export function MadrasaClient({
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">Total Students</CardTitle>
             <GraduationCap className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.students}</div>
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{stats.students}</div>
             <div className="text-muted-foreground text-xs">enrolled in all classes</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Classes</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">Classes</CardTitle>
             <BookOpen className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.classes}</div>
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{stats.classes}</div>
             <div className="text-muted-foreground text-xs">active classes</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Teachers</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">Teachers</CardTitle>
             <Users className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.teachers}</div>
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{stats.teachers}</div>
             <div className="text-muted-foreground text-xs">on staff</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Avg Class Size</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">Avg Class Size</CardTitle>
             <GraduationCap className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">
               {stats.classes > 0 ? Math.round(stats.students / stats.classes) : 0}
             </div>
             <div className="text-muted-foreground text-xs">students per class</div>
@@ -149,7 +149,7 @@ export function MadrasaClient({
         ].map((link) => (
           <Card key={link.title} className="cursor-pointer transition-colors hover:bg-accent">
             <Link href={link.href}>
-              <CardContent className="flex items-center gap-4 pt-6">
+              <CardContent className="flex items-center gap-4">
                 <div className="bg-primary/10 flex size-12 items-center justify-center rounded-lg">
                   <link.icon className="text-primary size-6" />
                 </div>
@@ -165,7 +165,7 @@ export function MadrasaClient({
       </div>
 
       {stats.students === 0 && stats.classes === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="empty-state">
           <p className="text-muted-foreground text-lg">No madrasa data yet</p>
           <p className="text-muted-foreground text-sm">
             Start by creating classes and enrolling students.

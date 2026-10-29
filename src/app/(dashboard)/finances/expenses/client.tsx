@@ -110,10 +110,10 @@ export function ExpensesClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
-          <p className="text-muted-foreground">
+          <h1 className="page-title">Expenses</h1>
+          <p className="page-subtitle">
             Record expenses with approval workflow
           </p>
         </div>
@@ -122,7 +122,7 @@ export function ExpensesClient({
             <Plus />
             Record Expense
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Record Expense</DialogTitle>
               <DialogDescription>
@@ -218,27 +218,27 @@ export function ExpensesClient({
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Total Expenses</p>
-            <p className="text-2xl font-bold">Rs. {totalAmount.toLocaleString("en-IN")}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalAmount.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Pending Approval</p>
-            <p className="text-2xl font-bold">{pendingCount}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{pendingCount}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Total Entries</p>
-            <p className="text-2xl font-bold">{entries.length}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{entries.length}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Showing</p>
-            <p className="text-2xl font-bold">{filtered.length}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -290,14 +290,14 @@ export function ExpensesClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No expense entries found</p>
               <p className="text-muted-foreground text-sm">
                 {entries.length === 0 ? "Record your first expense to get started." : "Try adjusting your search or filters."}
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -327,7 +327,7 @@ export function ExpensesClient({
                           {(exp.status || "draft").replace("_", " ")}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right font-medium text-red-500">
+                      <TableCell className="text-right font-medium text-destructive">
                         Rs. {Number(exp.amount).toLocaleString("en-IN")}
                       </TableCell>
                     </TableRow>

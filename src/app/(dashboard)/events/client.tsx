@@ -67,10 +67,10 @@ export function EventsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Events & Programs</h1>
-          <p className="text-muted-foreground">Manage community events and programs</p>
+          <h1 className="page-title">Events & Programs</h1>
+          <p className="page-subtitle">Manage community events and programs</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> Create Event</DialogTrigger>
@@ -126,10 +126,10 @@ export function EventsClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Events</p><p className="text-2xl font-bold">{events.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Upcoming</p><p className="text-2xl font-bold">{upcoming.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Past</p><p className="text-2xl font-bold">{past.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Scheduled</p><p className="text-2xl font-bold">{events.filter(e => e.status === "scheduled").length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Events</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{events.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Upcoming</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{upcoming.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Past</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{past.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Scheduled</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{events.filter(e => e.status === "scheduled").length}</p></CardContent></Card>
       </div>
 
       {/* Events List */}
@@ -137,7 +137,7 @@ export function EventsClient({
         <CardHeader><CardTitle>All Events</CardTitle><CardDescription>Scheduled programs and activities</CardDescription></CardHeader>
         <CardContent>
           {events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No events yet</p>
               <p className="text-muted-foreground text-sm">Create your first event to get started.</p>
             </div>

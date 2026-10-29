@@ -54,19 +54,19 @@ export function CemeteryClient({ plots }: { plots: Plot[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cemetery (Qabristan)</h1>
-          <p className="text-muted-foreground">Plot management, burial records, and capacity tracking</p>
+          <h1 className="page-title">Cemetery (Qabristan)</h1>
+          <p className="page-subtitle">Plot management, burial records, and capacity tracking</p>
         </div>
         <Button disabled title="Plot reservation workflow is not configured yet"><Plus /> Reserve Plot</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Plots</p><p className="text-2xl font-bold">{totalPlots}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Occupied</p><p className="text-2xl font-bold text-red-500">{totalOccupied}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Available</p><p className="text-2xl font-bold text-green-600">{totalAvailable}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Capacity Used</p><p className="text-2xl font-bold">{capacityUsed.toFixed(0)}%</p><Progress value={capacityUsed} className="mt-2 h-2" /></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Plots</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{totalPlots}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Occupied</p><p className="text-2xl font-bold text-destructive">{totalOccupied}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Available</p><p className="text-2xl font-bold text-success">{totalAvailable}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Capacity Used</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{capacityUsed.toFixed(0)}%</p><Progress value={capacityUsed} className="mt-2 h-2" /></CardContent></Card>
       </div>
 
       {/* Cemetery Grid Map */}
@@ -114,7 +114,7 @@ export function CemeteryClient({ plots }: { plots: Plot[] }) {
               </div>
             ))}
             {filteredBurials.length === 0 && (
-              <p className="text-muted-foreground py-8 text-center text-sm">No burial records match the search.</p>
+              <p className="empty-state text-muted-foreground text-sm">No burial records match the search.</p>
             )}
           </div>
         </CardContent>

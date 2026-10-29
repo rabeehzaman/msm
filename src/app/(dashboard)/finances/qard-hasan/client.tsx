@@ -72,14 +72,14 @@ export function QardHasanClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Qard Hasan</h1>
-          <p className="text-muted-foreground">Interest-free community loan management (zero interest - Shariah compliant)</p>
+          <h1 className="page-title">Qard Hasan</h1>
+          <p className="page-subtitle">Interest-free community loan management (zero interest - Shariah compliant)</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> New Loan Disbursement</DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Qard Hasan Loan Disbursement</DialogTitle>
               <DialogDescription>Record an interest-free loan disbursement</DialogDescription>
@@ -119,10 +119,10 @@ export function QardHasanClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="flex size-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30"><Handshake className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Total Loans</p><p className="text-2xl font-bold">{disbursements.length}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="flex size-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30"><IndianRupee className="size-5 text-green-600" /></div><div><p className="text-muted-foreground text-sm">Total Disbursed</p><p className="text-2xl font-bold">Rs. {totalDisbursed.toLocaleString("en-IN")}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><TrendingUp className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Fund Balance</p><p className="text-2xl font-bold">Rs. {Number(qardFund?.balance || 0).toLocaleString("en-IN")}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4 pt-6"><div className="bg-muted flex size-10 items-center justify-center rounded-lg"><AlertTriangle className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Fund Type</p><p className="text-2xl font-bold">{qardFund ? "Active" : "Not Set Up"}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon stat-icon-lagoon"><Handshake className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Total Loans</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{disbursements.length}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><IndianRupee className="size-5 text-success" /></div><div><p className="text-muted-foreground text-sm">Total Disbursed</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalDisbursed.toLocaleString("en-IN")}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><TrendingUp className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Fund Balance</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {Number(qardFund?.balance || 0).toLocaleString("en-IN")}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><AlertTriangle className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Fund Type</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{qardFund ? "Active" : "Not Set Up"}</p></div></CardContent></Card>
       </div>
 
       <Card>
@@ -137,12 +137,12 @@ export function QardHasanClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No loans recorded yet</p>
               <p className="text-muted-foreground text-sm">Record your first Qard Hasan loan disbursement to get started.</p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader><TableRow>
                   <TableHead>Borrower</TableHead><TableHead>Purpose</TableHead><TableHead>Date</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Amount</TableHead>

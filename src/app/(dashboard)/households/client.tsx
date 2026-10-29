@@ -99,16 +99,16 @@ export function HouseholdsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Households</h1>
-          <p className="text-muted-foreground">Manage all registered families in the Mahallu</p>
+          <h1 className="page-title">Households</h1>
+          <p className="page-subtitle">Manage all registered families in the Mahallu</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}>
             <Plus /> Add Household
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add New Household</DialogTitle>
               <DialogDescription>Register a new family in the Mahallu</DialogDescription>
@@ -172,10 +172,10 @@ export function HouseholdsClient({
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Households</p><p className="text-2xl font-bold">{stats.total}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Active</p><p className="text-2xl font-bold">{stats.active}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Wards</p><p className="text-2xl font-bold">{wards.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Showing</p><p className="text-2xl font-bold">{filtered.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Households</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{stats.total}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Active</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{stats.active}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Wards</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{wards.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Showing</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p></CardContent></Card>
       </div>
 
       {/* Table */}
@@ -208,14 +208,14 @@ export function HouseholdsClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No households found</p>
               <p className="text-muted-foreground text-sm">
                 {stats.total === 0 ? "Add your first household to get started." : "Try adjusting your search or filters."}
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -250,7 +250,7 @@ export function HouseholdsClient({
                           onClick={() => setDeleteTarget({ id: h.id, name: h.familyName })}
                           disabled={deletingId === h.id}
                         >
-                          {deletingId === h.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-red-500" />}
+                          {deletingId === h.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-destructive" />}
                         </Button>
                       </TableCell>
                     </TableRow>

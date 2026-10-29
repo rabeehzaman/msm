@@ -86,10 +86,10 @@ export function FridayCollectionsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Friday Collections</h1>
-          <p className="text-muted-foreground">
+          <h1 className="page-title">Friday Collections</h1>
+          <p className="page-subtitle">
             Juma collection tracking and verification
           </p>
         </div>
@@ -135,10 +135,10 @@ export function FridayCollectionsClient({
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-                <IndianRupee className="size-5 text-green-600" />
+              <div className="stat-icon">
+                <IndianRupee className="size-5 text-success" />
               </div>
               <div>
                 <p className="text-muted-foreground text-sm">This Month</p>
@@ -148,9 +148,9 @@ export function FridayCollectionsClient({
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="flex items-center gap-3">
-              <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+              <div className="stat-icon">
                 <IndianRupee className="text-muted-foreground size-5" />
               </div>
               <div>
@@ -161,9 +161,9 @@ export function FridayCollectionsClient({
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="flex items-center gap-3">
-              <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+              <div className="stat-icon">
                 <CheckCircle2 className="text-muted-foreground size-5" />
               </div>
               <div>
@@ -174,9 +174,9 @@ export function FridayCollectionsClient({
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="flex items-center gap-3">
-              <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+              <div className="stat-icon">
                 <CheckCircle2 className="text-muted-foreground size-5" />
               </div>
               <div>
@@ -200,14 +200,14 @@ export function FridayCollectionsClient({
         </CardHeader>
         <CardContent>
           {collections.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No collections yet</p>
               <p className="text-muted-foreground text-sm">
                 Record your first Friday collection to get started.
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>

@@ -30,10 +30,10 @@ export function HifzClient({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Hifz Tracker</h1>
-          <p className="text-muted-foreground">Quran memorization progress for all students</p>
+          <h1 className="page-title">Hifz Tracker</h1>
+          <p className="page-subtitle">Quran memorization progress for all students</p>
         </div>
         <Button nativeButton={false} render={<Link href="/madrasa/students" />}>
           <BookOpen />
@@ -44,46 +44,46 @@ export function HifzClient({
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-              <BookOpen className="size-5 text-green-600" />
+          <CardContent className="flex items-center gap-4">
+            <div className="stat-icon">
+              <BookOpen className="size-5 text-success" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">Total Students</p>
-              <p className="text-2xl font-bold">{students.length}</p>
+              <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{students.length}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+          <CardContent className="flex items-center gap-4">
+            <div className="stat-icon stat-icon-gold">
               <Award className="size-5 text-yellow-600" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">Active</p>
-              <p className="text-2xl font-bold">{students.filter(s => s.status === "active").length}</p>
+              <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{students.filter(s => s.status === "active").length}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+          <CardContent className="flex items-center gap-4">
+            <div className="stat-icon">
               <BookOpen className="text-muted-foreground size-5" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">In Madrasa</p>
-              <p className="text-2xl font-bold">{students.filter(s => s.className).length}</p>
+              <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{students.filter(s => s.className).length}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+          <CardContent className="flex items-center gap-4">
+            <div className="stat-icon">
               <Award className="text-muted-foreground size-5" />
             </div>
             <div>
               <p className="text-muted-foreground text-sm">Unassigned</p>
-              <p className="text-2xl font-bold">{students.filter(s => !s.className).length}</p>
+              <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{students.filter(s => !s.className).length}</p>
             </div>
           </CardContent>
         </Card>
@@ -97,12 +97,12 @@ export function HifzClient({
         </CardHeader>
         <CardContent>
           {students.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No students enrolled yet</p>
               <p className="text-muted-foreground text-sm">Enroll students in the Madrasa first.</p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>

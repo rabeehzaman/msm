@@ -81,10 +81,10 @@ export function ZakatClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Zakat Management</h1>
-          <p className="text-muted-foreground">Collection and distribution tracking</p>
+          <h1 className="page-title">Zakat Management</h1>
+          <p className="page-subtitle">Collection and distribution tracking</p>
         </div>
         <div className="flex gap-2">
           <Dialog>
@@ -177,34 +177,34 @@ export function ZakatClient({
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Total Collected</p>
-            <p className="text-2xl font-bold">Rs. {totalCollected.toLocaleString("en-IN")}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalCollected.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Total Disbursed</p>
-            <p className="text-2xl font-bold text-green-600">Rs. {totalDisbursed.toLocaleString("en-IN")}</p>
+            <p className="text-2xl font-bold text-success">Rs. {totalDisbursed.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Available Balance</p>
-            <p className="text-2xl font-bold">Rs. {balance.toLocaleString("en-IN")}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {balance.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <p className="text-muted-foreground text-sm">Beneficiaries</p>
-            <p className="text-2xl font-bold">{expenses.length}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{expenses.length}</p>
           </CardContent>
         </Card>
       </div>
 
       {totalCollected > 0 && (
         <Card>
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-medium">Zakat Utilization</span>
               <span className="text-sm font-medium">{totalCollected > 0 ? ((totalDisbursed / totalCollected) * 100).toFixed(1) : 0}%</span>
@@ -220,12 +220,12 @@ export function ZakatClient({
         <CardHeader><CardTitle>Distribution Register</CardTitle><CardDescription>All Zakat disbursements</CardDescription></CardHeader>
         <CardContent>
           {expenses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No distributions yet</p>
               <p className="text-muted-foreground text-sm">Record your first Zakat distribution to get started.</p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader><TableRow>
                   <TableHead>Recipient</TableHead><TableHead>Description</TableHead><TableHead>Date</TableHead><TableHead className="text-right">Amount</TableHead>
@@ -236,7 +236,7 @@ export function ZakatClient({
                       <TableCell className="font-medium">{d.payee || "-"}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{d.description || "-"}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{d.date ? new Date(d.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}</TableCell>
-                      <TableCell className="text-right font-medium text-green-600">Rs. {Number(d.amount).toLocaleString("en-IN")}</TableCell>
+                      <TableCell className="text-right font-medium text-success">Rs. {Number(d.amount).toLocaleString("en-IN")}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

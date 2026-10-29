@@ -113,14 +113,14 @@ export function MembersClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Members</h1>
-          <p className="text-muted-foreground">View and manage all community members</p>
+          <h1 className="page-title">Members</h1>
+          <p className="page-subtitle">View and manage all community members</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> Add Member</DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add New Member</DialogTitle>
               <DialogDescription>Add a member to a household</DialogDescription>
@@ -209,9 +209,9 @@ export function MembersClient({
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Members</p><p className="text-2xl font-bold">{stats.total}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Households</p><p className="text-2xl font-bold">{households.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Showing</p><p className="text-2xl font-bold">{filtered.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Members</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{stats.total}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Households</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{households.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Showing</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p></CardContent></Card>
       </div>
 
       {/* Table */}
@@ -239,7 +239,7 @@ export function MembersClient({
           </div>
 
           {households.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No households created yet</p>
               <p className="text-muted-foreground text-sm">Add a household before adding members.</p>
               <Link href="/households" className="mt-4">
@@ -250,14 +250,14 @@ export function MembersClient({
               </Link>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No members found</p>
               <p className="text-muted-foreground text-sm">
                 {stats.total === 0 ? "Add households first, then add members." : "Try adjusting your search."}
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -293,7 +293,7 @@ export function MembersClient({
                       <TableCell><Badge variant={m.status === "active" ? "default" : "secondary"}>{m.status}</Badge></TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm" onClick={() => setDeleteTarget({ id: m.id, name: m.fullName })} disabled={deletingId === m.id}>
-                          {deletingId === m.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-red-500" />}
+                          {deletingId === m.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-destructive" />}
                         </Button>
                       </TableCell>
                     </TableRow>

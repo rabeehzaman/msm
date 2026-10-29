@@ -61,10 +61,10 @@ export function ExamsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Exams & Results</h1>
-          <p className="text-muted-foreground">Create exams, enter grades, and track results</p>
+          <h1 className="page-title">Exams & Results</h1>
+          <p className="page-subtitle">Create exams, enter grades, and track results</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={open} onOpenChange={setOpen}>
@@ -136,10 +136,10 @@ export function ExamsClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Exams</p><p className="text-2xl font-bold">{exams.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Classes</p><p className="text-2xl font-bold">{classes.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Monthly Tests</p><p className="text-2xl font-bold">{exams.filter(e => e.type === "monthly_test").length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Term Exams</p><p className="text-2xl font-bold">{exams.filter(e => e.type === "term_exam").length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Exams</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{exams.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Classes</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{classes.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Monthly Tests</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{exams.filter(e => e.type === "monthly_test").length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Term Exams</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{exams.filter(e => e.type === "term_exam").length}</p></CardContent></Card>
       </div>
 
       {/* Exam List */}
@@ -154,7 +154,7 @@ export function ExamsClient({
         </CardHeader>
         <CardContent>
           {exams.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No exams created yet</p>
               <p className="text-muted-foreground text-sm">
                 {classes.length === 0 ? "Create classes first, then set up exams." : "Create your first exam to get started."}
@@ -169,7 +169,7 @@ export function ExamsClient({
               )}
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="table-shell">
               <Table>
                 <TableHeader>
                   <TableRow>

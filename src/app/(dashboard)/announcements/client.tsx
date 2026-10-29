@@ -59,10 +59,10 @@ export function AnnouncementsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Announcements</h1>
-          <p className="text-muted-foreground">Create and manage community announcements</p>
+          <h1 className="page-title">Announcements</h1>
+          <p className="page-subtitle">Create and manage community announcements</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger render={<Button />}><Plus /> New Announcement</DialogTrigger>
@@ -96,10 +96,10 @@ export function AnnouncementsClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total</p><p className="text-2xl font-bold">{announcements.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Published</p><p className="text-2xl font-bold">{publishedCount}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Draft</p><p className="text-2xl font-bold">{announcements.length - publishedCount}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Showing</p><p className="text-2xl font-bold">{filtered.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{announcements.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Published</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{publishedCount}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Draft</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{announcements.length - publishedCount}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Showing</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p></CardContent></Card>
       </div>
 
       <Card>
@@ -117,7 +117,7 @@ export function AnnouncementsClient({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="empty-state">
               <p className="text-muted-foreground text-lg">No announcements yet</p>
               <p className="text-muted-foreground text-sm">{announcements.length === 0 ? "Create your first announcement." : "Try adjusting your search."}</p>
             </div>

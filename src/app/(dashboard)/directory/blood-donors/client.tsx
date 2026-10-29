@@ -48,10 +48,10 @@ export function BloodDonorsClient({ donors }: { donors: Donor[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Blood Donor Directory</h1>
-          <p className="text-muted-foreground">Find and alert compatible donors during emergencies</p>
+          <h1 className="page-title">Blood Donor Directory</h1>
+          <p className="page-subtitle">Find and alert compatible donors during emergencies</p>
         </div>
         <Button variant="destructive" disabled title="Emergency broadcasts are not configured yet">
           <AlertCircle /> Emergency Alert
@@ -59,10 +59,10 @@ export function BloodDonorsClient({ donors }: { donors: Donor[] }) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Total Donors</p><p className="text-2xl font-bold">{donors.length}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Available Now</p><p className="text-2xl font-bold text-green-600">{availableCount}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Donations This Year</p><p className="text-2xl font-bold">{donationsThisYear}</p></CardContent></Card>
-        <Card><CardContent className="pt-6"><p className="text-muted-foreground text-sm">Rare Groups (O-, AB-)</p><p className="text-2xl font-bold text-orange-500">{rareCount}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Total Donors</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{donors.length}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Available Now</p><p className="text-2xl font-bold text-success">{availableCount}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Donations This Year</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{donationsThisYear}</p></CardContent></Card>
+        <Card><CardContent><p className="text-muted-foreground text-sm">Rare Groups (O-, AB-)</p><p className="text-2xl font-bold text-orange-500">{rareCount}</p></CardContent></Card>
       </div>
 
       {/* Blood Group Grid */}
@@ -72,7 +72,7 @@ export function BloodDonorsClient({ donors }: { donors: Donor[] }) {
           <div className="grid grid-cols-4 gap-3 md:grid-cols-8">
             {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map(bg => (
               <div key={bg} className="flex flex-col items-center gap-1 rounded-lg border p-4">
-                <Droplets className="size-5 text-red-500" />
+                <Droplets className="size-5 text-destructive" />
                 <span className="text-lg font-bold">{bg}</span>
                 <span className="text-muted-foreground text-xs">{bloodGroupCounts[bg] || 0} donors</span>
               </div>
@@ -113,7 +113,7 @@ export function BloodDonorsClient({ donors }: { donors: Donor[] }) {
               </div>
             ))}
             {filteredDonors.length === 0 && (
-              <p className="text-muted-foreground py-8 text-center text-sm md:col-span-2">{donors.length === 0 ? "No blood donors yet." : "No donors match the current filters."}</p>
+              <p className="empty-state text-muted-foreground text-sm md:col-span-2">{donors.length === 0 ? "No blood donors yet." : "No donors match the current filters."}</p>
             )}
           </div>
         </CardContent>
