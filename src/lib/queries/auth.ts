@@ -21,11 +21,8 @@ export async function ensureTenant() {
     const [newTenant] = await db
       .insert(tenants)
       .values({
-        name: "Juma Masjid Mahallu",
-        slug: "juma-masjid",
-        address: "Near Bus Stand, Kondotty",
-        phone: "+91 483 2712345",
-        email: "info@jumamasjid.org",
+        name: "My Mahallu",
+        slug: "mahallu",
       })
       .returning();
     tenant = newTenant;
