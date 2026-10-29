@@ -4,12 +4,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Mahallu design system
+ * Emerald/teal + warm Kasavu gold, frosted-glass surfaces over a soft
+ * patterned canvas. Fonts: Inter (UI), Fraunces (display), with Noto Sans
+ * Malayalam and Noto Naskh Arabic as script fallbacks in every stack.
+ */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-inter), var(--font-malayalam), var(--font-naskh), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-heading: var(--font-display), var(--font-malayalam), var(--font-naskh), Georgia, serif;
+  --font-arabic: var(--font-naskh), serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,6 +47,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-success: var(--success);
+  --color-surface: var(--surface);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -46,85 +58,337 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --shadow-glass: var(--glass-shadow);
+  --shadow-glass-lg: var(--glass-shadow-lg);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+
+  /* Ivory canvas, deep emerald ink */
+  --background: oklch(0.975 0.012 95);
+  --foreground: oklch(0.23 0.03 175);
+  --surface: oklch(0.99 0.006 95);
+
+  /* Frosted glass: translucent white over the patterned canvas */
+  --card: oklch(1 0 0 / 0.7);
+  --card-foreground: oklch(0.23 0.03 175);
+  --popover: oklch(0.995 0.005 95 / 0.9);
+  --popover-foreground: oklch(0.23 0.03 175);
+
+  --primary: oklch(0.47 0.095 172);
+  --primary-foreground: oklch(0.985 0.01 95);
+  --secondary: oklch(0.94 0.03 168 / 0.8);
+  --secondary-foreground: oklch(0.33 0.065 172);
+  --muted: oklch(0.94 0.014 140 / 0.7);
+  --muted-foreground: oklch(0.47 0.03 172);
+  --accent: oklch(0.94 0.04 160 / 0.75);
+  --accent-foreground: oklch(0.3 0.06 172);
+  --gold: oklch(0.77 0.13 78);
+  --gold-foreground: oklch(0.27 0.05 65);
+  --success: oklch(0.52 0.12 158);
+  --destructive: oklch(0.55 0.2 27);
+
+  --border: oklch(0.42 0.05 170 / 0.13);
+  --input: oklch(0.42 0.05 170 / 0.2);
+  --ring: oklch(0.58 0.1 172);
+
+  /* Charts: emerald, gold, lagoon, laterite, indigo */
+  --chart-1: oklch(0.5 0.11 168);
+  --chart-2: oklch(0.74 0.14 75);
+  --chart-3: oklch(0.62 0.09 210);
+  --chart-4: oklch(0.6 0.13 40);
+  --chart-5: oklch(0.5 0.12 275);
+
+  /* Sidebar: deep forest emerald with gold highlights */
+  --sidebar: oklch(0.27 0.05 174);
+  --sidebar-foreground: oklch(0.92 0.025 160);
+  --sidebar-primary: oklch(0.8 0.12 80);
+  --sidebar-primary-foreground: oklch(0.24 0.04 70);
+  --sidebar-accent: oklch(1 0 0 / 0.09);
+  --sidebar-accent-foreground: oklch(0.99 0.01 95);
+  --sidebar-border: oklch(1 0 0 / 0.09);
+  --sidebar-ring: oklch(0.8 0.12 80);
+
+  --glass-shadow: 0 1px 1px oklch(0.3 0.05 170 / 0.04), 0 10px 30px -12px oklch(0.3 0.06 170 / 0.18);
+  --glass-shadow-lg: 0 2px 4px oklch(0.3 0.05 170 / 0.05), 0 30px 60px -20px oklch(0.25 0.06 170 / 0.35);
+  --glass-highlight: oklch(1 0 0 / 0.65);
+  --canvas-glow-1: oklch(0.86 0.08 168 / 0.55);
+  --canvas-glow-2: oklch(0.9 0.08 85 / 0.5);
+  --pattern-opacity: 0.07;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.165 0.022 180);
+  --foreground: oklch(0.95 0.01 95);
+  --surface: oklch(0.2 0.025 178);
+
+  --card: oklch(0.24 0.03 176 / 0.55);
+  --card-foreground: oklch(0.95 0.01 95);
+  --popover: oklch(0.22 0.03 177 / 0.92);
+  --popover-foreground: oklch(0.95 0.01 95);
+
+  --primary: oklch(0.76 0.11 168);
+  --primary-foreground: oklch(0.18 0.035 175);
+  --secondary: oklch(0.3 0.04 172 / 0.7);
+  --secondary-foreground: oklch(0.92 0.03 160);
+  --muted: oklch(0.28 0.025 175 / 0.6);
+  --muted-foreground: oklch(0.74 0.03 160);
+  --accent: oklch(0.32 0.04 170 / 0.7);
+  --accent-foreground: oklch(0.96 0.01 95);
+  --gold: oklch(0.8 0.12 80);
+  --gold-foreground: oklch(0.22 0.04 65);
+  --success: oklch(0.75 0.13 158);
+  --destructive: oklch(0.7 0.17 25);
+
+  --border: oklch(1 0 0 / 0.1);
+  --input: oklch(1 0 0 / 0.14);
+  --ring: oklch(0.7 0.1 170);
+
+  --chart-1: oklch(0.6 0.12 168);
+  --chart-2: oklch(0.75 0.13 78);
+  --chart-3: oklch(0.72 0.09 215);
+  --chart-4: oklch(0.7 0.13 45);
+  --chart-5: oklch(0.68 0.12 280);
+
+  --sidebar: oklch(0.14 0.024 178);
+  --sidebar-foreground: oklch(0.9 0.025 160);
+  --sidebar-primary: oklch(0.8 0.12 80);
+  --sidebar-primary-foreground: oklch(0.22 0.04 70);
+  --sidebar-accent: oklch(1 0 0 / 0.07);
+  --sidebar-accent-foreground: oklch(0.99 0.01 95);
+  --sidebar-border: oklch(1 0 0 / 0.08);
+  --sidebar-ring: oklch(0.8 0.12 80);
+
+  --glass-shadow: 0 1px 1px oklch(0 0 0 / 0.2), 0 12px 32px -12px oklch(0 0 0 / 0.55);
+  --glass-shadow-lg: 0 2px 4px oklch(0 0 0 / 0.25), 0 30px 60px -20px oklch(0 0 0 / 0.7);
+  --glass-highlight: oklch(1 0 0 / 0.08);
+  --canvas-glow-1: oklch(0.42 0.08 172 / 0.45);
+  --canvas-glow-2: oklch(0.45 0.08 80 / 0.22);
+  --pattern-opacity: 0.06;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(60rem 40rem at 100% -10%, var(--canvas-glow-1), transparent 60%),
+      radial-gradient(50rem 36rem at -10% 110%, var(--canvas-glow-2), transparent 60%);
+    background-attachment: fixed;
+    font-feature-settings: "cv11", "ss01";
+  }
+  /* Faint geometric pattern behind everything (masked so it takes the theme colour) */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--primary);
+    opacity: var(--pattern-opacity);
+    -webkit-mask-image: url("/images/pattern-lines.webp");
+    mask-image: url("/images/pattern-lines.webp");
+    -webkit-mask-size: 420px;
+    mask-size: 420px;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  ::selection {
+    background: oklch(0.8 0.12 80 / 0.35);
+  }
+  :lang(ar), [lang="ar"] {
+    font-family: var(--font-naskh), serif;
+  }
+}
+
+/* ---------- Glass surfaces ---------- */
+
+@utility glass {
+  background-color: var(--card);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
+
+/* For panels floating over photography: denser, so text stays AA-readable */
+@utility glass-strong {
+  background-color: oklch(0.99 0.008 95 / 0.8);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  box-shadow: var(--glass-shadow-lg), inset 0 1px 0 oklch(1 0 0 / 0.7);
+  &:where(.dark *) {
+    background-color: oklch(0.2 0.03 178 / 0.72);
+    box-shadow: var(--glass-shadow-lg), inset 0 1px 0 oklch(1 0 0 / 0.08);
+  }
+}
+
+/* Dark-tinted glass for chips and labels sitting on imagery */
+@utility glass-dark {
+  background-color: oklch(0.2 0.04 175 / 0.45);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid oklch(1 0 0 / 0.16);
+}
+
+@utility text-gradient-gold {
+  background-image: linear-gradient(100deg, oklch(0.86 0.11 85), oklch(0.74 0.14 70) 55%, oklch(0.88 0.09 90));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-pattern {
+  background-image: url("/images/islamic-pattern.webp");
+  background-size: 360px;
+}
+
+/* ---------- Page scaffolding ---------- */
+
+@layer components {
+  .page-header {
+    @apply flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between;
+  }
+  .page-header > div:first-child {
+    @apply min-w-0;
+  }
+  .page-header > :not(:first-child) {
+    @apply shrink-0;
+  }
+  .page-title {
+    @apply font-heading text-3xl font-semibold tracking-tight text-foreground md:text-[2.1rem];
+    font-optical-sizing: auto;
+  }
+  .page-title::after {
+    content: "";
+    display: block;
+    margin-top: 0.6rem;
+    height: 3px;
+    width: 3rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+  .page-subtitle {
+    @apply mt-2 max-w-2xl text-sm text-muted-foreground md:text-base;
+  }
+
+  /* Empty states: an ornamental medallion above the message */
+  .empty-state {
+    @apply flex flex-col items-center justify-center gap-1 px-6 py-12 text-center;
+  }
+  .empty-state::before {
+    content: "";
+    display: block;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin-bottom: 0.75rem;
+    border-radius: 999px;
+    background:
+      url("/images/islamic-pattern.webp") center / 150px,
+      radial-gradient(circle at 30% 25%, oklch(0.6 0.11 168), oklch(0.32 0.06 178));
+    background-blend-mode: screen, normal;
+    box-shadow: 0 12px 28px -12px oklch(0.3 0.08 170 / 0.55), 0 0 0 4px oklch(0.77 0.13 78 / 0.18), inset 0 1px 0 oklch(1 0 0 / 0.25);
+  }
+
+  .table-shell {
+    @apply overflow-hidden rounded-xl border bg-surface/60 dark:bg-white/[0.02];
+  }
+
+  .stat-icon {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary/15 to-primary/5 text-primary ring-1 ring-primary/15;
+  }
+  .stat-icon-gold {
+    @apply from-gold/30 to-gold/10 text-amber-700 ring-gold/30 dark:text-gold;
+  }
+  .stat-icon-lagoon {
+    @apply from-chart-3/25 to-chart-3/5 text-sky-700 ring-chart-3/25 dark:text-sky-300;
+  }
+  .stat-icon-rose {
+    @apply from-chart-4/25 to-chart-4/5 text-orange-800 ring-chart-4/25 dark:text-orange-300;
+  }
+  .stat-icon-indigo {
+    @apply from-chart-5/25 to-chart-5/5 text-indigo-700 ring-chart-5/25 dark:text-indigo-300;
+  }
+}
+
+/* Unlayered so it wins over the per-page muted text utilities */
+.empty-state > p:first-of-type:not(:only-child) {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  color: var(--foreground);
+}
+
+/* Icon chips own their colour, whatever the icon class says */
+.stat-icon > svg {
+  color: inherit;
+}
+
+/* Leading icons inside search/input wrappers sit above the frosted input */
+.relative:has(> [data-slot="input"]) > svg {
+  z-index: 1;
+}
+
+/* ---------- Sidebar ornament ---------- */
+
+[data-sidebar="sidebar"] {
+  position: relative;
+  isolation: isolate;
+  background-image:
+    linear-gradient(180deg, oklch(0.3 0.06 172 / 0.0), oklch(0.18 0.04 176 / 0.55)),
+    radial-gradient(28rem 20rem at 0% 0%, oklch(0.8 0.12 80 / 0.12), transparent 70%);
+}
+[data-sidebar="sidebar"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("/images/islamic-pattern.webp") top left / 300px;
+  mix-blend-mode: screen;
+  opacity: 0.22;
+  -webkit-mask-image: linear-gradient(180deg, black, transparent 55%, black 120%);
+  mask-image: linear-gradient(180deg, black, transparent 55%, black 120%);
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slow-zoom {
+  from { transform: scale(1.06); }
+  to { transform: scale(1); }
+}
+
+@utility animate-rise {
+  animation: rise-in 0.5s var(--ease-soft) both;
+}
+@utility animate-slow-zoom {
+  animation: slow-zoom 14s var(--ease-soft) both;
+}
+
+/* Stagger the direct children of a page as they mount */
+.page-stagger > div > * {
+  animation: rise-in 0.55s var(--ease-soft) both;
+}
+.page-stagger > div > *:nth-child(2) { animation-delay: 40ms; }
+.page-stagger > div > *:nth-child(3) { animation-delay: 80ms; }
+.page-stagger > div > *:nth-child(4) { animation-delay: 120ms; }
+.page-stagger > div > *:nth-child(n + 5) { animation-delay: 160ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
