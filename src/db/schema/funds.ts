@@ -7,6 +7,7 @@ import {
   boolean,
   jsonb,
   pgEnum,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants";
 
@@ -27,22 +28,26 @@ export const fundTypeEnum = pgEnum("fund_type", [
   "bait_ul_maal",
 ]);
 
-export const funds = pgTable("funds", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  tenantId: uuid("tenant_id")
-    .notNull()
-    .references(() => tenants.id, { onDelete: "cascade" }),
-  type: fundTypeEnum("type").notNull(),
-  name: text("name").notNull(),
-  description: text("description"),
-  balance: numeric("balance", { precision: 12, scale: 2 }).default("0").notNull(),
-  isRestricted: boolean("is_restricted").default(false).notNull(),
-  rules: jsonb("rules").default({}),
-  isActive: boolean("is_active").default(true).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const funds = pgTable(
+  "funds",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    type: fundTypeEnum("type").notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    balance: numeric("balance", { precision: 12, scale: 2 }).default("0").notNull(),
+    isRestricted: boolean("is_restricted").default(false).notNull(),
+    rules: jsonb("rules").default({}),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [uniqueIndex("funds_tenant_id_name_key").on(t.tenantId, t.name)],
+);

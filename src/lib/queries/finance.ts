@@ -28,7 +28,12 @@ export async function getFunds() {
     { type: "ramadan_special" as const, name: "Ramadan Special Fund", isRestricted: true },
   ];
 
-  await db.insert(funds).values(defaultFunds.map((fund) => ({ tenantId: tenant.id, ...fund })));
+  // Concurrent first loads may race here; the unique (tenant_id, name) index plus
+  // ON CONFLICT DO NOTHING makes the losing insert a harmless no-op.
+  await db
+    .insert(funds)
+    .values(defaultFunds.map((fund) => ({ tenantId: tenant.id, ...fund })))
+    .onConflictDoNothing({ target: [funds.tenantId, funds.name] });
 
   return db.select().from(funds).where(eq(funds.tenantId, tenant.id)).orderBy(funds.name);
 }
