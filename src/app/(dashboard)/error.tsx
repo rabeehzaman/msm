@@ -18,13 +18,13 @@ export default function DashboardError({
 
   return (
     <div className="flex flex-1 items-center justify-center p-6">
-      <Card className="w-full max-w-md">
-        <CardContent className="flex flex-col items-center gap-4 pt-6 text-center">
+      <Card className="w-full max-w-md rounded-3xl">
+        <CardContent className="flex flex-col items-center gap-4 py-4 text-center">
           <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10">
             <AlertTriangle className="size-6 text-destructive" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Something went wrong</h2>
+            <h2 className="font-heading text-xl font-semibold">Something went wrong</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               An unexpected error occurred while loading this page. Please try
               again.

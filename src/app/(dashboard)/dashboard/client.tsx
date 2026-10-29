@@ -8,11 +8,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
+import Link from "next/link";
 import {
   Users,
   Home,
   Wallet,
   GraduationCap,
+  ArrowRight,
+  Plus,
+  TrendingUp,
+  ClipboardCheck,
 } from "lucide-react";
 
 type DashboardStats = {
@@ -42,57 +48,82 @@ export function DashboardClient({
   stats: DashboardStats;
   financeStats: FinanceStats;
 }) {
+  const net = financeStats.totalIncome - financeStats.totalExpenses;
+  const flowTotal = financeStats.totalIncome + financeStats.totalExpenses;
+  const incomeShare = flowTotal > 0 ? (financeStats.totalIncome / flowTotal) * 100 : 0;
+  const topFunds = financeStats.funds.slice(0, 8);
+  const maxFund = Math.max(1, ...topFunds.map((f) => Math.abs(Number(f.balance || 0))));
+
+  const statCards = [
+    { label: "Total Households", value: stats.households.toLocaleString("en-IN"), caption: "registered families", icon: Home, tone: "" },
+    { label: "Total Members", value: stats.members.toLocaleString("en-IN"), caption: "community members", icon: Users, tone: "stat-icon-lagoon" },
+    { label: "Total Income", value: `Rs. ${financeStats.totalIncome.toLocaleString("en-IN")}`, caption: `${financeStats.incomeCount} entries`, icon: Wallet, tone: "stat-icon-gold" },
+    { label: "Madrasa Students", value: stats.students.toLocaleString("en-IN"), caption: "enrolled", icon: GraduationCap, tone: "stat-icon-indigo" },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back. Here&apos;s an overview of your Mahallu.
-        </p>
-      </div>
+      {/* Hero */}
+      <section className="relative isolate overflow-hidden rounded-[1.75rem] shadow-glass-lg ring-1 ring-white/40 dark:ring-white/10">
+        <Image
+          src="/images/village-banner.webp"
+          alt="A Kerala village with a mosque among coconut palms at dusk"
+          fill
+          priority
+          sizes="(min-width: 1400px) 1400px, 100vw"
+          className="-z-10 animate-slow-zoom object-cover object-[center_75%]"
+        />
+        <div className="absolute inset-0 -z-10 bg-linear-to-r from-emerald-950/85 via-emerald-950/55 to-emerald-950/5" />
+        <div className="absolute inset-0 -z-10 bg-linear-to-t from-emerald-950/60 to-transparent" />
+        <div className="flex min-h-[15rem] flex-col justify-between gap-8 p-6 text-white md:min-h-[17rem] md:p-9">
+          <div className="max-w-xl">
+            <p className="text-sm font-medium tracking-wide text-amber-200">
+              Assalamu Alaikum · <span lang="ml">സ്വാഗതം</span>
+            </p>
+            <h1 className="font-heading mt-2 text-3xl font-semibold tracking-tight md:text-[2.6rem] md:leading-[1.1]">
+              Your Mahallu at a glance
+            </h1>
+            <p className="mt-3 max-w-md text-sm text-white/80 md:text-base">
+              Welcome back. Here&apos;s an overview of your Mahallu.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: "Add household", href: "/households", icon: Plus },
+              { label: "Record income", href: "/finances/income", icon: TrendingUp },
+              { label: "Mark attendance", href: "/madrasa/attendance", icon: ClipboardCheck },
+            ].map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="glass-dark inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+              >
+                <action.icon className="size-4 text-amber-200" />
+                {action.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Households</CardTitle>
-            <Home className="text-muted-foreground size-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.households.toLocaleString("en-IN")}</div>
-            <div className="text-muted-foreground text-xs">registered families</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Members</CardTitle>
-            <Users className="text-muted-foreground size-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.members.toLocaleString("en-IN")}</div>
-            <div className="text-muted-foreground text-xs">community members</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
-            <Wallet className="text-muted-foreground size-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Rs. {financeStats.totalIncome.toLocaleString("en-IN")}</div>
-            <div className="text-muted-foreground text-xs">{financeStats.incomeCount} entries</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Madrasa Students</CardTitle>
-            <GraduationCap className="text-muted-foreground size-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.students.toLocaleString("en-IN")}</div>
-            <div className="text-muted-foreground text-xs">enrolled</div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {statCards.map((card) => (
+          <Card key={card.label} className="group/stat">
+            <CardContent className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+                <p className="font-heading mt-2 truncate text-[1.85rem] leading-none font-semibold tracking-tight">
+                  {card.value}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">{card.caption}</p>
+              </div>
+              <div className={`stat-icon transition-transform duration-300 group-hover/stat:scale-110 ${card.tone}`}>
+                <card.icon className="size-5" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Two column layout */}
@@ -105,82 +136,56 @@ export function DashboardClient({
               Income vs Expenses overview
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-4">
+          <CardContent className="flex flex-col gap-5">
+            <div>
+              <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Net Surplus</p>
+              <p className={`font-heading mt-1 text-3xl font-semibold tracking-tight ${net >= 0 ? "text-success" : "text-destructive"}`}>
+                Rs. {net.toLocaleString("en-IN")}
+              </p>
+            </div>
+
+            {/* Share of money flow: income vs expenses */}
+            <div
+              className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full bg-muted"
+              role="img"
+              aria-label={`Income Rs. ${financeStats.totalIncome.toLocaleString("en-IN")}, expenses Rs. ${financeStats.totalExpenses.toLocaleString("en-IN")}`}
+            >
+              {flowTotal > 0 && (
+                <>
+                  <div className="h-full rounded-l-full bg-chart-1 transition-[width] duration-700" style={{ width: `${incomeShare}%` }} title="Income" />
+                  <div className="h-full flex-1 rounded-r-full bg-chart-2" title="Expenses" />
+                </>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Total Income</span>
-                <span className="text-sm font-bold text-green-600">
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  <span className="size-2.5 rounded-full bg-chart-1" />
+                  Total Income
+                </span>
+                <span className="text-sm font-semibold tabular-nums">
                   Rs. {financeStats.totalIncome.toLocaleString("en-IN")}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Total Expenses</span>
-                <span className="text-sm font-bold text-red-500">
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  <span className="size-2.5 rounded-full bg-chart-2" />
+                  Total Expenses
+                </span>
+                <span className="text-sm font-semibold tabular-nums">
                   Rs. {financeStats.totalExpenses.toLocaleString("en-IN")}
                 </span>
               </div>
-              <div className="flex items-center justify-between border-t pt-2">
-                <span className="text-sm font-semibold">Net Surplus</span>
-                <span className={`text-sm font-bold ${financeStats.totalIncome - financeStats.totalExpenses >= 0 ? "text-green-600" : "text-red-500"}`}>
-                  Rs. {(financeStats.totalIncome - financeStats.totalExpenses).toLocaleString("en-IN")}
-                </span>
-              </div>
             </div>
+            <Link href="/finances" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              Open finances <ArrowRight className="size-4" />
+            </Link>
           </CardContent>
         </Card>
 
-        {/* Quick Stats */}
+        {/* Fund balances chart */}
         <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Community Overview</CardTitle>
-            <CardDescription>Key metrics at a glance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex size-8 items-center justify-center rounded-lg">
-                    <Home className="size-4" />
-                  </div>
-                  <span className="text-sm font-medium">Households</span>
-                </div>
-                <Badge variant="secondary">{stats.households}</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex size-8 items-center justify-center rounded-lg">
-                    <Users className="size-4" />
-                  </div>
-                  <span className="text-sm font-medium">Members</span>
-                </div>
-                <Badge variant="secondary">{stats.members}</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex size-8 items-center justify-center rounded-lg">
-                    <GraduationCap className="size-4" />
-                  </div>
-                  <span className="text-sm font-medium">Madrasa Students</span>
-                </div>
-                <Badge variant="secondary">{stats.students}</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex size-8 items-center justify-center rounded-lg">
-                    <Wallet className="size-4" />
-                  </div>
-                  <span className="text-sm font-medium">Active Funds</span>
-                </div>
-                <Badge variant="secondary">{financeStats.funds.length}</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Fund Overview */}
-      {financeStats.funds.length > 0 && (
-        <Card>
           <CardHeader>
             <CardTitle>Fund Overview</CardTitle>
             <CardDescription>
@@ -188,33 +193,105 @@ export function DashboardClient({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {financeStats.funds.slice(0, 8).map((fund) => (
-                <div key={fund.id} className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{fund.name}</span>
-                    {fund.isRestricted && (
-                      <span className="text-muted-foreground text-xs">Restricted</span>
-                    )}
-                  </div>
-                  <span className="text-lg font-bold">
-                    Rs. {Number(fund.balance || 0).toLocaleString("en-IN")}
+            {topFunds.length === 0 ? (
+              <div className="empty-state py-8">
+                <p>No funds yet</p>
+                <p className="text-sm text-muted-foreground">Fund balances appear here once funds are set up.</p>
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-3.5">
+                {topFunds.map((fund) => {
+                  const balance = Number(fund.balance || 0);
+                  return (
+                    <li key={fund.id} className="grid grid-cols-[minmax(0,9rem)_1fr_auto] items-center gap-3 text-sm sm:grid-cols-[minmax(0,12rem)_1fr_auto]">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="truncate font-medium" title={fund.name}>{fund.name}</span>
+                        {fund.isRestricted && (
+                          <Badge variant="secondary" className="h-4.5 px-1.5 text-[10px]">Restricted</Badge>
+                        )}
+                      </span>
+                      <span className="h-2.5 overflow-hidden rounded-full bg-muted">
+                        <span
+                          className="block h-full rounded-full bg-linear-to-r from-chart-1/70 to-chart-1 transition-[width] duration-700"
+                          style={{ width: `${Math.max(2, (Math.abs(balance) / maxFund) * 100)}%` }}
+                        />
+                      </span>
+                      <span className="text-right font-semibold tabular-nums">
+                        Rs. {balance.toLocaleString("en-IN")}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Community overview */}
+      <div className="grid gap-4 lg:grid-cols-7">
+        <Card className="lg:col-span-4">
+          <CardHeader>
+            <CardTitle>Community Overview</CardTitle>
+            <CardDescription>Key metrics at a glance</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { label: "Households", value: stats.households, icon: Home, href: "/households" },
+                { label: "Members", value: stats.members, icon: Users, href: "/members" },
+                { label: "Madrasa Students", value: stats.students, icon: GraduationCap, href: "/madrasa/students" },
+                { label: "Active Funds", value: financeStats.funds.length, icon: Wallet, href: "/finances" },
+              ].map((row) => (
+                <Link
+                  key={row.label}
+                  href={row.href}
+                  className="flex items-center justify-between rounded-xl border bg-white/40 px-3 py-2.5 transition-colors hover:border-primary/30 hover:bg-white/80 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="stat-icon size-8 rounded-lg">
+                      <row.icon className="size-4" />
+                    </span>
+                    <span className="text-sm font-medium">{row.label}</span>
                   </span>
-                </div>
+                  <Badge variant="secondary" className="tabular-nums">{row.value}</Badge>
+                </Link>
               ))}
             </div>
           </CardContent>
         </Card>
-      )}
 
-      {stats.households === 0 && stats.members === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <p className="text-muted-foreground text-lg">Getting started</p>
-          <p className="text-muted-foreground text-sm">
-            Start by adding households and members to see data on the dashboard.
-          </p>
+        <div className="relative isolate min-h-56 overflow-hidden rounded-2xl shadow-glass ring-1 ring-white/40 lg:col-span-3 dark:ring-white/10">
+          <Image
+            src="/images/prayer-hall.webp"
+            alt="Sunlight streaming into a wooden prayer hall"
+            fill
+            sizes="(min-width: 1024px) 40vw, 100vw"
+            className="-z-10 object-cover object-[center_60%]"
+          />
+          <div className="absolute inset-0 -z-10 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="flex h-full flex-col justify-end p-6 text-white">
+            {stats.households === 0 && stats.members === 0 ? (
+              <>
+                <p className="font-heading text-xl font-semibold">Getting started</p>
+                <p className="mt-1 text-sm text-white/80">
+                  Start by adding households and members to see data on the dashboard.
+                </p>
+                <Link href="/households" className="glass-dark mt-4 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-medium hover:bg-white/20">
+                  Add your first household <ArrowRight className="size-4" />
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="font-heading text-xl font-semibold">Serving the community</p>
+                <p className="mt-1 text-sm text-white/80">
+                  {stats.households.toLocaleString("en-IN")} families and {stats.members.toLocaleString("en-IN")} members are part of your Mahallu.
+                </p>
+              </>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
