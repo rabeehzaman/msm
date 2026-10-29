@@ -5,7 +5,7 @@ const tableRowWidths = [72, 104, 88, 116, 96, 64, 108, 80];
 
 function HeaderSkeleton({ hasAction = true }: { hasAction?: boolean }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="page-header">
       <div className="flex flex-col gap-2">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="h-4 w-72" />
@@ -18,7 +18,7 @@ function HeaderSkeleton({ hasAction = true }: { hasAction?: boolean }) {
 function StatCardSkeleton() {
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent>
         <Skeleton className="mb-2 h-4 w-24" />
         <Skeleton className="h-7 w-16" />
       </CardContent>
@@ -112,9 +112,11 @@ function CardGridSkeleton({ count = 4 }: { count?: number }) {
 export function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Skeleton className="h-9 w-40" />
-        <Skeleton className="mt-2 h-4 w-80" />
+      <div className="relative h-60 overflow-hidden rounded-[1.75rem] bg-linear-to-r from-emerald-900/80 to-teal-700/60 p-8 md:h-68">
+        <div className="absolute inset-0 bg-pattern opacity-10 mix-blend-screen" />
+        <Skeleton className="h-4 w-40 bg-white/20" />
+        <Skeleton className="mt-4 h-10 w-80 max-w-full bg-white/20" />
+        <Skeleton className="mt-3 h-4 w-64 max-w-full bg-white/15" />
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (

@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -123,24 +124,31 @@ const navGroups = [
   },
 ];
 
+const allUrls = navGroups.flatMap((group) => group.items.map((item) => item.url));
+
+// Highlight only the most specific nav entry that matches the current path.
+function isNavActive(pathname: string, url: string) {
+  const matches = (u: string) => pathname === u || pathname.startsWith(u + "/");
+  if (!matches(url)) return false;
+  return !allUrls.some((other) => other.length > url.length && matches(other));
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="border-r-0">
+      <SidebarHeader className="border-b border-sidebar-border pb-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg font-bold">
-                M
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  Mahallu Smart Manager
+              <BrandMark className="size-8" />
+              <div className="grid flex-1 text-left leading-tight">
+                <span className="font-heading truncate text-[0.95rem] font-semibold text-white">
+                  Mahallu
                 </span>
-                <span className="text-muted-foreground truncate text-xs">
-                  Community ERP
+                <span className="truncate text-[0.7rem] tracking-wide text-sidebar-foreground/65">
+                  Smart Manager
                 </span>
               </div>
             </SidebarMenuButton>
@@ -158,7 +166,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       render={<Link href={item.url} />}
-                      isActive={pathname.startsWith(item.url)}
+                      isActive={isNavActive(pathname, item.url)}
                       tooltip={item.title}
                     >
                       <item.icon />
@@ -172,7 +180,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -184,14 +192,14 @@ export function AppSidebar() {
                   />
                 }
               >
-                <Avatar className="size-8">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                <Avatar className="size-8 ring-1 ring-sidebar-primary/40">
+                  <AvatarFallback className="bg-sidebar-primary/15 text-sidebar-primary text-xs font-semibold">
                     AD
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Admin User</span>
-                  <span className="text-muted-foreground truncate text-xs">
+                  <span className="truncate text-xs text-sidebar-foreground/60">
                     admin@mahallu.app
                   </span>
                 </div>

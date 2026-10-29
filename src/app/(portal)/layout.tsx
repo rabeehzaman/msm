@@ -1,42 +1,32 @@
-import { Home, CreditCard, GraduationCap, Menu } from "lucide-react";
-import Link from "next/link";
+import { Menu } from "lucide-react";
+import { BrandMark } from "@/components/brand";
+import { PortalNav } from "@/components/portal/portal-nav";
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col">
       {/* Top Header */}
-      <header className="bg-primary text-primary-foreground sticky top-0 z-50 flex h-14 items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-white/20 font-bold">M</div>
-          <div>
-            <p className="text-sm font-semibold">Mahallu Smart Manager</p>
-            <p className="text-xs opacity-80">Family Portal</p>
+      <header className="sticky top-0 z-50 overflow-hidden border-b border-white/10 bg-emerald-950/85 text-white backdrop-blur-xl">
+        <div className="absolute inset-0 bg-pattern opacity-15 mix-blend-screen" />
+        <div className="relative mx-auto flex h-16 max-w-lg items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            <BrandMark className="size-9" />
+            <div className="leading-tight">
+              <p className="font-heading text-base font-semibold">Mahallu Smart Manager</p>
+              <p className="text-xs tracking-wide text-amber-200/80">Family Portal</p>
+            </div>
           </div>
+          <button className="flex size-9 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15 transition-colors hover:bg-white/20">
+            <Menu className="size-5" />
+          </button>
         </div>
-        <button className="flex size-8 items-center justify-center rounded-lg bg-white/10">
-          <Menu className="size-5" />
-        </button>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 pb-20">{children}</main>
+      <main className="page-stagger flex-1 p-4 pb-28">{children}</main>
 
       {/* Bottom Navigation */}
-      <nav className="bg-background fixed bottom-0 left-0 right-0 z-50 border-t">
-        <div className="flex items-center justify-around py-2">
-          {[
-            { label: "Home", href: "/portal", icon: Home },
-            { label: "Payments", href: "/portal/payments", icon: CreditCard },
-            { label: "Madrasa", href: "/portal/madrasa", icon: GraduationCap },
-            { label: "More", href: "/portal/certificates", icon: Menu },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground transition-colors hover:text-primary">
-              <item.icon className="size-5" />
-              <span className="text-xs">{item.label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
+      <PortalNav />
     </div>
   );
 }

@@ -12,7 +12,9 @@ export default function DashboardLayout({
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex-1 p-6">{children}</main>
+        <main className="page-stagger mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 md:px-8 md:py-8 [&>div]:gap-6 md:[&>div]:gap-8">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
