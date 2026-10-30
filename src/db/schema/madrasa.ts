@@ -9,9 +9,11 @@ import {
   boolean,
   jsonb,
   pgEnum,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants";
 import { members } from "./members";
+import { cashAccounts } from "./accounts";
 
 // --- ENUMS ---
 export const attendanceStatusEnum = pgEnum("attendance_status", [
@@ -142,12 +144,19 @@ export const students = pgTable("students", {
   previousInstitution: text("previous_institution"),
   healthInfo: text("health_info"),
   specialNeeds: text("special_needs"),
+  admissionNumber: text("admission_number"),
+  gender: text("gender"),
+  guardianName: text("guardian_name"),
+  houseAddress: text("house_address"),
+  photoPath: text("photo_path"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // --- STUDENT ATTENDANCE ---
-export const studentAttendance = pgTable("student_attendance", {
+export const studentAttendance = pgTable(
+  "student_attendance",
+  {
   id: uuid("id").primaryKey().defaultRandom(),
   tenantId: uuid("tenant_id")
     .notNull()
@@ -161,7 +170,9 @@ export const studentAttendance = pgTable("student_attendance", {
   markedBy: uuid("marked_by").references(() => teachers.id, { onDelete: "set null" }),
   notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+  },
+  (t) => [uniqueIndex("student_attendance_student_date_key").on(t.studentId, t.date)],
+);
 
 // --- EXAMS ---
 export const exams = pgTable("exams", {
@@ -283,6 +294,10 @@ export const feePayments = pgTable("fee_payments", {
   receiptNumber: text("receipt_number"),
   waiverAmount: numeric("waiver_amount", { precision: 10, scale: 2 }).default("0").notNull(),
   waiverReason: text("waiver_reason"),
+  accountId: uuid("account_id").references(() => cashAccounts.id, { onDelete: "restrict" }),
+  note: text("note"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
