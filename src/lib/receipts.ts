@@ -1,6 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { cashAccounts, rentPayments, roomTenancies, salaryPayments, staff } from "@/db/schema";
+import {
+  cashAccounts, households, incomeEntries, rentPayments, roomTenancies, salaryPayments, staff, subscriptionPayments,
+} from "@/db/schema";
 import { MONTHS } from "@/lib/format";
 import { ensureTenant } from "@/lib/queries/auth";
 import { getRoomDetail } from "@/lib/queries/rent";
@@ -86,9 +88,72 @@ async function salarySlip(id: string): Promise<ReceiptData | null> {
   };
 }
 
+async function collectionReceipt(id: string): Promise<ReceiptData | null> {
+  const tenant = await ensureTenant();
+  const [row] = await db
+    .select({ e: incomeEntries, via: cashAccounts.name })
+    .from(incomeEntries)
+    .leftJoin(cashAccounts, eq(incomeEntries.accountId, cashAccounts.id))
+    .where(and(eq(incomeEntries.id, id), eq(incomeEntries.tenantId, tenant.id)))
+    .limit(1);
+  if (!row) return null;
+  const { e, via } = row;
+  return {
+    kind: "receipt",
+    title: "Collection Receipt",
+    number: e.receiptNumber,
+    date: e.date,
+    partyLabel: "Received from",
+    party: [e.donorName, e.houseName].filter(Boolean).join(", ") || "-",
+    subject: e.bookNumber ? `Book ${e.bookNumber}` : "",
+    lines: [{ label: e.category, amount: e.amount }],
+    total: e.amount,
+    via,
+    note: e.description,
+    phone: null,
+    backHref: "/finances/income",
+  };
+}
+
+async function subscriptionReceipt(id: string): Promise<ReceiptData | null> {
+  const tenant = await ensureTenant();
+  const [row] = await db
+    .select({ p: subscriptionPayments, house: households, via: cashAccounts.name })
+    .from(subscriptionPayments)
+    .innerJoin(households, eq(subscriptionPayments.householdId, households.id))
+    .leftJoin(cashAccounts, eq(subscriptionPayments.accountId, cashAccounts.id))
+    .where(and(eq(subscriptionPayments.id, id), eq(subscriptionPayments.tenantId, tenant.id)))
+    .limit(1);
+  if (!row) return null;
+  const { p, house, via } = row;
+  const periods = p.periods
+    .map((key) => {
+      const [y, m] = key.split("-").map(Number);
+      return `${MONTHS[m - 1]} ${y}`;
+    })
+    .join(", ");
+  return {
+    kind: "receipt",
+    title: "Subscription Receipt",
+    number: p.receiptNumber ?? "-",
+    date: p.date,
+    partyLabel: "Received from",
+    party: `${house.houseNumber} ${house.familyName}`,
+    subject: p.bookNumber ? `Book ${p.bookNumber}` : "",
+    lines: [{ label: `Subscription: ${periods}`, amount: p.amount }],
+    total: p.amount,
+    via,
+    note: p.note,
+    phone: house.primaryPhone,
+    backHref: "/subscriptions",
+  };
+}
+
 const loaders: Record<string, (id: string) => Promise<ReceiptData | null>> = {
   rent: rentReceipt,
   salary: salarySlip,
+  collection: collectionReceipt,
+  subscription: subscriptionReceipt,
 };
 
 export async function loadReceipt(type: string, id: string) {
