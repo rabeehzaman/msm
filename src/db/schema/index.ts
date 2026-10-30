@@ -5,6 +5,7 @@ export * from "./wards";
 export * from "./roles";
 export * from "./audit-logs";
 export * from "./accounts";
+export * from "./rent";
 export * from "./funds";
 export * from "./finance";
 export * from "./madrasa";
