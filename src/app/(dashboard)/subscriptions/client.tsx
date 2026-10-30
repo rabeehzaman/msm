@@ -192,7 +192,7 @@ function PayDialog({ plan, accounts, onClose }: { plan: Plan; accounts: AccountO
   const router = useRouter();
   const open = plan.periods.filter((p) => !p.paid);
   const [chosen, setChosen] = useState<string[]>(open.filter((p) => p.started).slice(0, 1).map((p) => p.key));
-  const [amount, setAmount] = useState(String(Number(plan.amount) * Math.max(chosen.length, 1)));
+  const [amount, setAmount] = useState((Number(plan.amount) * Math.max(chosen.length, 1)).toFixed(2));
   const pay = useAction(paySubscription, {
     success: "Payment saved",
     onDone: (id) => {
@@ -204,7 +204,7 @@ function PayDialog({ plan, accounts, onClose }: { plan: Plan; accounts: AccountO
   function toggle(key: string) {
     const next = chosen.includes(key) ? chosen.filter((k) => k !== key) : [...chosen, key];
     setChosen(next);
-    setAmount(String(Number(plan.amount) * next.length));
+    setAmount((Number(plan.amount) * next.length).toFixed(2));
   }
 
   return (

@@ -619,4 +619,10 @@ export const ml: Record<string, string> = {
   "This week's Friday collection": "ഈ ആഴ്ചത്തെ ജുമുഅ പിരിവ്",
   "Bills due": "അടയ്ക്കാനുള്ള ബില്ലുകൾ",
   "No bills due soon.": "ഉടൻ അടയ്ക്കേണ്ട ബില്ലുകളില്ല.",
+
+  // Safeguards
+  "Current account (hidden)": "ഇപ്പോഴത്തെ അക്കൗണ്ട് (മറച്ചത്)",
+  "This entry has no cash or bank line, so it cannot be edited.": "ഈ എൻട്രിക്ക് ക്യാഷ്/ബാങ്ക് വരിയില്ല, അതിനാൽ തിരുത്താനാവില്ല.",
+  "This date is before the account's opening date. Change the date, or the account's opening date and balance.": "ഈ തീയതി അക്കൗണ്ടിന്റെ തുടങ്ങുന്ന തീയതിക്ക് മുമ്പാണ്. തീയതി മാറ്റുക, അല്ലെങ്കിൽ അക്കൗണ്ടിന്റെ തുടങ്ങുന്ന തീയതിയും ബാക്കിയും മാറ്റുക.",
+  "This account still holds money. Transfer it out before hiding the account.": "ഈ അക്കൗണ്ടിൽ ഇപ്പോഴും പണമുണ്ട്. മറയ്ക്കുന്നതിന് മുമ്പ് അത് മാറ്റുക.",
 };

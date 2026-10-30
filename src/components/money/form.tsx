@@ -58,10 +58,17 @@ export function AccountPicker({
 }) {
   const t = useT();
   const first = defaultValue ?? accounts.find((a) => a.type === "cash")?.id ?? accounts[0]?.id;
+  const hiddenCurrent = !!defaultValue && !accounts.some((a) => a.id === defaultValue);
   return (
     <fieldset className="flex flex-col gap-1.5">
       <legend className="mb-1.5 text-sm font-medium">{label}</legend>
       <div className="grid grid-cols-2 gap-2">
+        {hiddenCurrent && (
+          <label className="has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-input bg-white/50 px-3 py-2 text-sm font-medium transition-colors dark:bg-white/5">
+            <input type="radio" name={name} value={defaultValue} defaultChecked required className="sr-only" />
+            <span className="min-w-0 truncate">{t("Current account (hidden)")}</span>
+          </label>
+        )}
         {accounts.map((a) => {
           const Icon = a.type === "cash" ? Banknote : Landmark;
           return (
