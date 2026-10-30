@@ -21,7 +21,11 @@ export function SettingsClient({ tenant }: { tenant: Tenant }) {
         <p className="page-subtitle">Manage Mahallu configuration and preferences</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Link href="/settings/categories" className="glass hover:border-primary/40 rounded-2xl p-4 transition-colors">
+          <p className="font-medium">Categories</p>
+          <p className="text-muted-foreground text-sm">Expense and collection categories</p>
+        </Link>
         <Link href="/settings/users" className="glass hover:border-primary/40 rounded-2xl p-4 transition-colors">
           <p className="font-medium">Users & Access</p>
           <p className="text-muted-foreground text-sm">Give people a role: Admin, Entry or View only</p>

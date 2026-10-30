@@ -57,6 +57,8 @@ import {
   DoorOpen,
   KeyRound,
   HandCoins,
+  Zap,
+  Wrench,
 } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { useSession } from "@/lib/auth/session";
@@ -84,6 +86,7 @@ const navGroups = [
       { title: "Finance Overview", url: "/finances", icon: Wallet },
       { title: "Income", url: "/finances/income", icon: TrendingUp },
       { title: "Expenses", url: "/finances/expenses", icon: CreditCard },
+      { title: "KSEB & regular bills", url: "/bills", icon: Zap },
       { title: "Friday Collections", url: "/finances/friday-collections", icon: Landmark },
       { title: "Subscriptions", url: "/subscriptions", icon: Receipt },
       { title: "Zakat", url: "/finances/zakat", icon: Heart },
@@ -97,6 +100,7 @@ const navGroups = [
       { title: "Rooms & Tenants", url: "/rent/rooms", icon: DoorOpen },
       { title: "Salaries", url: "/salaries", icon: HandCoins },
       { title: "Staff", url: "/salaries/staff", icon: Users },
+      { title: "Maintenance", url: "/maintenance", icon: Wrench },
     ],
   },
   {

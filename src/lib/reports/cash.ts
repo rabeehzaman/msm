@@ -1,11 +1,166 @@
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { funds, ledgerEntries } from "@/db/schema";
+import { cashAccounts, funds, ledgerEntries } from "@/db/schema";
 import { getAccountBook, getAccountsWithBalances } from "@/lib/queries/accounts";
 import { ensureTenant } from "@/lib/queries/auth";
+import { getMaintenanceLogs } from "@/lib/queries/expenses";
 import { MONTHS } from "@/lib/format";
 import { dateRange, monthEnd, monthStart, round2, sumBy, yearFilter } from "./helpers";
 import type { ReportDefinition, ReportRow } from "./types";
+
+export const expenseReports: ReportDefinition[] = [
+  {
+    slug: "expenses-by-category",
+    title: "Expenses by category",
+    description: "Totals per category for any dates, including salaries, bills and maintenance",
+    group: "Expenses & Maintenance",
+    build: async (params) => {
+      const tenant = await ensureTenant();
+      const { from, to, filters } = dateRange(params, 2);
+      const lines = await db
+        .select({
+          category: ledgerEntries.category,
+          total: sql<string>`sum(${ledgerEntries.amount})`,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(ledgerEntries)
+        .where(
+          and(
+            eq(ledgerEntries.tenantId, tenant.id),
+            eq(ledgerEntries.kind, "expense"),
+            gte(ledgerEntries.date, from),
+            lte(ledgerEntries.date, to),
+          ),
+        )
+        .groupBy(ledgerEntries.category)
+        .orderBy(sql`2 desc`);
+      const rows: ReportRow[] = lines.map((l) => ({ category: l.category, count: l.count, amount: Number(l.total) }));
+      return {
+        slug: "expenses-by-category",
+        title: "Expenses by category",
+        filters,
+        columns: [
+          { key: "category", label: "Category", translate: true },
+          { key: "count", label: "Entries" },
+          { key: "amount", label: "Amount", kind: "money" },
+        ],
+        rows,
+        totals: { category: "Total", amount: sumBy(rows, "amount") },
+      };
+    },
+  },
+  {
+    slug: "expense-list",
+    title: "Expense list",
+    description: "Every expense line for any dates and category",
+    group: "Expenses & Maintenance",
+    build: async (params) => {
+      const tenant = await ensureTenant();
+      const { from, to, filters } = dateRange(params, 2);
+      const lines = await db
+        .select({
+          date: ledgerEntries.date,
+          category: ledgerEntries.category,
+          party: ledgerEntries.party,
+          note: ledgerEntries.note,
+          accountName: cashAccounts.name,
+          amount: ledgerEntries.amount,
+        })
+        .from(ledgerEntries)
+        .leftJoin(cashAccounts, eq(ledgerEntries.accountId, cashAccounts.id))
+        .where(
+          and(
+            eq(ledgerEntries.tenantId, tenant.id),
+            eq(ledgerEntries.kind, "expense"),
+            gte(ledgerEntries.date, from),
+            lte(ledgerEntries.date, to),
+          ),
+        )
+        .orderBy(ledgerEntries.date, ledgerEntries.createdAt);
+      const categories = [...new Set(lines.map((l) => l.category))].sort();
+      const category = params.category && categories.includes(params.category) ? params.category : "";
+      const rows: ReportRow[] = lines
+        .filter((l) => !category || l.category === category)
+        .map((l) => ({ ...l, amount: Number(l.amount) }));
+      return {
+        slug: "expense-list",
+        title: "Expense list",
+        filters: [
+          ...filters,
+          {
+            name: "category",
+            label: "Category",
+            type: "select",
+            value: category,
+            options: [{ value: "", label: "All categories" }, ...categories.map((c) => ({ value: c, label: c }))],
+          },
+        ],
+        columns: [
+          { key: "date", label: "Date", kind: "date" },
+          { key: "category", label: "Category", translate: true },
+          { key: "party", label: "Paid to" },
+          { key: "note", label: "Note", wrap: true },
+          { key: "accountName", label: "Paid via" },
+          { key: "amount", label: "Amount", kind: "money" },
+        ],
+        rows,
+        totals: { date: "", category: "Total", amount: sumBy(rows, "amount") },
+      };
+    },
+  },
+  {
+    slug: "maintenance-history",
+    title: "Maintenance history",
+    description: "All work by building and room",
+    group: "Expenses & Maintenance",
+    build: async (params) => {
+      const { from, to, filters } = dateRange(params, 11);
+      const logs = (await getMaintenanceLogs()).filter((l) => l.date >= from && l.date <= to);
+      const buildings = [...new Set(logs.map((l) => l.buildingName).filter(Boolean))] as string[];
+      const building = params.building && buildings.includes(params.building) ? params.building : "";
+      const rows: ReportRow[] = logs
+        .filter((l) => !building || l.buildingName === building)
+        .map((l) => ({
+          date: l.date,
+          building: l.buildingName,
+          room: l.roomName,
+          area: l.area,
+          work: l.work,
+          doneBy: l.doneBy,
+          status: { pending: "Pending", in_progress: "In Progress", done: "Done" }[l.status] ?? l.status,
+          paidDate: l.paidDate,
+          cost: Number(l.cost),
+        }));
+      return {
+        slug: "maintenance-history",
+        title: "Maintenance history",
+        filters: [
+          ...filters,
+          {
+            name: "building",
+            label: "Building",
+            type: "select",
+            value: building,
+            options: [{ value: "", label: "All buildings" }, ...buildings.map((b) => ({ value: b, label: b }))],
+          },
+        ],
+        columns: [
+          { key: "date", label: "Date", kind: "date" },
+          { key: "building", label: "Building" },
+          { key: "room", label: "Room" },
+          { key: "area", label: "Area" },
+          { key: "work", label: "Work description", wrap: true },
+          { key: "doneBy", label: "Done by" },
+          { key: "status", label: "Status", translate: true },
+          { key: "paidDate", label: "Paid date", kind: "date" },
+          { key: "cost", label: "Cost", kind: "money" },
+        ],
+        rows,
+        totals: { date: "", work: "Total", cost: sumBy(rows, "cost") },
+      };
+    },
+  },
+];
 
 export const cashReports: ReportDefinition[] = [
   {
