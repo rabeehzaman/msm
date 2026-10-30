@@ -99,7 +99,8 @@ export async function getRentSummary() {
   for (const room of facts) {
     const cell = monthCell(room, now.year, now.month, now);
     if (cell.payment) collected += Number(cell.payment.amount);
-    if (cell.tenancyId || cell.payment) expected += cell.payment ? Number(cell.payment.amount) : cell.expected;
+    if (cell.payment) expected += Number(cell.payment.amount);
+    else if (cell.status === "due") expected += cell.expected;
     for (const p of roomPending(room, now)) {
       pendingCount += 1;
       pendingAmount += p.amount;

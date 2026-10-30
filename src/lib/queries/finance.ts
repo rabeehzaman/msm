@@ -52,7 +52,7 @@ export async function getFunds() {
   return db.select().from(funds).where(eq(funds.tenantId, tenant.id)).orderBy(funds.name);
 }
 
-export async function getIncomeEntries() {
+export async function getIncomeEntries(fundId?: string) {
   const tenant = await ensureTenant();
   const result = await db
     .select({
@@ -70,13 +70,13 @@ export async function getIncomeEntries() {
     })
     .from(incomeEntries)
     .leftJoin(funds, eq(incomeEntries.fundId, funds.id))
-    .where(eq(incomeEntries.tenantId, tenant.id))
+    .where(and(eq(incomeEntries.tenantId, tenant.id), fundId ? eq(incomeEntries.fundId, fundId) : undefined))
     .orderBy(desc(incomeEntries.date))
-    .limit(50);
+    .limit(fundId ? 100000 : 50);
   return result;
 }
 
-export async function getExpenseEntries() {
+export async function getExpenseEntries(fundId?: string) {
   const tenant = await ensureTenant();
   const result = await db
     .select({
@@ -94,9 +94,9 @@ export async function getExpenseEntries() {
     })
     .from(expenseEntries)
     .leftJoin(funds, eq(expenseEntries.fundId, funds.id))
-    .where(eq(expenseEntries.tenantId, tenant.id))
+    .where(and(eq(expenseEntries.tenantId, tenant.id), fundId ? eq(expenseEntries.fundId, fundId) : undefined))
     .orderBy(desc(expenseEntries.date))
-    .limit(50);
+    .limit(fundId ? 100000 : 50);
   return result;
 }
 
