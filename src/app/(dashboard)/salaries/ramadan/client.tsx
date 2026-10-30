@@ -103,7 +103,7 @@ function AllowanceDialog({ staff, onClose }: { staff: { id: string; name: string
           <DialogTitle>{t("Add allowance")}</DialogTitle>
           <DialogDescription>{t("For all ustadhs, each person gets the full amount entered here.")}</DialogDescription>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           <Field label={t("For")}>
             <NativeSelect name="staffId" defaultValue="all">
               <option value="all">{t("All ustadhs")}</option>

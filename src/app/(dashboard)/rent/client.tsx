@@ -82,7 +82,7 @@ export function RentClient({
         </Button>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Expected this month" value={formatMoney(summary.expected)} icon={IndianRupee} />
         <StatCard label="Collected this month" value={formatMoney(summary.collected)} icon={Wallet} tone="stat-icon-gold" />
         <StatCard label="Pending this month" value={formatMoney(summary.pendingThisMonth)} icon={CircleAlert} tone="stat-icon-rose" />

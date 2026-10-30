@@ -203,7 +203,7 @@ function FeeTypeDialog({ fee, classes, onClose }: { fee: FeeType | null; classes
         <DialogHeader>
           <DialogTitle>{t(fee ? "Edit fee type" : "Add fee type")}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {fee && <input type="hidden" name="id" value={fee.id} />}
           <Field label={t("Fee name")}>
             <Input name="feeType" defaultValue={fee?.feeType} placeholder={t("e.g. Admission fee, Exam fee")} required />
@@ -264,7 +264,7 @@ function CollectDialog({
         <DialogHeader>
           <DialogTitle>{t("Collect fee")}</DialogTitle>
         </DialogHeader>
-        <form action={pay.call} className="flex flex-col gap-4">
+        <form onSubmit={pay.submit} className="flex flex-col gap-4">
           <Field label={t("Student")}>
             <NativeSelect name="studentId" defaultValue={preset.studentId ?? ""} required>
               <option value="" disabled>

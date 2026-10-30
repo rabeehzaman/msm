@@ -199,7 +199,7 @@ function LogDialog({ log, tree, onClose }: { log: Log | null; tree: Tree; onClos
         <DialogHeader>
           <DialogTitle>{t(log ? "Edit work" : "Add work")}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {log && <input type="hidden" name="id" value={log.id} />}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t("Date")}>
@@ -274,7 +274,7 @@ function PayDialog({ log, accounts, onClose }: { log: Log; accounts: AccountOpti
           </DialogTitle>
           <DialogDescription>{log.work}</DialogDescription>
         </DialogHeader>
-        <form action={pay.call} className="flex flex-col gap-4">
+        <form onSubmit={pay.submit} className="flex flex-col gap-4">
           <input type="hidden" name="id" value={log.id} />
           <Field label={t("Paid date")}>
             <Input name="paidDate" type="date" defaultValue={todayIST()} required />

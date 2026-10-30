@@ -131,7 +131,7 @@ function NameDialog({ edit, onClose }: { edit: Edit; onClose: () => void }) {
         <DialogHeader>
           <DialogTitle>{t(`${edit.id ? "Rename" : "Add"} ${noun}`)}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {edit.id && <input type="hidden" name="id" value={edit.id} />}
           {edit.kind === "floor" && edit.buildingId && <input type="hidden" name="buildingId" value={edit.buildingId} />}
           {edit.kind === "room" && edit.floorId && <input type="hidden" name="floorId" value={edit.floorId} />}

@@ -116,7 +116,7 @@ function StaffDialog({ person, onClose }: { person: Person | null; onClose: () =
         <DialogHeader>
           <DialogTitle>{t(person ? "Edit staff" : "Add staff")}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {person && <input type="hidden" name="id" value={person.id} />}
           <Field label={t("Name")}>
             <Input name="name" defaultValue={person?.name} required />

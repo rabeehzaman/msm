@@ -293,7 +293,7 @@ function TenancyDialog({
           <DialogTitle>{t(tenancy ? "Edit tenant" : "Add tenant")}</DialogTitle>
           
         </DialogHeader>
-        <form action={tenancy ? update.call : create.call} className="flex flex-col gap-4">
+        <form onSubmit={tenancy ? update.submit : create.submit} className="flex flex-col gap-4">
           {tenancy ? <input type="hidden" name="id" value={tenancy.id} /> : <input type="hidden" name="roomId" value={roomId} />}
           <Field label={t("Tenant name")}>
             <Input name="tenantName" defaultValue={tenancy?.tenantName} required />
@@ -341,7 +341,7 @@ function EndDialog({ tenancy, onClose }: { tenancy: Tenancy; onClose: () => void
             {t("{name} is closed on this date. Their payment history stays.", { name: tenancy.tenantName })}
           </DialogDescription>
         </DialogHeader>
-        <form action={end.call} className="flex flex-col gap-4">
+        <form onSubmit={end.submit} className="flex flex-col gap-4">
           <input type="hidden" name="id" value={tenancy.id} />
           <Field label={t("End date")}>
             <Input name="endDate" type="date" min={tenancy.startDate} defaultValue={todayIST()} required />
@@ -364,7 +364,7 @@ function RentDialog({ roomId, current, onClose }: { roomId: string; current?: st
           <DialogTitle>{t("Change rent")}</DialogTitle>
           <DialogDescription>{t("Past months stay at the old rent. The new rent applies from the month you choose.")}</DialogDescription>
         </DialogHeader>
-        <form action={change.call} className="flex flex-col gap-4">
+        <form onSubmit={change.submit} className="flex flex-col gap-4">
           <input type="hidden" name="roomId" value={roomId} />
           <Field label={t("New monthly rent (₹)")}>
             <Input name="rent" type="number" step="0.01" min="0.01" inputMode="decimal" defaultValue={current} required />
@@ -399,7 +399,7 @@ function RoomDialog({ room, onClose }: { room: Room; onClose: () => void }) {
         <DialogHeader>
           <DialogTitle>{t("Rename room")}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           <input type="hidden" name="id" value={room.id} />
           <Field label={t("Name")}>
             <Input name="name" defaultValue={room.name} required />

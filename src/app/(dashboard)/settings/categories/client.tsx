@@ -62,7 +62,7 @@ function CategoryRow({ category, save, onDone }: { category?: Category; save: Sa
     },
   });
   return (
-    <form action={action.call} className="flex items-center gap-2">
+    <form onSubmit={action.submit} className="flex items-center gap-2">
       {category && <input type="hidden" name="id" value={category.id} />}
       <Input name="name" defaultValue={category?.name} required aria-label={t("Name")} />
       {category && (

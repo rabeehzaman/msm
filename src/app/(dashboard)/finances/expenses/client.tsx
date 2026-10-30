@@ -203,7 +203,7 @@ function ExpenseDialog({
           <DialogTitle>{t(entry ? "Edit expense" : "Add expense")}</DialogTitle>
           <DialogDescription>{t("The amount is taken out of the account you choose.")}</DialogDescription>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {entry && <input type="hidden" name="id" value={entry.id} />}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t("Date")}>

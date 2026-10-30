@@ -173,7 +173,7 @@ function StudentDialog({ student, classes, onClose }: { student: Student | null;
         <DialogHeader>
           <DialogTitle>{t(student ? "Edit student" : "Add student")}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {student && <input type="hidden" name="id" value={student.id} />}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t("Name")}>

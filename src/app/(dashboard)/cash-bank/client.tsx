@@ -191,7 +191,7 @@ function AccountDialog({ account, onClose }: { account: Account | null; onClose:
           <DialogTitle>{t(account ? "Edit account" : "Add account")}</DialogTitle>
           <DialogDescription>{t("The opening balance is the amount held on the opening date.")}</DialogDescription>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {account && <input type="hidden" name="id" value={account.id} />}
           <Field label={t("Type")}>
             <NativeSelect name="type" value={type} onChange={(e) => setType(e.target.value as "cash" | "bank")}>
@@ -255,7 +255,7 @@ function TransferDialog({
         {bank.length === 0 ? (
           <p className="text-muted-foreground text-sm">{t("Add a bank account first.")}</p>
         ) : (
-          <form action={save.call} className="flex flex-col gap-4">
+          <form onSubmit={save.submit} className="flex flex-col gap-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={t("From")}>
                 <NativeSelect name="fromAccountId" required>

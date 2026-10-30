@@ -127,7 +127,7 @@ function FridayDialog({ entry, accounts, onClose }: { entry: Entry | null; accou
         <DialogHeader>
           <DialogTitle>{t(entry ? "Edit Friday collection" : "Add Friday collection")}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {entry && <input type="hidden" name="id" value={entry.id} />}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t("Date")}>

@@ -85,7 +85,7 @@ export function SalariesClient({
         </Button>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard label="Payable this month" value={formatMoney(summary.payable)} icon={Wallet} />
         <StatCard label="Paid this month" value={formatMoney(summary.paid)} icon={Check} tone="stat-icon-gold" />
         <StatCard
@@ -233,7 +233,7 @@ function SalarySheet({
         )}
 
         {canEdit && (
-          <form action={payment ? update.call : pay.call} className="flex flex-col gap-4">
+          <form onSubmit={payment ? update.submit : pay.submit} className="flex flex-col gap-4">
             {payment ? (
               <input type="hidden" name="id" value={payment.id} />
             ) : (

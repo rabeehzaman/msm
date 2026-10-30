@@ -230,7 +230,7 @@ function AccountDialog({ account, categories, onClose }: { account: BillAccount 
         <DialogHeader>
           <DialogTitle>{t(account ? "Edit consumer number" : "Add consumer number")}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {account && <input type="hidden" name="id" value={account.id} />}
           <Field label={t("Name")}>
             <Input name="name" defaultValue={account?.name} placeholder={t("e.g. KSEB Pally")} required />
@@ -264,7 +264,7 @@ function BillDialog({ bill, billAccounts, onClose }: { bill: Bill | null; billAc
         <DialogHeader>
           <DialogTitle>{t(bill ? "Edit bill" : "Add bill")}</DialogTitle>
         </DialogHeader>
-        <form action={save.call} className="flex flex-col gap-4">
+        <form onSubmit={save.submit} className="flex flex-col gap-4">
           {bill ? (
             <input type="hidden" name="id" value={bill.id} />
           ) : (
@@ -323,7 +323,7 @@ function PayDialog({ bill, accounts, onClose }: { bill: Bill; accounts: AccountO
             {t("Pay")} {bill.accountLabel} · {formatMoney(bill.amount)}
           </DialogTitle>
         </DialogHeader>
-        <form action={pay.call} className="flex flex-col gap-4">
+        <form onSubmit={pay.submit} className="flex flex-col gap-4">
           <input type="hidden" name="id" value={bill.id} />
           <Field label={t("Paid date")}>
             <Input name="paidDate" type="date" defaultValue={todayIST()} required />

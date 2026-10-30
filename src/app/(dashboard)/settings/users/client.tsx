@@ -55,7 +55,7 @@ function UserCard({ user }: { user: AppUser }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={save.call} className="flex flex-col gap-3">
+        <form onSubmit={save.submit} className="flex flex-col gap-3">
           <input type="hidden" name="userId" value={user.userId} />
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label={t("Name")}>

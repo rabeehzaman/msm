@@ -217,12 +217,13 @@ function PayDialog({ plan, accounts, onClose }: { plan: Plan; accounts: AccountO
           <DialogDescription>{plan.planName}</DialogDescription>
         </DialogHeader>
         <form
-          action={(formData) => {
+          onSubmit={(event) => {
             if (chosen.length === 0) {
+              event.preventDefault();
               toast.error(t("Please choose the periods being paid."));
               return;
             }
-            pay.call(formData);
+            pay.submit(event);
           }}
           className="flex flex-col gap-4"
         >
@@ -288,7 +289,9 @@ function AddDialog({ households, onClose }: { households: { id: string; label: s
   const [saving, setSaving] = useState(false);
   const today = useMemo(() => todayIST(), []);
 
-  async function submit(formData: FormData) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
     setSaving(true);
     try {
       formData.set("nextDueDate", String(formData.get("startDate")));
@@ -312,7 +315,7 @@ function AddDialog({ households, onClose }: { households: { id: string; label: s
         {households.length === 0 ? (
           <p className="text-muted-foreground text-sm">{t("Add households first.")}</p>
         ) : (
-          <form action={submit} className="flex flex-col gap-4">
+          <form onSubmit={submit} className="flex flex-col gap-4">
             <Field label={t("House")}>
               <NativeSelect name="householdId" required>
                 {households.map((h) => (

@@ -111,7 +111,12 @@ export function useAction<A extends unknown[], R = undefined>(
       }
     });
   }
-  return { pending, call, lastError };
+  // Used instead of <form action>, which would wipe the fields even when the save failed.
+  function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    (call as unknown as (formData: FormData) => void)(new FormData(event.currentTarget));
+  }
+  return { pending, call, submit, lastError };
 }
 
 export function SaveButton({
