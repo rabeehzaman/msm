@@ -1,243 +1,152 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { CalendarDays, IndianRupee, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, IndianRupee, CheckCircle2, Loader2 } from "lucide-react";
-import { createFridayCollection } from "@/lib/actions/finance";
-import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
+import { ConfirmButton } from "@/components/money/confirm-button";
+import { AccountPicker, Field, SaveButton, useAction, type AccountOption } from "@/components/money/form";
+import { PageHeader, StatCard } from "@/components/money/page-header";
+import { deleteFriday, saveFriday } from "@/lib/actions/collections";
+import { useSession } from "@/lib/auth/session";
+import { formatDate, formatMoney, todayIST } from "@/lib/format";
+import { useT } from "@/lib/i18n/client";
 
-type FridayCollection = {
+type Entry = {
   id: string;
-  date: string | null;
-  totalAmount: string | null;
-  status: string | null;
+  date: string;
+  totalAmount: string;
+  countedBy: string | null;
   notes: string | null;
+  accountId: string | null;
+  accountName: string | null;
 };
 
-const statusColors: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
-  open: "outline",
-  counting: "secondary",
-  pending_verification: "secondary",
-  verified: "default",
-  deposited: "default",
-  reconciled: "default",
-};
-
-export function FridayCollectionsClient({
-  collections,
-}: {
-  collections: FridayCollection[];
-}) {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const totalThisMonth = collections
-    .filter((c) => {
-      if (!c.date) return false;
-      const d = new Date(c.date);
-      const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    })
-    .reduce((sum, c) => sum + Number(c.totalAmount || 0), 0);
-
-  const avgPerFriday = collections.length > 0
-    ? collections.reduce((sum, c) => sum + Number(c.totalAmount || 0), 0) / collections.length
-    : 0;
-
-  async function handleCreate(formData: FormData) {
-    setLoading(true);
-    try {
-      await createFridayCollection(formData);
-      toast.success("Friday collection recorded successfully");
-      setOpen(false);
-    } catch {
-      toast.error("Failed to record collection");
-    } finally {
-      setLoading(false);
-    }
-  }
+export function FridayCollectionsClient({ collections, accounts }: { collections: Entry[]; accounts: AccountOption[] }) {
+  const t = useT();
+  const router = useRouter();
+  const { canEnter, isAdmin } = useSession();
+  const [editing, setEditing] = useState<Entry | "new" | null>(null);
+  const remove = useAction(deleteFriday, { success: "Entry deleted. Balance corrected.", onDone: () => router.refresh() });
+  const month = todayIST().slice(0, 7);
+  const thisMonth = collections.filter((c) => c.date.startsWith(month));
+  const sum = (list: Entry[]) => list.reduce((s, c) => s + Number(c.totalAmount), 0);
+  const average = collections.length ? sum(collections) / collections.length : 0;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Friday Collections</h1>
-          <p className="page-subtitle">
-            Juma collection tracking and verification
-          </p>
-        </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button />}>
-            <Plus />
-            New Collection Batch
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>New Friday Collection Batch</DialogTitle>
-              <DialogDescription>
-                Record today&apos;s Juma collection
-              </DialogDescription>
-            </DialogHeader>
-            <form action={handleCreate}>
-              <div className="flex flex-col gap-4 py-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">Collection Date *</label>
-                  <Input type="date" name="date" defaultValue={new Date().toISOString().split("T")[0]} required />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">Total Amount (Rs.) *</label>
-                  <Input type="number" name="totalAmount" placeholder="0.00" required />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">Notes</label>
-                  <Textarea name="notes" placeholder="Any observations about the collection..." rows={2} />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 />}
-                  {loading ? "Saving..." : "Submit Collection"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+      <PageHeader title="Friday Collections" subtitle="Jumu'ah collection, with who counted it. It goes straight to Cash or Bank.">
+        {canEnter && (
+          <Button onClick={() => setEditing("new")}>
+            <Plus className="size-4" />
+            {t("Add Friday collection")}
+          </Button>
+        )}
+      </PageHeader>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard label="This month" value={formatMoney(sum(thisMonth))} icon={IndianRupee} tone="stat-icon-gold" />
+        <StatCard label="Average per Friday" value={formatMoney(Math.round(average))} icon={CalendarDays} />
+        <StatCard label="Fridays recorded" value={String(collections.length)} icon={CalendarDays} />
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="stat-icon">
-                <IndianRupee className="size-5 text-success" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">This Month</p>
-                <p className="text-xl font-bold">Rs. {totalThisMonth.toLocaleString("en-IN")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="stat-icon">
-                <IndianRupee className="text-muted-foreground size-5" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">Avg per Friday</p>
-                <p className="text-xl font-bold">Rs. {Math.round(avgPerFriday).toLocaleString("en-IN")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="stat-icon">
-                <CheckCircle2 className="text-muted-foreground size-5" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">Total Sessions</p>
-                <p className="text-xl font-bold">{collections.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="stat-icon">
-                <CheckCircle2 className="text-muted-foreground size-5" />
-              </div>
-              <div>
-                <p className="text-muted-foreground text-sm">Verified</p>
-                <p className="text-xl font-bold">
-                  {collections.filter((c) => c.status === "verified" || c.status === "reconciled" || c.status === "deposited").length} / {collections.length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Collection History */}
       <Card>
         <CardHeader>
-          <CardTitle>Collection History</CardTitle>
-          <CardDescription>
-            All Friday collection batches with verification status
-          </CardDescription>
+          <CardTitle>{t("History")}</CardTitle>
         </CardHeader>
         <CardContent>
           {collections.length === 0 ? (
-            <div className="empty-state">
-              <p className="text-muted-foreground text-lg">No collections yet</p>
-              <p className="text-muted-foreground text-sm">
-                Record your first Friday collection to get started.
-              </p>
-            </div>
+            <EmptyState message={t("No Friday collections yet.")} />
           ) : (
-            <div className="table-shell">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {collections.map((c) => (
-                    <TableRow key={c.id}>
-                      <TableCell>
-                        {c.date ? new Date(c.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{c.notes || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant={statusColors[c.status || "open"] || "outline"}>{c.status || "open"}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-bold">
-                        Rs. {Number(c.totalAmount || 0).toLocaleString("en-IN")}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <ul className="divide-border divide-y">
+              {collections.map((c) => (
+                <li key={c.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <p className="font-medium">{formatDate(c.date)}</p>
+                    <p className="text-muted-foreground truncate text-sm">
+                      {[c.countedBy ? `${t("Counted by")} ${c.countedBy}` : null, c.accountName].filter(Boolean).join(" · ")}
+                    </p>
+                    {c.notes && <p className="text-muted-foreground truncate text-xs">{c.notes}</p>}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    <span className="text-success mr-1 font-semibold tabular-nums">{formatMoney(c.totalAmount)}</span>
+                    {isAdmin && (
+                      <>
+                        <Button variant="ghost" size="icon" className="size-8" aria-label={t("Edit")} onClick={() => setEditing(c)}>
+                          <Pencil className="size-4" />
+                        </Button>
+                        <ConfirmButton
+                          title="Delete this entry?"
+                          description="The amount is taken back out of Cash/Bank. This is logged."
+                          onConfirm={() => remove.call(c.id)}
+                          trigger={
+                            <Button variant="ghost" size="icon" className="size-8" aria-label={t("Delete")}>
+                              <Trash2 className="size-4" />
+                            </Button>
+                          }
+                        />
+                      </>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </CardContent>
       </Card>
+
+      {editing && <FridayDialog entry={editing === "new" ? null : editing} accounts={accounts} onClose={() => setEditing(null)} />}
     </div>
+  );
+}
+
+// The most recent Friday, or today if today is Friday.
+function lastFriday() {
+  const today = new Date(`${todayIST()}T00:00:00Z`);
+  const back = (today.getUTCDay() + 2) % 7;
+  return new Date(today.getTime() - back * 86400000).toISOString().slice(0, 10);
+}
+
+function FridayDialog({ entry, accounts, onClose }: { entry: Entry | null; accounts: AccountOption[]; onClose: () => void }) {
+  const t = useT();
+  const router = useRouter();
+  const save = useAction(saveFriday, {
+    success: "Collection saved",
+    onDone: () => {
+      onClose();
+      router.refresh();
+    },
+  });
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{t(entry ? "Edit Friday collection" : "Add Friday collection")}</DialogTitle>
+        </DialogHeader>
+        <form action={save.call} className="flex flex-col gap-4">
+          {entry && <input type="hidden" name="id" value={entry.id} />}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("Date")}>
+              <Input name="date" type="date" defaultValue={entry?.date ?? lastFriday()} required />
+            </Field>
+            <Field label={t("Amount (₹)")}>
+              <Input name="amount" type="number" step="0.01" min="0.01" inputMode="decimal" defaultValue={entry?.totalAmount} required />
+            </Field>
+          </div>
+          <Field label={t("Counted by (names)")}>
+            <Input name="countedBy" defaultValue={entry?.countedBy ?? ""} />
+          </Field>
+          <AccountPicker accounts={accounts} label={t("Received via")} defaultValue={entry?.accountId} />
+          <Field label={t("Note")}>
+            <Input name="notes" defaultValue={entry?.notes ?? ""} />
+          </Field>
+          <SaveButton pending={save.pending} />
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

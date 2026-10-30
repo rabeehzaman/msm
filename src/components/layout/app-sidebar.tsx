@@ -84,7 +84,7 @@ const navGroups = [
     items: [
       { title: "Cash & Bank", url: "/cash-bank", icon: Banknote },
       { title: "Finance Overview", url: "/finances", icon: Wallet },
-      { title: "Income", url: "/finances/income", icon: TrendingUp },
+      { title: "Collections", url: "/finances/income", icon: TrendingUp },
       { title: "Expenses", url: "/finances/expenses", icon: CreditCard },
       { title: "KSEB & regular bills", url: "/bills", icon: Zap },
       { title: "Friday Collections", url: "/finances/friday-collections", icon: Landmark },
