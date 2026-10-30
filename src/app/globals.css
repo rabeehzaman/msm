@@ -392,3 +392,56 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Printing: reports, receipts and salary slips ---------- */
+
+@media print {
+  [data-slot="sidebar"],
+  [data-slot="sidebar-gap"],
+  [data-slot="sidebar-container"],
+  [data-slot="sidebar-rail"],
+  header,
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body,
+  [data-slot="sidebar-wrapper"],
+  [data-slot="sidebar-inset"],
+  main {
+    background: white !important;
+    color: black !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    min-height: 0 !important;
+  }
+  body::before,
+  body::after {
+    display: none !important;
+  }
+  [data-slot="card"] {
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+  .page-stagger > div > * {
+    animation: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .table-shell {
+    overflow: visible !important;
+    border: 1px solid #999 !important;
+  }
+  table {
+    font-size: 11px;
+  }
+}
+
+.print-only {
+  display: none;
+}
