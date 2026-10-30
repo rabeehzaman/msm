@@ -86,7 +86,7 @@ export function ReceiptClient({ receipt }: { receipt: Receipt }) {
           <tbody>
             {receipt.lines.map((line) => (
               <tr key={line.label} className="border-b">
-                <td className="py-2">{line.label}</td>
+                <td className="py-2">{t(line.label)}</td>
                 <td className="py-2 text-right tabular-nums">{formatMoney(line.amount)}</td>
               </tr>
             ))}

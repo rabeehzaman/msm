@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { cashAccounts, rentPayments, roomTenancies } from "@/db/schema";
+import { cashAccounts, rentPayments, roomTenancies, salaryPayments, staff } from "@/db/schema";
 import { MONTHS } from "@/lib/format";
 import { ensureTenant } from "@/lib/queries/auth";
 import { getRoomDetail } from "@/lib/queries/rent";
@@ -52,8 +52,43 @@ async function rentReceipt(id: string): Promise<ReceiptData | null> {
   };
 }
 
+async function salarySlip(id: string): Promise<ReceiptData | null> {
+  const tenant = await ensureTenant();
+  const [row] = await db
+    .select({ p: salaryPayments, person: staff, via: cashAccounts.name })
+    .from(salaryPayments)
+    .innerJoin(staff, eq(salaryPayments.staffId, staff.id))
+    .leftJoin(cashAccounts, eq(salaryPayments.accountId, cashAccounts.id))
+    .where(and(eq(salaryPayments.id, id), eq(salaryPayments.tenantId, tenant.id)))
+    .limit(1);
+  if (!row) return null;
+  const { p, person, via } = row;
+  const lines: ReceiptLine[] = [
+    { label: "Basic salary", amount: p.basic },
+    { label: "Cleaning fee", amount: p.cleaning },
+    { label: "Ramadan allowance", amount: p.ramadan },
+    { label: p.otherNote ? `Other additions (${p.otherNote})` : "Other additions", amount: p.otherAdditions },
+  ].filter((l) => Number(l.amount) > 0);
+  return {
+    kind: "slip",
+    title: "Salary Slip",
+    number: `${p.year}-${String(p.month).padStart(2, "0")}`,
+    date: p.paidDate,
+    partyLabel: "Paid to",
+    party: person.name,
+    subject: `${MONTHS[p.month - 1]} ${p.year}`,
+    lines,
+    total: p.amount,
+    via,
+    note: p.note,
+    phone: person.phone,
+    backHref: `/salaries?year=${p.year}`,
+  };
+}
+
 const loaders: Record<string, (id: string) => Promise<ReceiptData | null>> = {
   rent: rentReceipt,
+  salary: salarySlip,
 };
 
 export async function loadReceipt(type: string, id: string) {
@@ -64,5 +99,3 @@ export async function loadReceipt(type: string, id: string) {
   const tenant = await ensureTenant();
   return { ...receipt, mahalluName: tenant.name, mahalluAddress: tenant.address, mahalluPhone: tenant.phone };
 }
-
-export const monthLabel = (year: number, month: number) => `${MONTHS[month - 1]} ${year}`;
