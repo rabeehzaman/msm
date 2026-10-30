@@ -13,6 +13,7 @@ import { tenants } from "./tenants";
 import { funds } from "./funds";
 import { households } from "./households";
 import { members } from "./members";
+import { cashAccounts } from "./accounts";
 
 // --- PAYMENT METHOD ---
 export const paymentMethodEnum = pgEnum("payment_method", [
@@ -88,6 +89,13 @@ export const expenseEntries = pgTable("expense_entries", {
   approvedBy: uuid("approved_by").references(() => members.id),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   attachmentUrls: jsonb("attachment_urls").default([]),
+  accountId: uuid("account_id").references(() => cashAccounts.id, { onDelete: "restrict" }),
+  categoryId: uuid("category_id"),
+  photoPath: text("photo_path"),
+  sourceType: text("source_type"),
+  sourceId: uuid("source_id"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
   date: date("date").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

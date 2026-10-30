@@ -7,6 +7,7 @@ export * from "./audit-logs";
 export * from "./accounts";
 export * from "./rent";
 export * from "./salary";
+export * from "./expenses";
 export * from "./funds";
 export * from "./finance";
 export * from "./madrasa";
