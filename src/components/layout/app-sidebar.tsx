@@ -59,6 +59,7 @@ import {
   HandCoins,
   Zap,
   Wrench,
+  Coins,
 } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { useSession } from "@/lib/auth/session";
@@ -110,6 +111,7 @@ const navGroups = [
       { title: "Classes", url: "/madrasa/classes", icon: BookOpen },
       { title: "Students", url: "/madrasa/students", icon: BookOpen },
       { title: "Attendance", url: "/madrasa/attendance", icon: ClipboardCheck },
+      { title: "Madrasa fees", url: "/madrasa/fees", icon: Coins },
       { title: "Hifz Tracker", url: "/madrasa/hifz", icon: BookMarked },
       { title: "Exams & Results", url: "/madrasa/exams", icon: FileText },
     ],

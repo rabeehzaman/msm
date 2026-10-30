@@ -1,7 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
-  cashAccounts, households, incomeEntries, rentPayments, roomTenancies, salaryPayments, staff, subscriptionPayments,
+  cashAccounts, classes, feePayments, feeStructures, households, incomeEntries, rentPayments, roomTenancies,
+  salaryPayments, staff, students, subscriptionPayments,
 } from "@/db/schema";
 import { MONTHS } from "@/lib/format";
 import { ensureTenant } from "@/lib/queries/auth";
@@ -149,11 +150,42 @@ async function subscriptionReceipt(id: string): Promise<ReceiptData | null> {
   };
 }
 
+async function feeReceipt(id: string): Promise<ReceiptData | null> {
+  const tenant = await ensureTenant();
+  const [row] = await db
+    .select({ p: feePayments, student: students, fee: feeStructures.feeType, className: classes.name, via: cashAccounts.name })
+    .from(feePayments)
+    .innerJoin(students, eq(feePayments.studentId, students.id))
+    .leftJoin(feeStructures, eq(feePayments.feeStructureId, feeStructures.id))
+    .leftJoin(classes, eq(students.classId, classes.id))
+    .leftJoin(cashAccounts, eq(feePayments.accountId, cashAccounts.id))
+    .where(and(eq(feePayments.id, id), eq(feePayments.tenantId, tenant.id)))
+    .limit(1);
+  if (!row) return null;
+  const { p, student, fee, className, via } = row;
+  return {
+    kind: "receipt",
+    title: "Fee Receipt",
+    number: p.receiptNumber ?? "-",
+    date: p.date,
+    partyLabel: "Received from",
+    party: student.fullName,
+    subject: [student.admissionNumber ? `#${student.admissionNumber}` : null, className].filter(Boolean).join(" · "),
+    lines: [{ label: fee ?? "Fee", amount: p.amount }],
+    total: p.amount,
+    via,
+    note: p.note,
+    phone: student.parentPhone,
+    backHref: "/madrasa/fees",
+  };
+}
+
 const loaders: Record<string, (id: string) => Promise<ReceiptData | null>> = {
   rent: rentReceipt,
   salary: salarySlip,
   collection: collectionReceipt,
   subscription: subscriptionReceipt,
+  fee: feeReceipt,
 };
 
 export async function loadReceipt(type: string, id: string) {
