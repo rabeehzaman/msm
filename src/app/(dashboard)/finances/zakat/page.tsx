@@ -1,13 +1,15 @@
 import { getFunds, getIncomeEntries, getExpenseEntries } from "@/lib/queries/finance";
+import { getActiveAccounts } from "@/lib/queries/accounts";
 import { ZakatClient } from "./client";
 
 export const dynamic = "force-dynamic";
 
 export default async function ZakatPage() {
-  const [funds, allIncome, allExpenses] = await Promise.all([
+  const [funds, allIncome, allExpenses, accounts] = await Promise.all([
     getFunds(),
     getIncomeEntries(),
     getExpenseEntries(),
+    getActiveAccounts(),
   ]);
 
   const zakatFund = funds.find((f) => f.type === "zakat") || null;
@@ -25,6 +27,7 @@ export default async function ZakatPage() {
       zakatFund={zakatFund}
       income={zakatIncome}
       expenses={zakatExpenses}
+      accounts={accounts}
     />
   );
 }

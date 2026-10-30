@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Search, Handshake, IndianRupee, TrendingUp, AlertTriangle, Loader2 } from "lucide-react";
-import { createExpenseEntry } from "@/lib/actions/finance";
+import { recordFundPayment } from "@/lib/actions/expenses";
+import { AccountPicker, type AccountOption } from "@/components/money/form";
 import { toast } from "sonner";
 
 type ExpenseEntry = {
@@ -37,9 +38,11 @@ type Fund = {
 export function QardHasanClient({
   qardFund,
   disbursements,
+  accounts,
 }: {
   qardFund: Fund | null;
   disbursements: ExpenseEntry[];
+  accounts: AccountOption[];
 }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -59,8 +62,12 @@ export function QardHasanClient({
       if (qardFund) {
         formData.set("fundId", qardFund.id);
       }
-      formData.set("category", "welfare");
-      await createExpenseEntry(formData);
+      formData.set("category", "Qard Hasan Loan");
+      const result = await recordFundPayment(formData);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
       toast.success("Qard Hasan loan recorded");
       setOpen(false);
     } catch {
@@ -104,6 +111,7 @@ export function QardHasanClient({
                   <label className="text-sm font-medium">Purpose / Details</label>
                   <Textarea name="description" placeholder="Explain the purpose..." rows={2} />
                 </div>
+                <AccountPicker accounts={accounts} label="Paid via" />
                 <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-950/20">
                   <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Shariah Compliance Note</p>
                   <p className="text-xs text-yellow-700 dark:text-yellow-300">This is a Qard Hasan (benevolent loan). Zero interest will be charged. Only the principal amount is repayable.</p>

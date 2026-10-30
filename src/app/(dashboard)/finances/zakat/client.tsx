@@ -19,7 +19,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Calculator, Loader2 } from "lucide-react";
-import { createExpenseEntry } from "@/lib/actions/finance";
+import { recordFundPayment } from "@/lib/actions/expenses";
+import { AccountPicker, type AccountOption } from "@/components/money/form";
 import { toast } from "sonner";
 
 type IncomeEntry = {
@@ -50,10 +51,12 @@ export function ZakatClient({
   zakatFund,
   income,
   expenses,
+  accounts,
 }: {
   zakatFund: Fund | null;
   income: IncomeEntry[];
   expenses: ExpenseEntry[];
+  accounts: AccountOption[];
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -68,8 +71,12 @@ export function ZakatClient({
       if (zakatFund) {
         formData.set("fundId", zakatFund.id);
       }
-      formData.set("category", "welfare");
-      await createExpenseEntry(formData);
+      formData.set("category", "Zakat Distribution");
+      const result = await recordFundPayment(formData);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
       toast.success("Zakat distribution recorded");
       setOpen(false);
     } catch {
@@ -163,6 +170,7 @@ export function ZakatClient({
                     <label className="text-sm font-medium">Description</label>
                     <Textarea name="description" placeholder="Details..." rows={2} />
                   </div>
+                  <AccountPicker accounts={accounts} label="Paid via" />
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
