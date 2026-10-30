@@ -1,9 +1,9 @@
 "use server";
 
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { cashAccounts, cashTransfers } from "@/db/schema";
+import { cashAccounts, cashTransfers, ledgerEntries } from "@/db/schema";
 import { requireAdmin, requireEntry } from "@/lib/auth/guard";
 import { parseAmount, parseDate, parseId, parseOptionalAmount, requiredText, run, text, UserError } from "@/lib/money/action";
 import { postLedger, removeLedger, writeAudit } from "@/lib/money/ledger";
@@ -28,6 +28,7 @@ export async function saveAccount(formData: FormData) {
           .select()
           .from(cashAccounts)
           .where(and(eq(cashAccounts.id, id), eq(cashAccounts.tenantId, actor.tenantId)))
+          .for("update")
           .limit(1);
         if (!old) throw new UserError("That account no longer exists.");
         const [row] = await tx
@@ -56,6 +57,7 @@ export async function setAccountActive(id: string, isActive: boolean) {
         .select()
         .from(cashAccounts)
         .where(and(eq(cashAccounts.id, id), eq(cashAccounts.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That account no longer exists.");
       if (!isActive) {
@@ -64,6 +66,15 @@ export async function setAccountActive(id: string, isActive: boolean) {
           .from(cashAccounts)
           .where(and(eq(cashAccounts.tenantId, actor.tenantId), eq(cashAccounts.isActive, true), ne(cashAccounts.id, id)));
         if (others.length === 0) throw new UserError("At least one account must stay active.");
+        const [moved] = await tx
+          .select({
+            total: sql<string>`coalesce(sum(case when ${ledgerEntries.direction} = 'in' then ${ledgerEntries.amount} else -${ledgerEntries.amount} end), 0)`,
+          })
+          .from(ledgerEntries)
+          .where(eq(ledgerEntries.accountId, id));
+        if (Math.round((Number(old.openingBalance) + Number(moved.total)) * 100) !== 0) {
+          throw new UserError("This account still holds money. Transfer it out before hiding the account.");
+        }
       }
       await tx
         .update(cashAccounts)
@@ -108,6 +119,7 @@ export async function deleteTransfer(id: string) {
         .select()
         .from(cashTransfers)
         .where(and(eq(cashTransfers.id, id), eq(cashTransfers.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That transfer no longer exists.");
       await removeLedger(tx, "transfer", id);

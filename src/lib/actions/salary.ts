@@ -39,7 +39,7 @@ export async function saveStaff(formData: FormData) {
     };
     await db.transaction(async (tx) => {
       if (id) {
-        const [old] = await tx.select().from(staff).where(and(eq(staff.id, id), eq(staff.tenantId, actor.tenantId))).limit(1);
+        const [old] = await tx.select().from(staff).where(and(eq(staff.id, id), eq(staff.tenantId, actor.tenantId))).for("update").limit(1);
         if (!old) throw new UserError("That staff member no longer exists.");
         const [row] = await tx
           .update(staff)
@@ -163,6 +163,7 @@ export async function updateSalaryPayment(formData: FormData) {
         .from(salaryPayments)
         .innerJoin(staff, eq(salaryPayments.staffId, staff.id))
         .where(and(eq(salaryPayments.id, id), eq(salaryPayments.tenantId, actor.tenantId)))
+        .for("update", { of: salaryPayments })
         .limit(1);
       if (!old) throw new UserError("That payment no longer exists.");
       const [row] = await tx
@@ -194,6 +195,7 @@ export async function deleteSalaryPayment(id: string) {
         .select()
         .from(salaryPayments)
         .where(and(eq(salaryPayments.id, id), eq(salaryPayments.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That payment no longer exists.");
       await removeLedger(tx, "salary", id);
@@ -281,6 +283,7 @@ export async function deleteAllowance(id: string) {
         .select()
         .from(ramadanAllowances)
         .where(and(eq(ramadanAllowances.id, id), eq(ramadanAllowances.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That allowance no longer exists.");
       const [paid] = await tx

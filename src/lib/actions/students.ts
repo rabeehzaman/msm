@@ -38,7 +38,7 @@ export async function saveStudent(formData: FormData) {
     };
     await db.transaction(async (tx) => {
       if (id) {
-        const [old] = await tx.select().from(students).where(and(eq(students.id, id), eq(students.tenantId, actor.tenantId))).limit(1);
+        const [old] = await tx.select().from(students).where(and(eq(students.id, id), eq(students.tenantId, actor.tenantId))).for("update").limit(1);
         if (!old) throw new UserError("That student no longer exists.");
         const [row] = await tx
           .update(students)
@@ -59,7 +59,7 @@ export async function deleteStudent(id: string) {
   return run(async () => {
     const { actor } = await requireAdmin();
     await db.transaction(async (tx) => {
-      const [old] = await tx.select().from(students).where(and(eq(students.id, id), eq(students.tenantId, actor.tenantId))).limit(1);
+      const [old] = await tx.select().from(students).where(and(eq(students.id, id), eq(students.tenantId, actor.tenantId))).for("update").limit(1);
       if (!old) throw new UserError("That student no longer exists.");
       // Deleting would cascade into fee payments and leave the cash book wrong.
       const [paid] = await tx
@@ -86,21 +86,24 @@ export async function saveRegister(classId: string, date: string, absentIds: str
       .where(and(eq(students.tenantId, actor.tenantId), eq(students.classId, id), eq(students.status, "active")));
     if (people.length === 0) throw new UserError("This class has no students.");
     const absent = new Set(absentIds);
-    await db
-      .insert(studentAttendance)
-      .values(
-        people.map((s) => ({
-          tenantId: actor.tenantId,
-          studentId: s.id,
-          classId: id,
-          date: day,
-          status: absent.has(s.id) ? ("absent" as const) : ("present" as const),
-        })),
-      )
-      .onConflictDoUpdate({
-        target: [studentAttendance.studentId, studentAttendance.date],
-        set: { status: sql`excluded.status`, classId: id },
-      });
+    await db.transaction(async (tx) => {
+      await tx
+        .insert(studentAttendance)
+        .values(
+          people.map((s) => ({
+            tenantId: actor.tenantId,
+            studentId: s.id,
+            classId: id,
+            date: day,
+            status: absent.has(s.id) ? ("absent" as const) : ("present" as const),
+          })),
+        )
+        .onConflictDoUpdate({
+          target: [studentAttendance.studentId, studentAttendance.date],
+          set: { status: sql`excluded.status`, classId: id },
+        });
+      await writeAudit(tx, actor, "update", "student_attendance", null, null, { classId: id, date: day, absent: absentIds });
+    });
     revalidatePath("/madrasa/attendance");
   });
 }
@@ -186,6 +189,7 @@ export async function deleteFeePayment(id: string) {
         .select()
         .from(feePayments)
         .where(and(eq(feePayments.id, id), eq(feePayments.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That payment no longer exists.");
       await removeLedger(tx, "fee", id);

@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { funds } from "@/db/schema";
 import type { Tx } from "./ledger";
 
@@ -14,6 +14,7 @@ export async function fundIdByName(tx: Tx, tenantId: string, name: string) {
     .select({ id: funds.id })
     .from(funds)
     .where(and(eq(funds.tenantId, tenantId), eq(funds.type, "general")))
+    .orderBy(asc(funds.createdAt))
     .limit(1);
   if (fallback) return fallback.id;
   const [created] = await tx

@@ -151,6 +151,7 @@ export async function updateTenancy(formData: FormData) {
         .select()
         .from(roomTenancies)
         .where(and(eq(roomTenancies.id, id), eq(roomTenancies.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That tenant no longer exists.");
       const [row] = await tx
@@ -184,6 +185,7 @@ export async function endTenancy(formData: FormData) {
         .select()
         .from(roomTenancies)
         .where(and(eq(roomTenancies.id, id), eq(roomTenancies.tenantId, actor.tenantId), isNull(roomTenancies.endDate)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That tenant no longer exists.");
       if (endDate < old.startDate) throw new UserError("The end date cannot be before the start date.");
@@ -319,6 +321,7 @@ export async function updateRentPayment(formData: FormData) {
         .select()
         .from(rentPayments)
         .where(and(eq(rentPayments.id, id), eq(rentPayments.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That payment no longer exists.");
       const label = await roomName(tx, actor.tenantId, old.roomId);
@@ -358,6 +361,7 @@ export async function deleteRentPayment(id: string) {
         .select()
         .from(rentPayments)
         .where(and(eq(rentPayments.id, id), eq(rentPayments.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That payment no longer exists.");
       await removeLedger(tx, "rent", id);

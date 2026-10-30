@@ -11,7 +11,9 @@ import {
   parseAmount, parseDate, parseId, requiredText, run, text, UserError,
 } from "@/lib/money/action";
 import { fundIdByName } from "@/lib/money/funds";
-import { nextReceiptNumber, postLedger, removeLedger, replaceLedger, writeAudit, type Tx } from "@/lib/money/ledger";
+import {
+  nextReceiptNumber, postLedger, removeLedger, renameLedgerCategory, replaceLedger, writeAudit, type Tx,
+} from "@/lib/money/ledger";
 import { receiptUsed } from "@/lib/queries/collections";
 
 function refresh() {
@@ -66,6 +68,7 @@ export async function saveCollection(formData: FormData) {
           .select()
           .from(incomeEntries)
           .where(and(eq(incomeEntries.id, id), eq(incomeEntries.tenantId, actor.tenantId)))
+          .for("update")
           .limit(1);
         if (!old) throw new UserError("That entry no longer exists.");
         const receiptNumber = text(formData.get("receiptNumber")) ?? old.receiptNumber;
@@ -115,6 +118,7 @@ export async function deleteCollection(id: string) {
         .select()
         .from(incomeEntries)
         .where(and(eq(incomeEntries.id, id), eq(incomeEntries.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That entry no longer exists.");
       await removeLedger(tx, "collection", id);
@@ -147,6 +151,7 @@ export async function saveFriday(formData: FormData) {
           .select()
           .from(fridayCollections)
           .where(and(eq(fridayCollections.id, id), eq(fridayCollections.tenantId, actor.tenantId)))
+          .for("update")
           .limit(1);
         if (!old) throw new UserError("That entry no longer exists.");
         const [row] = await tx
@@ -180,6 +185,7 @@ export async function deleteFriday(id: string) {
         .select()
         .from(fridayCollections)
         .where(and(eq(fridayCollections.id, id), eq(fridayCollections.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That entry no longer exists.");
       await removeLedger(tx, "friday", id);
@@ -246,6 +252,7 @@ export async function deleteSubscriptionPayment(id: string) {
         .select()
         .from(subscriptionPayments)
         .where(and(eq(subscriptionPayments.id, id), eq(subscriptionPayments.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That payment no longer exists.");
       await removeLedger(tx, "subscription", id);
@@ -263,23 +270,40 @@ export async function saveCollectionCategory(formData: FormData) {
     const { actor } = await requireAdmin();
     const id = text(formData.get("id"));
     const name = requiredText(formData.get("name"), "Name");
+    const fundValue = text(formData.get("fundId"));
     await db.transaction(async (tx) => {
+      const [chosen] = fundValue
+        ? await tx
+            .select({ id: funds.id })
+            .from(funds)
+            .where(and(eq(funds.id, fundValue), eq(funds.tenantId, actor.tenantId)))
+            .limit(1)
+        : [];
+      const fundId = chosen?.id ?? (await fundIdByName(tx, actor.tenantId, "General Fund"));
       if (id) {
+        const [old] = await tx
+          .select()
+          .from(collectionCategories)
+          .where(and(eq(collectionCategories.id, id), eq(collectionCategories.tenantId, actor.tenantId)))
+          .for("update")
+          .limit(1);
+        if (!old) throw new UserError("Please select a category.");
         const [row] = await tx
           .update(collectionCategories)
-          .set({ name, isActive: formData.getAll("isActive").includes("on"), updatedAt: new Date() })
-          .where(and(eq(collectionCategories.id, id), eq(collectionCategories.tenantId, actor.tenantId)))
+          .set({ name, fundId, isActive: formData.getAll("isActive").includes("on"), updatedAt: new Date() })
+          .where(eq(collectionCategories.id, id))
           .returning();
-        await writeAudit(tx, actor, "update", "collection_categories", id, null, row);
+        // Keeps old and new entries together in the reports.
+        await tx
+          .update(incomeEntries)
+          .set({ category: name })
+          .where(and(eq(incomeEntries.tenantId, actor.tenantId), eq(incomeEntries.categoryId, id)));
+        await renameLedgerCategory(tx, actor.tenantId, "income", old.name, name);
+        await writeAudit(tx, actor, "update", "collection_categories", id, old, row);
       } else {
-        const [general] = await tx
-          .select({ id: funds.id })
-          .from(funds)
-          .where(and(eq(funds.tenantId, actor.tenantId), eq(funds.name, "General Fund")))
-          .limit(1);
         const [row] = await tx
           .insert(collectionCategories)
-          .values({ tenantId: actor.tenantId, name, fundId: general?.id })
+          .values({ tenantId: actor.tenantId, name, fundId })
           .returning();
         await writeAudit(tx, actor, "create", "collection_categories", row.id, null, row);
       }

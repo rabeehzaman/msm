@@ -26,7 +26,7 @@ export type LedgerInput = {
 // Each money record posts here inside the same database transaction as the record itself,
 // so a record and its cash/bank movement always succeed or fail together.
 export async function postLedger(tx: Tx, actor: Actor, input: LedgerInput) {
-  await assertAccount(tx, actor.tenantId, input.accountId);
+  await assertAccount(tx, actor.tenantId, input.accountId, input.date);
   await tx.insert(ledgerEntries).values({
     tenantId: actor.tenantId,
     ...input,
@@ -37,19 +37,19 @@ export async function postLedger(tx: Tx, actor: Actor, input: LedgerInput) {
 
 // Editing a record rewrites its ledger row, keeping who first entered it.
 export async function replaceLedger(tx: Tx, actor: Actor, input: LedgerInput) {
-  await assertAccount(tx, actor.tenantId, input.accountId);
-  const rows = await tx
+  const match = and(
+    eq(ledgerEntries.sourceType, input.sourceType),
+    eq(ledgerEntries.sourceId, input.sourceId),
+    eq(ledgerEntries.direction, input.direction),
+  );
+  const [existing] = await tx.select({ accountId: ledgerEntries.accountId }).from(ledgerEntries).where(match).limit(1);
+  // Posting a fresh line here could count the money twice, so an edit never creates one.
+  if (!existing) throw new UserError("This entry has no cash or bank line, so it cannot be edited.");
+  await assertAccount(tx, actor.tenantId, input.accountId, input.date, existing.accountId === input.accountId);
+  await tx
     .update(ledgerEntries)
     .set({ ...input, updatedBy: actor.userId, updatedByName: actor.name, updatedAt: new Date() })
-    .where(
-      and(
-        eq(ledgerEntries.sourceType, input.sourceType),
-        eq(ledgerEntries.sourceId, input.sourceId),
-        eq(ledgerEntries.direction, input.direction),
-      ),
-    )
-    .returning({ id: ledgerEntries.id });
-  if (rows.length === 0) await postLedger(tx, actor, input);
+    .where(match);
 }
 
 export async function removeLedger(tx: Tx, sourceType: string, sourceId: string) {
@@ -58,13 +58,26 @@ export async function removeLedger(tx: Tx, sourceType: string, sourceId: string)
     .where(and(eq(ledgerEntries.sourceType, sourceType), eq(ledgerEntries.sourceId, sourceId)));
 }
 
-async function assertAccount(tx: Tx, tenantId: string, accountId: string) {
+export async function renameLedgerCategory(tx: Tx, tenantId: string, kind: "income" | "expense", from: string, to: string) {
+  if (from === to) return;
+  await tx
+    .update(ledgerEntries)
+    .set({ category: to })
+    .where(and(eq(ledgerEntries.tenantId, tenantId), eq(ledgerEntries.kind, kind), eq(ledgerEntries.category, from)));
+}
+
+// A hidden account stays allowed for a record that is already on it.
+async function assertAccount(tx: Tx, tenantId: string, accountId: string, date: string, allowHidden = false) {
   const [account] = await tx
-    .select({ id: cashAccounts.id })
+    .select({ isActive: cashAccounts.isActive, openingDate: cashAccounts.openingDate })
     .from(cashAccounts)
-    .where(and(eq(cashAccounts.id, accountId), eq(cashAccounts.tenantId, tenantId), eq(cashAccounts.isActive, true)))
+    .where(and(eq(cashAccounts.id, accountId), eq(cashAccounts.tenantId, tenantId)))
     .limit(1);
-  if (!account) throw new UserError("Please select a Cash or Bank account.");
+  if (!account || (!account.isActive && !allowHidden)) throw new UserError("Please select a Cash or Bank account.");
+  // Money from before the opening date is already inside the opening balance.
+  if (date < account.openingDate) {
+    throw new UserError("This date is before the account's opening date. Change the date, or the account's opening date and balance.");
+  }
 }
 
 export async function writeAudit(

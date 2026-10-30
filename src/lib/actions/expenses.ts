@@ -11,7 +11,9 @@ import {
 } from "@/lib/money/action";
 import { postExpense, removePostedExpense } from "@/lib/money/expense";
 import { fundIdByName } from "@/lib/money/funds";
-import { nextReceiptNumber, postLedger, removeLedger, replaceLedger, writeAudit, type Tx } from "@/lib/money/ledger";
+import {
+  nextReceiptNumber, postLedger, removeLedger, renameLedgerCategory, replaceLedger, writeAudit, type Tx,
+} from "@/lib/money/ledger";
 
 function refresh() {
   revalidatePath("/finances", "layout");
@@ -66,6 +68,7 @@ export async function saveExpense(formData: FormData) {
           .select()
           .from(expenseEntries)
           .where(and(eq(expenseEntries.id, id), eq(expenseEntries.tenantId, actor.tenantId)))
+          .for("update")
           .limit(1);
         if (!old) throw new UserError("That expense no longer exists.");
         if (old.sourceType) throw new UserError("This expense came from a bill or maintenance entry. Change it there.");
@@ -115,6 +118,7 @@ export async function deleteExpense(id: string) {
         .select()
         .from(expenseEntries)
         .where(and(eq(expenseEntries.id, id), eq(expenseEntries.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That expense no longer exists.");
       if (old.sourceType) throw new UserError("This expense came from a bill or maintenance entry. Change it there.");
@@ -161,12 +165,25 @@ export async function saveExpenseCategory(formData: FormData) {
     const name = requiredText(formData.get("name"), "Name");
     await db.transaction(async (tx) => {
       if (id) {
+        const [old] = await tx
+          .select()
+          .from(expenseCategories)
+          .where(and(eq(expenseCategories.id, id), eq(expenseCategories.tenantId, actor.tenantId)))
+          .for("update")
+          .limit(1);
+        if (!old) throw new UserError("Please select a category.");
         const [row] = await tx
           .update(expenseCategories)
           .set({ name, isActive: formData.getAll("isActive").includes("on"), updatedAt: new Date() })
-          .where(and(eq(expenseCategories.id, id), eq(expenseCategories.tenantId, actor.tenantId)))
+          .where(eq(expenseCategories.id, id))
           .returning();
-        await writeAudit(tx, actor, "update", "expense_categories", id, null, row);
+        // Keeps old and new entries together in the reports.
+        await tx
+          .update(expenseEntries)
+          .set({ category: name })
+          .where(and(eq(expenseEntries.tenantId, actor.tenantId), eq(expenseEntries.categoryId, id)));
+        await renameLedgerCategory(tx, actor.tenantId, "expense", old.name, name);
+        await writeAudit(tx, actor, "update", "expense_categories", id, old, row);
       } else {
         const [row] = await tx.insert(expenseCategories).values({ tenantId: actor.tenantId, name }).returning();
         await writeAudit(tx, actor, "create", "expense_categories", row.id, null, row);
@@ -187,7 +204,6 @@ export async function saveBillAccount(formData: FormData) {
       name: requiredText(formData.get("name"), "Name"),
       consumerNumber: text(formData.get("consumerNumber")),
       categoryId: parseId(formData.get("categoryId"), "a category"),
-      notes: text(formData.get("notes")),
     };
     await db.transaction(async (tx) => {
       await categoryName(tx, actor.tenantId, values.categoryId);
@@ -223,6 +239,7 @@ export async function saveBill(formData: FormData) {
           .select()
           .from(bills)
           .where(and(eq(bills.id, id), eq(bills.tenantId, actor.tenantId)))
+          .for("update")
           .limit(1);
         if (!old) throw new UserError("That bill no longer exists.");
         if (old.paidDate) throw new UserError("This bill is already paid. Undo the payment first.");
@@ -256,7 +273,7 @@ export async function deleteBill(id: string) {
   return run(async () => {
     const { actor } = await requireAdmin();
     await db.transaction(async (tx) => {
-      const [old] = await tx.select().from(bills).where(and(eq(bills.id, id), eq(bills.tenantId, actor.tenantId))).limit(1);
+      const [old] = await tx.select().from(bills).where(and(eq(bills.id, id), eq(bills.tenantId, actor.tenantId))).for("update").limit(1);
       if (!old) throw new UserError("That bill no longer exists.");
       if (old.paidDate) throw new UserError("This bill is already paid. Undo the payment first.");
       await tx.delete(bills).where(eq(bills.id, id));
@@ -309,7 +326,7 @@ export async function undoBillPayment(id: string) {
   return run(async () => {
     const { actor } = await requireAdmin();
     await db.transaction(async (tx) => {
-      const [old] = await tx.select().from(bills).where(and(eq(bills.id, id), eq(bills.tenantId, actor.tenantId))).limit(1);
+      const [old] = await tx.select().from(bills).where(and(eq(bills.id, id), eq(bills.tenantId, actor.tenantId))).for("update").limit(1);
       if (!old) throw new UserError("That bill no longer exists.");
       if (!old.expenseId) throw new UserError("This bill is not paid.");
       await tx
@@ -350,6 +367,7 @@ export async function saveMaintenance(formData: FormData) {
           .select()
           .from(maintenanceLogs)
           .where(and(eq(maintenanceLogs.id, id), eq(maintenanceLogs.tenantId, actor.tenantId)))
+          .for("update")
           .limit(1);
         if (!old) throw new UserError("That entry no longer exists.");
         if (old.expenseId && Number(old.cost) !== Number(values.cost)) {
@@ -381,6 +399,7 @@ export async function deleteMaintenance(id: string) {
         .select()
         .from(maintenanceLogs)
         .where(and(eq(maintenanceLogs.id, id), eq(maintenanceLogs.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That entry no longer exists.");
       if (old.expenseId) throw new UserError("This work is already paid. Undo the payment first.");
@@ -442,6 +461,7 @@ export async function undoMaintenancePayment(id: string) {
         .select()
         .from(maintenanceLogs)
         .where(and(eq(maintenanceLogs.id, id), eq(maintenanceLogs.tenantId, actor.tenantId)))
+        .for("update")
         .limit(1);
       if (!old) throw new UserError("That entry no longer exists.");
       if (!old.expenseId) throw new UserError("This work is not paid.");

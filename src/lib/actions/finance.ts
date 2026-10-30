@@ -4,10 +4,10 @@ import { db } from "@/db";
 import { subscriptions, funds } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { requireEntry } from "@/lib/auth/guard";
+import { requireAdmin, requireEntry } from "@/lib/auth/guard";
 
 export async function createFund(formData: FormData) {
-  const { tenant } = await requireEntry();
+  const { tenant } = await requireAdmin();
   await db.insert(funds).values({
     tenantId: tenant.id,
     type: formData.get("type") as typeof funds.$inferInsert.type,
