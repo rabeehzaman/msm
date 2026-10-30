@@ -1,277 +1,231 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Pencil, Phone, Plus, Search, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import {
-  Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Plus, Search, Trash2, Loader2 } from "lucide-react";
-import { createStudent, deleteStudent } from "@/lib/actions/madrasa";
-import { toast } from "sonner";
-import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
+import { ConfirmButton } from "@/components/money/confirm-button";
+import { Field, NativeSelect, SaveButton, useAction } from "@/components/money/form";
+import { PageHeader, StatCard } from "@/components/money/page-header";
+import { PhotoButton, PhotoField } from "@/components/money/photo";
+import { deleteStudent, saveStudent } from "@/lib/actions/students";
+import { useSession } from "@/lib/auth/session";
+import { formatDate, todayIST } from "@/lib/format";
+import { useT } from "@/lib/i18n/client";
+import { LEFT_STATUSES } from "@/lib/madrasa/fees";
 
 type Student = {
   id: string;
   fullName: string;
+  admissionNumber: string | null;
+  gender: string | null;
+  guardianName: string | null;
+  houseAddress: string | null;
+  photoPath: string | null;
   dateOfBirth: string | null;
   parentPhone: string | null;
-  status: string | null;
+  status: string;
   admissionDate: string | null;
   classId: string | null;
   className: string | null;
-  classLevel: number | null;
 };
 
-type ClassInfo = {
-  id: string;
-  name: string;
-  level: number | null;
-};
+type ClassInfo = { id: string; name: string; section?: string | null };
 
-function getInitials(name: string) {
-  return name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
-}
-
-export function StudentsClient({
-  students,
-  classes,
-}: {
-  students: Student[];
-  classes: ClassInfo[];
-}) {
+export function StudentsClient({ students, classes }: { students: Student[]; classes: ClassInfo[] }) {
+  const t = useT();
+  const router = useRouter();
+  const { canEnter, isAdmin } = useSession();
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("all");
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-
-  const filtered = students.filter((s) => {
-    const matchesSearch =
-      !search ||
-      s.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      (s.parentPhone && s.parentPhone.includes(search));
-    const matchesClass = classFilter === "all" || s.classId === classFilter;
-    return matchesSearch && matchesClass;
-  });
-
-  const activeCount = students.filter(s => s.status === "active").length;
-
-  async function handleCreate(formData: FormData) {
-    setLoading(true);
-    try {
-      await createStudent(formData);
-      toast.success("Student enrolled successfully");
-      setOpen(false);
-    } catch {
-      toast.error("Failed to enroll student");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleDelete() {
-    if (!deleteTarget) return;
-    setDeletingId(deleteTarget.id);
-    try {
-      await deleteStudent(deleteTarget.id);
-      toast.success("Student removed");
-      setDeleteTarget(null);
-    } catch {
-      toast.error("Failed to remove student");
-    } finally {
-      setDeletingId(null);
-    }
-  }
+  const [editing, setEditing] = useState<Student | "new" | null>(null);
+  const remove = useAction(deleteStudent, { success: "Student deleted", onDone: () => router.refresh() });
+  const q = search.toLowerCase();
+  const shown = students.filter(
+    (s) =>
+      (classFilter === "all" || s.classId === classFilter) &&
+      (s.fullName.toLowerCase().includes(q) || (s.admissionNumber ?? "").toLowerCase().includes(q)),
+  );
+  const active = students.filter((s) => !LEFT_STATUSES.includes(s.status)).length;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Students</h1>
-          <p className="page-subtitle">Manage Madrasa student enrollment and profiles</p>
+      <PageHeader title="Students" subtitle="Admission number, class, guardian and contact details.">
+        {canEnter && (
+          <Button onClick={() => setEditing("new")}>
+            <Plus className="size-4" />
+            {t("Add student")}
+          </Button>
+        )}
+      </PageHeader>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard label="Active" value={String(active)} />
+        <StatCard label="Left" value={String(students.length - active)} />
+        <StatCard label="Classes" value={String(classes.length)} />
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Input
+            aria-label={t("Search student")}
+            placeholder={t("Search student")}
+            className="pl-9"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button />}><Plus /> New Admission</DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>New Student Admission</DialogTitle>
-              <DialogDescription>Enroll a new student in the Madrasa</DialogDescription>
-            </DialogHeader>
-            <form action={handleCreate}>
-              <div className="flex flex-col gap-4 py-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">Full Name *</label>
-                  <Input name="fullName" placeholder="Student full name" required />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">Class</label>
-                  <Select name="classId" disabled={classes.length === 0}>
-                    <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {classes.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  {classes.length === 0 && (
-                    <p className="text-muted-foreground text-xs">
-                      Create a class first to assign this student.
+        <NativeSelect aria-label={t("Class")} className="sm:w-52" value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
+          <option value="all">{t("All classes")}</option>
+          {classes.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+              {c.section ? ` ${c.section}` : ""}
+            </option>
+          ))}
+        </NativeSelect>
+      </div>
+
+      {shown.length === 0 ? (
+        <Card>
+          <CardContent>
+            <EmptyState message={t("No students found.")} />
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {shown.map((s) => (
+            <Card key={s.id}>
+              <CardContent className="flex flex-col gap-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-heading truncate text-lg font-semibold">{s.fullName}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {[s.admissionNumber ? `#${s.admissionNumber}` : null, s.className].filter(Boolean).join(" · ")}
                     </p>
+                  </div>
+                  <Badge variant={LEFT_STATUSES.includes(s.status) ? "secondary" : "default"}>
+                    {t(LEFT_STATUSES.includes(s.status) ? "Left" : "Active")}
+                  </Badge>
+                </div>
+                {s.guardianName && <p className="text-sm">{s.guardianName}</p>}
+                {s.houseAddress && <p className="text-muted-foreground text-sm">{s.houseAddress}</p>}
+                <p className="text-muted-foreground text-xs">
+                  {s.dateOfBirth ? `${t("Born")} ${formatDate(s.dateOfBirth)} · ` : ""}
+                  {t("Admitted")} {formatDate(s.admissionDate)}
+                </p>
+                <div className="flex items-center gap-1">
+                  {s.parentPhone && (
+                    <Button variant="ghost" size="sm" render={<a href={`tel:${s.parentPhone}`} />}>
+                      <Phone className="size-3.5" />
+                      {s.parentPhone}
+                    </Button>
+                  )}
+                  {s.photoPath && <PhotoButton path={s.photoPath} />}
+                  {isAdmin && (
+                    <>
+                      <Button variant="ghost" size="icon" className="size-8" aria-label={t("Edit")} onClick={() => setEditing(s)}>
+                        <Pencil className="size-4" />
+                      </Button>
+                      <ConfirmButton
+                        title="Delete this student?"
+                        description="This cannot be undone. If they have stopped coming, mark them as Left instead."
+                        onConfirm={() => remove.call(s.id)}
+                        trigger={
+                          <Button variant="ghost" size="icon" className="size-8" aria-label={t("Delete")}>
+                            <Trash2 className="size-4" />
+                          </Button>
+                        }
+                      />
+                    </>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">Date of Birth</label>
-                    <Input type="date" name="dateOfBirth" />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">Parent Phone</label>
-                    <Input name="parentPhone" placeholder="+91 94567 12345" />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={loading}>{loading ? <Loader2 className="size-4 animate-spin" /> : <Plus />} {loading ? "Saving..." : "Enroll Student"}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent><p className="text-muted-foreground text-sm">Total Enrolled</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{students.length}</p></CardContent></Card>
-        <Card><CardContent><p className="text-muted-foreground text-sm">Active</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{activeCount}</p></CardContent></Card>
-        <Card><CardContent><p className="text-muted-foreground text-sm">Classes</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{classes.length}</p></CardContent></Card>
-        <Card><CardContent><p className="text-muted-foreground text-sm">Showing</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{filtered.length}</p></CardContent></Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Student Directory</CardTitle>
-              <CardDescription>All enrolled students</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex flex-col gap-4 sm:flex-row">
-            <div className="relative flex-1">
-              <Search className="text-muted-foreground absolute left-3 top-1/2 size-4 -translate-y-1/2" />
-              <Input placeholder="Search by name or phone..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
-            </div>
-            <Select value={classFilter} onValueChange={(v) => setClassFilter(v ?? "all")}>
-              <SelectTrigger className="w-[150px]"><SelectValue placeholder="Class" /></SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="all">All Classes</SelectItem>
-                  {classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {classes.length === 0 ? (
-            <div className="empty-state">
-              <p className="text-muted-foreground text-lg">No classes created yet</p>
-              <p className="text-muted-foreground text-sm">
-                Create classes before enrolling students.
-              </p>
-              <Link href="/madrasa/classes" className="mt-4">
-                <Button>
-                  <Plus />
-                  Create Class
-                </Button>
-              </Link>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="empty-state">
-              <p className="text-muted-foreground text-lg">No students found</p>
-              <p className="text-muted-foreground text-sm">
-                {students.length === 0 ? "Enroll your first student to get started." : "Try adjusting your search or filters."}
-              </p>
-            </div>
-          ) : (
-            <div className="table-shell">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>DOB</TableHead>
-                    <TableHead>Parent Phone</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((s) => (
-                    <TableRow key={s.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="size-8">
-                            <AvatarFallback className="text-xs">{getInitials(s.fullName)}</AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{s.fullName}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell><Badge variant="outline">{s.className || "Unassigned"}</Badge></TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{s.dateOfBirth || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{s.parentPhone || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant={s.status === "active" ? "default" : "secondary"}>{s.status || "active"}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm" onClick={() => setDeleteTarget({ id: s.id, name: s.fullName })} disabled={deletingId === s.id}>
-                          {deletingId === s.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 text-destructive" />}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Student</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove &ldquo;{deleteTarget?.name}&rdquo; from the Madrasa? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={!!deletingId}>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={!!deletingId}>
-              {deletingId ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-              {deletingId ? "Removing..." : "Remove"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {editing && <StudentDialog student={editing === "new" ? null : editing} classes={classes} onClose={() => setEditing(null)} />}
     </div>
+  );
+}
+
+function StudentDialog({ student, classes, onClose }: { student: Student | null; classes: ClassInfo[]; onClose: () => void }) {
+  const t = useT();
+  const router = useRouter();
+  const save = useAction(saveStudent, {
+    success: "Student saved",
+    onDone: () => {
+      onClose();
+      router.refresh();
+    },
+  });
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{t(student ? "Edit student" : "Add student")}</DialogTitle>
+        </DialogHeader>
+        <form action={save.call} className="flex flex-col gap-4">
+          {student && <input type="hidden" name="id" value={student.id} />}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("Name")}>
+              <Input name="fullName" defaultValue={student?.fullName} required />
+            </Field>
+            <Field label={t("Admission number")}>
+              <Input name="admissionNumber" defaultValue={student?.admissionNumber ?? ""} />
+            </Field>
+            <Field label={t("Class / division")}>
+              <NativeSelect name="classId" defaultValue={student?.classId ?? ""}>
+                <option value="">{t("None")}</option>
+                {classes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                    {c.section ? ` ${c.section}` : ""}
+                  </option>
+                ))}
+              </NativeSelect>
+            </Field>
+            <Field label={t("Gender")}>
+              <NativeSelect name="gender" defaultValue={student?.gender ?? ""}>
+                <option value="">{t("Select")}</option>
+                <option value="male">{t("Male")}</option>
+                <option value="female">{t("Female")}</option>
+              </NativeSelect>
+            </Field>
+            <Field label={t("Date of birth")}>
+              <Input name="dateOfBirth" type="date" defaultValue={student?.dateOfBirth ?? ""} />
+            </Field>
+            <Field label={t("Admission date")}>
+              <Input name="admissionDate" type="date" defaultValue={student?.admissionDate ?? todayIST()} />
+            </Field>
+            <Field label={t("Father / guardian name")}>
+              <Input name="guardianName" defaultValue={student?.guardianName ?? ""} />
+            </Field>
+            <Field label={t("Phone")}>
+              <Input name="parentPhone" type="tel" inputMode="tel" defaultValue={student?.parentPhone ?? ""} />
+            </Field>
+            <Field label={t("House / address")}>
+              <Input name="houseAddress" defaultValue={student?.houseAddress ?? ""} />
+            </Field>
+            <Field label={t("Status")}>
+              <NativeSelect name="status" defaultValue={student && LEFT_STATUSES.includes(student.status) ? "withdrawn" : "active"}>
+                <option value="active">{t("Active")}</option>
+                <option value="withdrawn">{t("Left")}</option>
+              </NativeSelect>
+            </Field>
+          </div>
+          <PhotoField folder="students" label={t(student?.photoPath ? "Replace the photo" : "Photo")} />
+          <SaveButton pending={save.pending} />
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

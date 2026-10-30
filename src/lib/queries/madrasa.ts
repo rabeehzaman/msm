@@ -9,6 +9,11 @@ export async function getStudents() {
     .select({
       id: students.id,
       fullName: students.fullName,
+      admissionNumber: students.admissionNumber,
+      gender: students.gender,
+      guardianName: students.guardianName,
+      houseAddress: students.houseAddress,
+      photoPath: students.photoPath,
       dateOfBirth: students.dateOfBirth,
       parentPhone: students.parentPhone,
       status: students.status,
@@ -58,14 +63,6 @@ export async function getExams() {
     .leftJoin(classes, eq(exams.classId, classes.id))
     .where(eq(exams.tenantId, tenant.id))
     .orderBy(desc(exams.date));
-}
-
-export async function getStudentsByClass(classId: string) {
-  return db
-    .select()
-    .from(students)
-    .where(eq(students.classId, classId))
-    .orderBy(students.fullName);
 }
 
 export async function getMadrasaStats() {

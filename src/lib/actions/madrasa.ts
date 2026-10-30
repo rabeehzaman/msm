@@ -1,48 +1,9 @@
 "use server";
 
 import { db } from "@/db";
-import { students, studentAttendance, exams, classes, teachers } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { exams, classes, teachers } from "@/db/schema";
 import { revalidatePath } from "next/cache";
-import { requireAdmin, requireEntry } from "@/lib/auth/guard";
-
-export async function createStudent(formData: FormData) {
-  const { tenant } = await requireEntry();
-  await db.insert(students).values({
-    tenantId: tenant.id,
-    fullName: formData.get("fullName") as string,
-    classId: (formData.get("classId") as string) || null,
-    dateOfBirth: (formData.get("dateOfBirth") as string) || null,
-    parentPhone: (formData.get("parentPhone") as string) || null,
-    admissionDate: new Date().toISOString().split("T")[0],
-    status: "active",
-  });
-  revalidatePath("/madrasa/students");
-  revalidatePath("/madrasa");
-  return { success: true };
-}
-
-export async function deleteStudent(id: string) {
-  await requireAdmin();
-  await db.delete(students).where(eq(students.id, id));
-  revalidatePath("/madrasa/students");
-  return { success: true };
-}
-
-export async function saveAttendance(records: { studentId: string; classId: string; date: string; status: "present" | "absent" | "late" | "excused" }[]) {
-  const { tenant } = await requireEntry();
-  for (const r of records) {
-    await db.insert(studentAttendance).values({
-      tenantId: tenant.id,
-      studentId: r.studentId,
-      classId: r.classId,
-      date: r.date,
-      status: r.status,
-    });
-  }
-  revalidatePath("/madrasa/attendance");
-  return { success: true };
-}
+import { requireEntry } from "@/lib/auth/guard";
 
 export async function createExam(formData: FormData) {
   const { tenant } = await requireEntry();

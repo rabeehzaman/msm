@@ -1,229 +1,123 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { CheckCircle2, XCircle, Clock, AlertTriangle, Save, Loader2, BookOpen } from "lucide-react";
-import { saveAttendance } from "@/lib/actions/madrasa";
-import { toast } from "sonner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Check, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/empty-state";
+import { Field, NativeSelect, useAction } from "@/components/money/form";
+import { PageHeader, StatCard } from "@/components/money/page-header";
+import { saveRegister } from "@/lib/actions/students";
+import { useT } from "@/lib/i18n/client";
 
-type AttendanceStatus = "present" | "absent" | "late" | "excused";
-
-type Student = {
-  id: string;
-  fullName: string;
-  classId: string | null;
-  className: string | null;
-};
-
-type ClassInfo = {
-  id: string;
-  name: string;
-  level: number | null;
-};
-
-const statusConfig: Record<AttendanceStatus, { icon: typeof CheckCircle2; color: string; label: string }> = {
-  present: { icon: CheckCircle2, color: "text-green-500", label: "Present" },
-  absent: { icon: XCircle, color: "text-destructive", label: "Absent" },
-  late: { icon: Clock, color: "text-yellow-500", label: "Late" },
-  excused: { icon: AlertTriangle, color: "text-blue-500", label: "Excused" },
+type Register = {
+  students: { id: string; fullName: string; admissionNumber: string | null }[];
+  saved: boolean;
+  absent: string[];
 };
 
 export function AttendanceClient({
-  students,
   classes,
+  classId,
+  date,
+  register,
 }: {
-  students: Student[];
-  classes: ClassInfo[];
+  classes: { id: string; name: string; section: string | null }[];
+  classId: string;
+  date: string;
+  register: Register;
 }) {
-  const [selectedClass, setSelectedClass] = useState<string>(classes[0]?.id || "");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>({});
-  const [loading, setLoading] = useState(false);
+  const t = useT();
+  const router = useRouter();
+  const [absent, setAbsent] = useState(new Set(register.absent));
+  const save = useAction(saveRegister, { success: "Attendance saved", onDone: () => router.refresh() });
+  const total = register.students.length;
 
-  const classStudents = students.filter((s) => s.classId === selectedClass);
+  function go(nextClass: string, nextDate: string) {
+    router.push(`/madrasa/attendance?class=${nextClass}&date=${nextDate}`);
+  }
 
-  // Initialize attendance for current class students
-  const getStatus = (studentId: string): AttendanceStatus => {
-    return attendance[studentId] || "present";
-  };
-
-  const toggleStatus = (id: string) => {
-    const order: AttendanceStatus[] = ["present", "absent", "late", "excused"];
-    const current = getStatus(id);
-    const next = order[(order.indexOf(current) + 1) % order.length];
-    setAttendance((prev) => ({ ...prev, [id]: next }));
-  };
-
-  const counts = classStudents.reduce(
-    (acc, s) => {
-      const status = getStatus(s.id);
-      return { ...acc, [status]: (acc[status] || 0) + 1 };
-    },
-    {} as Record<string, number>
-  );
-
-  async function handleSave() {
-    if (!selectedClass || classStudents.length === 0) {
-      toast.error("No students to mark attendance for");
-      return;
-    }
-    setLoading(true);
-    try {
-      const records = classStudents.map((s) => ({
-        studentId: s.id,
-        classId: selectedClass,
-        date,
-        status: getStatus(s.id),
-      }));
-      await saveAttendance(records);
-      toast.success("Attendance saved successfully");
-    } catch {
-      toast.error("Failed to save attendance");
-    } finally {
-      setLoading(false);
-    }
+  function toggle(id: string) {
+    const next = new Set(absent);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setAbsent(next);
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Attendance</h1>
-          <p className="page-subtitle">Quick attendance marking - tap to toggle status</p>
-        </div>
-        <Button onClick={handleSave} disabled={loading || classes.length === 0}>
-          {loading ? <Loader2 className="size-4 animate-spin" /> : <Save />}
-          {loading ? "Saving..." : "Save Attendance"}
+      <PageHeader title="Attendance" subtitle="Everyone is Present by default. Tap a student to mark them Absent.">
+        <Button variant="outline" render={<Link href="/reports/attendance-monthly" />}>
+          {t("Monthly report")}
         </Button>
-      </div>
+      </PageHeader>
 
-      {/* Controls */}
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <Select value={selectedClass} onValueChange={(v) => setSelectedClass(v ?? "")} disabled={classes.length === 0}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select Class" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {classes.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-[200px]" />
-        <div className="ml-auto flex items-center gap-4">
-          {(["present", "absent", "late", "excused"] as AttendanceStatus[]).map((s) => {
-            const cfg = statusConfig[s];
-            return (
-              <div key={s} className="flex items-center gap-1.5">
-                <cfg.icon className={`size-4 ${cfg.color}`} />
-                <span className="text-sm font-medium">{counts[s] || 0}</span>
-              </div>
-            );
-          })}
-          <span className="text-muted-foreground text-sm">
-            Total: {classStudents.length}
-          </span>
-        </div>
-      </div>
-
-      {/* Attendance Grid */}
       <Card>
-        <CardHeader>
-          <CardTitle>{classes.find(c => c.id === selectedClass)?.name || "Select a class"} - Attendance</CardTitle>
-          <CardDescription>
-            Tap on a student&apos;s status to cycle through: Present → Absent → Late → Excused
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {classes.length === 0 ? (
-            <div className="empty-state">
-              <p className="text-muted-foreground text-lg">No classes created yet</p>
-              <p className="text-muted-foreground text-sm">Create classes first to start marking attendance.</p>
-              <Link href="/madrasa/classes" className="mt-4">
-                <Button>
-                  <BookOpen />
-                  Create Class
-                </Button>
-              </Link>
-            </div>
-          ) : classStudents.length === 0 ? (
-            <div className="empty-state">
-              <p className="text-muted-foreground text-lg">No students in this class</p>
-              <p className="text-muted-foreground text-sm">Enroll students in this class to mark attendance.</p>
-            </div>
-          ) : (
-            <div className="table-shell">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[80px]">#</TableHead>
-                    <TableHead>Student Name</TableHead>
-                    <TableHead className="w-[150px] text-center">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {classStudents.map((student, idx) => {
-                    const status = getStatus(student.id);
-                    const cfg = statusConfig[status];
-                    const Icon = cfg.icon;
-                    return (
-                      <TableRow key={student.id}>
-                        <TableCell className="font-mono text-sm">{idx + 1}</TableCell>
-                        <TableCell className="font-medium">{student.fullName}</TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className={`gap-2 ${cfg.color}`}
-                            onClick={() => toggleStatus(student.id)}
-                          >
-                            <Icon className="size-4" />
-                            {cfg.label}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+        <CardContent className="flex flex-wrap gap-3">
+          <Field label={t("Class")} className="w-full sm:w-56">
+            <NativeSelect value={classId} onChange={(e) => go(e.target.value, date)}>
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                  {c.section ? ` ${c.section}` : ""}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field label={t("Date")} className="w-full sm:w-44">
+            <Input type="date" value={date} onChange={(e) => e.target.value && go(classId, e.target.value)} />
+          </Field>
         </CardContent>
       </Card>
 
-      {/* Summary */}
-      <div className="grid gap-4 md:grid-cols-4">
-        {(["present", "absent", "late", "excused"] as AttendanceStatus[]).map((s) => {
-          const cfg = statusConfig[s];
-          const Icon = cfg.icon;
-          return (
-            <Card key={s}>
-              <CardContent className="flex items-center gap-4">
-                <div className="stat-icon">
-                  <Icon className={`size-5 ${cfg.color}`} />
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-sm capitalize">{cfg.label}</p>
-                  <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{counts[s] || 0}</p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="grid grid-cols-3 gap-3">
+        <StatCard label="Total" value={String(total)} />
+        <StatCard label="Present" value={String(total - absent.size)} />
+        <StatCard label="Absent" value={String(absent.size)} />
       </div>
+
+      <Card>
+        <CardContent className="flex flex-col gap-3">
+          {classes.length === 0 ? (
+            <EmptyState message={t("Add a class first.")} />
+          ) : total === 0 ? (
+            <EmptyState message={t("This class has no students.")} />
+          ) : (
+            <>
+              {register.saved && <Badge variant="secondary" className="self-start">{t("Already saved. Saving again replaces it.")}</Badge>}
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {register.students.map((s) => {
+                  const isAbsent = absent.has(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      aria-pressed={isAbsent}
+                      onClick={() => toggle(s.id)}
+                      className={`flex min-h-12 items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition-colors ${
+                        isAbsent ? "border-red-500/60 bg-red-500/10" : "border-emerald-500/40 bg-emerald-500/10"
+                      }`}
+                    >
+                      <span className="min-w-0 truncate font-medium">{s.fullName}</span>
+                      <span className={`flex shrink-0 items-center gap-1 text-sm font-medium ${isAbsent ? "text-red-600" : "text-emerald-700 dark:text-emerald-400"}`}>
+                        {isAbsent ? <X className="size-4" /> : <Check className="size-4" />}
+                        {t(isAbsent ? "Absent" : "Present")}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <Button className="self-start" disabled={save.pending} onClick={() => save.call(classId, date, [...absent])}>
+                {t(save.pending ? "Saving..." : "Save attendance")}
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
