@@ -56,6 +56,7 @@ import {
   Banknote,
   DoorOpen,
   KeyRound,
+  HandCoins,
 } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { useSession } from "@/lib/auth/session";
@@ -94,6 +95,8 @@ const navGroups = [
     items: [
       { title: "Rent", url: "/rent", icon: KeyRound },
       { title: "Rooms & Tenants", url: "/rent/rooms", icon: DoorOpen },
+      { title: "Salaries", url: "/salaries", icon: HandCoins },
+      { title: "Staff", url: "/salaries/staff", icon: Users },
     ],
   },
   {
