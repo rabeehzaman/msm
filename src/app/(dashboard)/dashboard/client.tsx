@@ -18,8 +18,19 @@ import {
   ArrowRight,
   Plus,
   TrendingUp,
-  ClipboardCheck,
+  KeyRound,
+  HandCoins,
+  CreditCard,
+  Banknote,
+  Landmark,
+  CalendarClock,
+  CircleAlert,
+  ArrowDownLeft,
+  ArrowUpRight,
 } from "lucide-react";
+import { useSession } from "@/lib/auth/session";
+import { currentYearMonth, formatDate, formatMoney, MONTHS } from "@/lib/format";
+import { useT } from "@/lib/i18n/client";
 
 type DashboardStats = {
   households: number;
@@ -41,13 +52,28 @@ type FinanceStats = {
   }[];
 };
 
+type Money = {
+  accounts: { id: string; name: string; type: "cash" | "bank"; balance: number }[];
+  totalBalance: number;
+  monthIncome: number;
+  monthExpense: number;
+  rent: { expected: number; collected: number; pendingThisMonth: number; pendingCount: number; pendingAmount: number };
+  salary: { payable: number; paid: number; pendingCount: number; pendingAmount: number };
+  dueBills: { id: string; accountLabel: string; year: number; month: number; amount: string; dueDate: string | null; state: string }[];
+  friday: { date: string; amount: number };
+};
+
 export function DashboardClient({
   stats,
   financeStats,
+  money,
 }: {
   stats: DashboardStats;
   financeStats: FinanceStats;
+  money: Money;
 }) {
+  const t = useT();
+  const { canEnter } = useSession();
   const net = financeStats.totalIncome - financeStats.totalExpenses;
   const flowTotal = financeStats.totalIncome + financeStats.totalExpenses;
   const incomeShare = flowTotal > 0 ? (financeStats.totalIncome / flowTotal) * 100 : 0;
@@ -55,10 +81,10 @@ export function DashboardClient({
   const maxFund = Math.max(1, ...topFunds.map((f) => Math.abs(Number(f.balance || 0))));
 
   const statCards = [
-    { label: "Total Households", value: stats.households.toLocaleString("en-IN"), caption: "registered families", icon: Home, tone: "" },
-    { label: "Total Members", value: stats.members.toLocaleString("en-IN"), caption: "community members", icon: Users, tone: "stat-icon-lagoon" },
-    { label: "Total Income", value: `Rs. ${financeStats.totalIncome.toLocaleString("en-IN")}`, caption: `${financeStats.incomeCount} entries`, icon: Wallet, tone: "stat-icon-gold" },
-    { label: "Madrasa Students", value: stats.students.toLocaleString("en-IN"), caption: "enrolled", icon: GraduationCap, tone: "stat-icon-indigo" },
+    { label: "Households", value: stats.households.toLocaleString("en-IN"), icon: Home, tone: "" },
+    { label: "Members", value: stats.members.toLocaleString("en-IN"), icon: Users, tone: "stat-icon-lagoon" },
+    { label: "Total income", value: formatMoney(financeStats.totalIncome), icon: Wallet, tone: "stat-icon-gold" },
+    { label: "Students", value: stats.students.toLocaleString("en-IN"), icon: GraduationCap, tone: "stat-icon-indigo" },
   ];
 
   return (
@@ -81,30 +107,134 @@ export function DashboardClient({
               Assalamu Alaikum · <span lang="ml">സ്വാഗതം</span>
             </p>
             <h1 className="font-heading mt-2 text-3xl font-semibold tracking-tight md:text-[2.6rem] md:leading-[1.1]">
-              Your Mahallu at a glance
+              {t("Your Mahallu at a glance")}
             </h1>
             <p className="mt-3 max-w-md text-sm text-white/80 md:text-base">
-              Welcome back. Here&apos;s an overview of your Mahallu.
+              {t("Cash, bank and everything due, in one place.")}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { label: "Add household", href: "/households", icon: Plus },
-              { label: "Record income", href: "/finances/income", icon: TrendingUp },
-              { label: "Mark attendance", href: "/madrasa/attendance", icon: ClipboardCheck },
-            ].map((action) => (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="glass-dark inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
-              >
-                <action.icon className="size-4 text-amber-200" />
-                {action.label}
-              </Link>
-            ))}
-          </div>
+          {canEnter && (
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: "Rent", href: "/rent", icon: KeyRound },
+                { label: "Collection", href: "/finances/income", icon: TrendingUp },
+                { label: "Expense", href: "/finances/expenses", icon: CreditCard },
+                { label: "Salary", href: "/salaries", icon: HandCoins },
+              ].map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="glass-dark inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+                >
+                  <Plus className="size-3.5 text-amber-200" />
+                  <action.icon className="size-4 text-amber-200" />
+                  {t(action.label)}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Cash and bank */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {money.accounts.map((a) => (
+          <Link key={a.id} href={canEnter ? "/cash-bank" : `/reports/cash-book?account=${a.id}`}>
+            <Card className="h-full transition-transform hover:-translate-y-0.5">
+              <CardContent className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-muted-foreground">{a.type === "cash" ? t("Cash in hand") : a.name}</p>
+                  <p className={`font-heading mt-2 truncate text-[1.85rem] leading-none font-semibold tracking-tight ${a.balance < 0 ? "text-destructive" : ""}`}>
+                    {formatMoney(a.balance)}
+                  </p>
+                </div>
+                <div className={`stat-icon ${a.type === "cash" ? "stat-icon-gold" : "stat-icon-lagoon"}`}>
+                  {a.type === "cash" ? <Banknote className="size-5" /> : <Landmark className="size-5" />}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+        <Card className="bg-primary/10">
+          <CardContent className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-muted-foreground">{t("Total balance")}</p>
+              <p className="font-heading mt-2 truncate text-[1.85rem] leading-none font-semibold tracking-tight">{formatMoney(money.totalBalance)}</p>
+            </div>
+            <div className="stat-icon">
+              <Wallet className="size-5" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* What needs attention */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Link href={canEnter ? "/finances/income" : "/reports/income-expense"}>
+          <Card className="h-full">
+            <CardContent className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-muted-foreground">{t(MONTHS[currentYearMonth().month - 1])} · {t("This month")}</p>
+              <p className="flex items-center gap-2 text-lg font-semibold text-success">
+                <ArrowDownLeft className="size-4" /> {t("Income")} {formatMoney(money.monthIncome)}
+              </p>
+              <p className="flex items-center gap-2 text-lg font-semibold text-destructive">
+                <ArrowUpRight className="size-4" /> {t("Expense")} {formatMoney(money.monthExpense)}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={canEnter ? "/rent" : "/reports/pending-rent"}>
+          <Card className="h-full">
+            <CardContent className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-muted-foreground">{t("Rent pending")}</p>
+              <p className="font-heading text-2xl font-semibold">{formatMoney(money.rent.pendingAmount)}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("{n} months", { n: money.rent.pendingCount })} · {t("This month")}: {formatMoney(money.rent.collected)} / {formatMoney(money.rent.expected)}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={canEnter ? "/salaries" : "/reports/unpaid-salaries"}>
+          <Card className="h-full">
+            <CardContent className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-muted-foreground">{t("Salaries pending this month")}</p>
+              <p className="font-heading text-2xl font-semibold">{formatMoney(money.salary.pendingAmount)}</p>
+              <p className="text-xs text-muted-foreground">{t("{n} unpaid", { n: money.salary.pendingCount })}</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={canEnter ? "/finances/friday-collections" : "/reports/friday-by-week"}>
+          <Card className="h-full">
+            <CardContent className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-muted-foreground">{t("This week's Friday collection")}</p>
+              <p className="font-heading text-2xl font-semibold">{formatMoney(money.friday.amount)}</p>
+              <p className="text-xs text-muted-foreground">{formatDate(money.friday.date)}</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Card className="sm:col-span-2 lg:col-span-2">
+          <CardContent className="flex flex-col gap-2">
+            <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <CalendarClock className="size-4" /> {t("Bills due")}
+            </p>
+            {money.dueBills.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("No bills due soon.")}</p>
+            ) : (
+              <ul className="flex flex-col gap-1">
+                {money.dueBills.slice(0, 4).map((b) => (
+                  <li key={b.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="min-w-0 truncate">
+                      {b.state === "overdue" && <CircleAlert className="mr-1 inline size-3.5 text-destructive" />}
+                      {b.accountLabel} · {formatDate(b.dueDate)}
+                    </span>
+                    <span className="font-semibold tabular-nums">{formatMoney(b.amount)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -112,11 +242,10 @@ export function DashboardClient({
           <Card key={card.label} className="group/stat">
             <CardContent className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t(card.label)}</p>
                 <p className="font-heading mt-2 truncate text-[1.85rem] leading-none font-semibold tracking-tight">
                   {card.value}
                 </p>
-                <p className="mt-2 text-xs text-muted-foreground">{card.caption}</p>
               </div>
               <div className={`stat-icon transition-transform duration-300 group-hover/stat:scale-110 ${card.tone}`}>
                 <card.icon className="size-5" />
@@ -140,7 +269,7 @@ export function DashboardClient({
             <div>
               <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Net Surplus</p>
               <p className={`font-heading mt-1 text-3xl font-semibold tracking-tight ${net >= 0 ? "text-success" : "text-destructive"}`}>
-                Rs. {net.toLocaleString("en-IN")}
+                ₹{net.toLocaleString("en-IN")}
               </p>
             </div>
 
@@ -148,7 +277,7 @@ export function DashboardClient({
             <div
               className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full bg-muted"
               role="img"
-              aria-label={`Income Rs. ${financeStats.totalIncome.toLocaleString("en-IN")}, expenses Rs. ${financeStats.totalExpenses.toLocaleString("en-IN")}`}
+              aria-label={`Income ₹${financeStats.totalIncome.toLocaleString("en-IN")}, expenses ₹${financeStats.totalExpenses.toLocaleString("en-IN")}`}
             >
               {flowTotal > 0 && (
                 <>
@@ -165,7 +294,7 @@ export function DashboardClient({
                   Total Income
                 </span>
                 <span className="text-sm font-semibold tabular-nums">
-                  Rs. {financeStats.totalIncome.toLocaleString("en-IN")}
+                  ₹{financeStats.totalIncome.toLocaleString("en-IN")}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -174,7 +303,7 @@ export function DashboardClient({
                   Total Expenses
                 </span>
                 <span className="text-sm font-semibold tabular-nums">
-                  Rs. {financeStats.totalExpenses.toLocaleString("en-IN")}
+                  ₹{financeStats.totalExpenses.toLocaleString("en-IN")}
                 </span>
               </div>
             </div>
@@ -217,7 +346,7 @@ export function DashboardClient({
                         />
                       </span>
                       <span className="text-right font-semibold tabular-nums">
-                        Rs. {balance.toLocaleString("en-IN")}
+                        ₹{balance.toLocaleString("en-IN")}
                       </span>
                     </li>
                   );

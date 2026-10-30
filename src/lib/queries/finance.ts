@@ -1,7 +1,21 @@
 import { db } from "@/db";
-import { funds, incomeEntries, expenseEntries, subscriptions, fridayCollections } from "@/db/schema";
-import { eq, desc, count, sum } from "drizzle-orm";
+import { funds, incomeEntries, expenseEntries, ledgerEntries, subscriptions, fridayCollections } from "@/db/schema";
+import { and, eq, desc, inArray, sql } from "drizzle-orm";
 import { ensureTenant } from "./auth";
+
+// Fund balances are worked out from the ledger; the stored funds.balance is never updated.
+async function withLedgerBalances<T extends { id: string; balance: string }>(tenantId: string, rows: T[]) {
+  const moved = await db
+    .select({
+      fundId: ledgerEntries.fundId,
+      total: sql<string>`sum(case when ${ledgerEntries.direction} = 'in' then ${ledgerEntries.amount} else -${ledgerEntries.amount} end)`,
+    })
+    .from(ledgerEntries)
+    .where(eq(ledgerEntries.tenantId, tenantId))
+    .groupBy(ledgerEntries.fundId);
+  const totals = new Map(moved.map((m) => [m.fundId, m.total]));
+  return rows.map((f) => ({ ...f, balance: totals.get(f.id) ?? "0" }));
+}
 
 export async function getFunds() {
   const tenant = await ensureTenant();
@@ -12,7 +26,7 @@ export async function getFunds() {
     .orderBy(funds.name);
 
   if (existingFunds.length > 0) {
-    return existingFunds;
+    return withLedgerBalances(tenant.id, existingFunds);
   }
 
   const defaultFunds = [
@@ -108,34 +122,24 @@ export async function getFridayCollections() {
 
 export async function getFinanceDashboardStats() {
   const tenant = await ensureTenant();
-
-  const [incomeTotal] = await db
-    .select({ total: sum(incomeEntries.amount) })
-    .from(incomeEntries)
-    .where(eq(incomeEntries.tenantId, tenant.id));
-
-  const [expenseTotal] = await db
-    .select({ total: sum(expenseEntries.amount) })
-    .from(expenseEntries)
-    .where(eq(expenseEntries.tenantId, tenant.id));
-
-  const [incomeCount] = await db
-    .select({ count: count() })
-    .from(incomeEntries)
-    .where(eq(incomeEntries.tenantId, tenant.id));
-
-  const [expenseCount] = await db
-    .select({ count: count() })
-    .from(expenseEntries)
-    .where(eq(expenseEntries.tenantId, tenant.id));
-
+  const totals = await db
+    .select({
+      kind: ledgerEntries.kind,
+      total: sql<string>`sum(${ledgerEntries.amount})`,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(ledgerEntries)
+    .where(and(eq(ledgerEntries.tenantId, tenant.id), inArray(ledgerEntries.kind, ["income", "expense"])))
+    .groupBy(ledgerEntries.kind);
+  const income = totals.find((t) => t.kind === "income");
+  const expense = totals.find((t) => t.kind === "expense");
   const fundBalances = await getFunds();
 
   return {
-    totalIncome: Number(incomeTotal?.total ?? 0),
-    totalExpenses: Number(expenseTotal?.total ?? 0),
-    incomeCount: Number(incomeCount?.count ?? 0),
-    expenseCount: Number(expenseCount?.count ?? 0),
+    totalIncome: Number(income?.total ?? 0),
+    totalExpenses: Number(expense?.total ?? 0),
+    incomeCount: income?.count ?? 0,
+    expenseCount: expense?.count ?? 0,
     funds: fundBalances,
   };
 }
