@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { incomeEntries, subscriptions, subscriptionPayments, fridayCollections, funds } from "@/db/schema";
+import { subscriptions, funds } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireEntry } from "@/lib/auth/guard";
@@ -46,44 +46,6 @@ export async function seedDefaultFunds() {
   }
 }
 
-export async function createIncomeEntry(formData: FormData) {
-  const { tenant } = await requireEntry();
-  const receiptNo = `REC-${Date.now().toString(36).toUpperCase()}`;
-
-  await db.insert(incomeEntries).values({
-    tenantId: tenant.id,
-    fundId: formData.get("fundId") as string,
-    receiptNumber: receiptNo,
-    amount: formData.get("amount") as string,
-    donorName: (formData.get("donorName") as string) || null,
-    category: formData.get("category") as string,
-    description: (formData.get("description") as string) || null,
-    paymentMethod: (formData.get("paymentMethod") as typeof incomeEntries.$inferInsert.paymentMethod) || "cash",
-    referenceNumber: (formData.get("referenceNumber") as string) || null,
-    isAnonymous: formData.get("isAnonymous") === "on",
-    date: formData.get("date") as string,
-  });
-
-  revalidatePath("/finances");
-  revalidatePath("/finances/income");
-  return { success: true };
-}
-
-export async function createFridayCollection(formData: FormData) {
-  const { tenant } = await requireEntry();
-
-  await db.insert(fridayCollections).values({
-    tenantId: tenant.id,
-    date: formData.get("date") as string,
-    totalAmount: formData.get("totalAmount") as string,
-    status: "pending_verification",
-    notes: (formData.get("notes") as string) || null,
-  });
-
-  revalidatePath("/finances/friday-collections");
-  return { success: true };
-}
-
 export async function createSubscription(formData: FormData) {
   const { tenant } = await requireEntry();
 
@@ -95,24 +57,6 @@ export async function createSubscription(formData: FormData) {
     frequency: (formData.get("frequency") as typeof subscriptions.$inferInsert.frequency) || "monthly",
     startDate: formData.get("startDate") as string,
     nextDueDate: formData.get("nextDueDate") as string,
-  });
-
-  revalidatePath("/subscriptions");
-  return { success: true };
-}
-
-export async function recordSubscriptionPayment(formData: FormData) {
-  const { tenant } = await requireEntry();
-
-  await db.insert(subscriptionPayments).values({
-    tenantId: tenant.id,
-    subscriptionId: formData.get("subscriptionId") as string,
-    householdId: formData.get("householdId") as string,
-    amount: formData.get("amount") as string,
-    paymentMethod: (formData.get("paymentMethod") as typeof subscriptionPayments.$inferInsert.paymentMethod) || "cash",
-    period: (formData.get("period") as string) || null,
-    date: formData.get("date") as string,
-    receiptNumber: `SUB-${Date.now().toString(36).toUpperCase()}`,
   });
 
   revalidatePath("/subscriptions");

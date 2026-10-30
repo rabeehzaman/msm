@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { households } from "@/db/schema";
+import { households, subscriptionPayments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireEntry } from "@/lib/auth/guard";
@@ -30,6 +30,13 @@ export async function createHousehold(formData: FormData) {
 
 export async function deleteHousehold(id: string) {
   await requireAdmin();
+  // Deleting would cascade into subscription payments and leave the cash book wrong.
+  const [paid] = await db
+    .select({ id: subscriptionPayments.id })
+    .from(subscriptionPayments)
+    .where(eq(subscriptionPayments.householdId, id))
+    .limit(1);
+  if (paid) throw new Error("This household has subscription payments and cannot be deleted.");
   await db.delete(households).where(eq(households.id, id));
   revalidatePath("/households");
   return { success: true };
