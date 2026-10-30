@@ -7,7 +7,9 @@ import {
   date,
   jsonb,
   boolean,
+  integer,
   pgEnum,
+  unique,
 } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants";
 import { funds } from "./funds";
@@ -49,6 +51,12 @@ export const incomeEntries = pgTable("income_entries", {
   isAnonymous: boolean("is_anonymous").default(false),
   collectedBy: uuid("collected_by").references(() => members.id),
   receiptUrl: text("receipt_url"),
+  accountId: uuid("account_id").references(() => cashAccounts.id, { onDelete: "restrict" }),
+  categoryId: uuid("category_id"),
+  houseName: text("house_name"),
+  bookNumber: text("book_number"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
   date: date("date").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -163,6 +171,12 @@ export const subscriptionPayments = pgTable("subscription_payments", {
   receiptNumber: text("receipt_number"),
   collectedBy: uuid("collected_by").references(() => members.id),
   period: text("period"),
+  accountId: uuid("account_id").references(() => cashAccounts.id, { onDelete: "restrict" }),
+  bookNumber: text("book_number"),
+  periods: jsonb("periods").$type<string[]>().default([]).notNull(),
+  note: text("note"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
   date: date("date").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -198,6 +212,10 @@ export const fridayCollections = pgTable("friday_collections", {
   bankDepositRef: text("bank_deposit_ref"),
   depositDate: date("deposit_date"),
   notes: text("notes"),
+  accountId: uuid("account_id").references(() => cashAccounts.id, { onDelete: "restrict" }),
+  countedBy: text("counted_by"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -205,6 +223,25 @@ export const fridayCollections = pgTable("friday_collections", {
     .defaultNow()
     .notNull(),
 });
+
+// --- COLLECTION CATEGORIES ---
+export const collectionCategories = pgTable(
+  "collection_categories",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id")
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    kind: text("kind").default("general").notNull(),
+    fundId: uuid("fund_id").references(() => funds.id, { onDelete: "set null" }),
+    sortOrder: integer("sort_order").default(99).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [unique("collection_categories_tenant_id_name_key").on(t.tenantId, t.name)],
+);
 
 // --- BUDGETS ---
 export const budgets = pgTable("budgets", {
