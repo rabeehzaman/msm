@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { incomeEntries, expenseEntries, subscriptions, subscriptionPayments, fridayCollections, funds } from "@/db/schema";
+import { incomeEntries, subscriptions, subscriptionPayments, fridayCollections, funds } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireEntry } from "@/lib/auth/guard";
@@ -66,29 +66,6 @@ export async function createIncomeEntry(formData: FormData) {
 
   revalidatePath("/finances");
   revalidatePath("/finances/income");
-  return { success: true };
-}
-
-export async function createExpenseEntry(formData: FormData) {
-  const { tenant } = await requireEntry();
-  const voucherNo = `EXP-${Date.now().toString(36).toUpperCase()}`;
-
-  await db.insert(expenseEntries).values({
-    tenantId: tenant.id,
-    fundId: formData.get("fundId") as string,
-    voucherNumber: voucherNo,
-    amount: formData.get("amount") as string,
-    payee: formData.get("payee") as string,
-    category: formData.get("category") as string,
-    description: (formData.get("description") as string) || null,
-    paymentMethod: (formData.get("paymentMethod") as typeof expenseEntries.$inferInsert.paymentMethod) || "cash",
-    referenceNumber: (formData.get("referenceNumber") as string) || null,
-    status: "pending_approval",
-    date: formData.get("date") as string,
-  });
-
-  revalidatePath("/finances");
-  revalidatePath("/finances/expenses");
   return { success: true };
 }
 
