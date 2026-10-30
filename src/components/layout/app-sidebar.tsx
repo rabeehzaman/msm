@@ -54,6 +54,8 @@ import {
   Plane,
   Briefcase,
   Banknote,
+  DoorOpen,
+  KeyRound,
 } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { useSession } from "@/lib/auth/session";
@@ -85,6 +87,13 @@ const navGroups = [
       { title: "Subscriptions", url: "/subscriptions", icon: Receipt },
       { title: "Zakat", url: "/finances/zakat", icon: Heart },
       { title: "Qard Hasan", url: "/finances/qard-hasan", icon: Handshake },
+    ],
+  },
+  {
+    label: "Buildings & Staff",
+    items: [
+      { title: "Rent", url: "/rent", icon: KeyRound },
+      { title: "Rooms & Tenants", url: "/rent/rooms", icon: DoorOpen },
     ],
   },
   {
