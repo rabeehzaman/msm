@@ -81,7 +81,7 @@ export function RentSheet({
         )}
 
         {canEdit ? (
-          <form action={payment ? update.call : pay.call} className="flex flex-col gap-4">
+          <form onSubmit={payment ? update.submit : pay.submit} className="flex flex-col gap-4">
             {payment ? (
               <input type="hidden" name="id" value={payment.id} />
             ) : (
