@@ -1,5 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { appUsers } from "@/db/schema";
+import { canOpenPath, isOpenPath } from "@/lib/auth/access";
 
 function hasSupabaseSessionCookie(request: NextRequest) {
   return request.cookies
@@ -70,6 +74,29 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
+  }
+
+  if (user && !isOpenPath(request.nextUrl.pathname)) {
+    const url = request.nextUrl.clone();
+    try {
+      const [row] = await db
+        .select({ role: appUsers.role, isActive: appUsers.isActive })
+        .from(appUsers)
+        .where(eq(appUsers.userId, user.id))
+        .limit(1);
+      if (!row?.role || !row.isActive) {
+        url.pathname = "/no-access";
+        return NextResponse.redirect(url);
+      }
+      if (!canOpenPath(row.role, request.nextUrl.pathname)) {
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
+    } catch (error) {
+      // The dashboard layout checks the role again on the server, so a failed lookup
+      // here does not let anyone without a role in and does not lock out real users.
+      console.warn("Role check failed in middleware", error);
+    }
   }
 
   return supabaseResponse;

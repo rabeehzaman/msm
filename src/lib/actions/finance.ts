@@ -4,10 +4,10 @@ import { db } from "@/db";
 import { incomeEntries, expenseEntries, subscriptions, subscriptionPayments, fridayCollections, funds } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { ensureTenant } from "@/lib/queries/auth";
+import { requireEntry } from "@/lib/auth/guard";
 
 export async function createFund(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(funds).values({
     tenantId: tenant.id,
     type: formData.get("type") as typeof funds.$inferInsert.type,
@@ -24,7 +24,7 @@ export async function createFund(formData: FormData) {
 }
 
 export async function seedDefaultFunds() {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   const existing = await db.select().from(funds).where(eq(funds.tenantId, tenant.id)).limit(1);
   if (existing.length > 0) return;
 
@@ -47,7 +47,7 @@ export async function seedDefaultFunds() {
 }
 
 export async function createIncomeEntry(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   const receiptNo = `REC-${Date.now().toString(36).toUpperCase()}`;
 
   await db.insert(incomeEntries).values({
@@ -70,7 +70,7 @@ export async function createIncomeEntry(formData: FormData) {
 }
 
 export async function createExpenseEntry(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   const voucherNo = `EXP-${Date.now().toString(36).toUpperCase()}`;
 
   await db.insert(expenseEntries).values({
@@ -93,7 +93,7 @@ export async function createExpenseEntry(formData: FormData) {
 }
 
 export async function createFridayCollection(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
 
   await db.insert(fridayCollections).values({
     tenantId: tenant.id,
@@ -108,7 +108,7 @@ export async function createFridayCollection(formData: FormData) {
 }
 
 export async function createSubscription(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
 
   await db.insert(subscriptions).values({
     tenantId: tenant.id,
@@ -125,7 +125,7 @@ export async function createSubscription(formData: FormData) {
 }
 
 export async function recordSubscriptionPayment(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
 
   await db.insert(subscriptionPayments).values({
     tenantId: tenant.id,

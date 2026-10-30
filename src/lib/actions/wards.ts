@@ -4,10 +4,10 @@ import { db } from "@/db";
 import { wards } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { ensureTenant } from "@/lib/queries/auth";
+import { requireAdmin, requireEntry } from "@/lib/auth/guard";
 
 export async function createWard(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
 
   await db.insert(wards).values({
     tenantId: tenant.id,
@@ -21,6 +21,7 @@ export async function createWard(formData: FormData) {
 }
 
 export async function deleteWard(id: string) {
+  await requireAdmin();
   await db.delete(wards).where(eq(wards.id, id));
   revalidatePath("/wards");
   return { success: true };

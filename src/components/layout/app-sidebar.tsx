@@ -53,7 +53,11 @@ import {
   Droplets,
   Plane,
   Briefcase,
+  Banknote,
 } from "lucide-react";
+import { useT } from "@/lib/i18n/client";
+import { useSession } from "@/lib/auth/session";
+import { canOpenPath } from "@/lib/auth/access";
 
 const navGroups = [
   {
@@ -73,6 +77,7 @@ const navGroups = [
   {
     label: "Finance",
     items: [
+      { title: "Cash & Bank", url: "/cash-bank", icon: Banknote },
       { title: "Finance Overview", url: "/finances", icon: Wallet },
       { title: "Income", url: "/finances/income", icon: TrendingUp },
       { title: "Expenses", url: "/finances/expenses", icon: CreditCard },
@@ -135,6 +140,11 @@ function isNavActive(pathname: string, url: string) {
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const t = useT();
+  const { name, email, role, isAdmin } = useSession();
+  const groups = navGroups
+    .map((group) => ({ ...group, items: group.items.filter((item) => canOpenPath(role, item.url)) }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -157,9 +167,9 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {navGroups.map((group) => (
+        {groups.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupLabel>{t(group.label)}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (
@@ -167,10 +177,10 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       render={<Link href={item.url} />}
                       isActive={isNavActive(pathname, item.url)}
-                      tooltip={item.title}
+                      tooltip={t(item.title)}
                     >
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span>{t(item.title)}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -194,13 +204,13 @@ export function AppSidebar() {
               >
                 <Avatar className="size-8 ring-1 ring-sidebar-primary/40">
                   <AvatarFallback className="bg-sidebar-primary/15 text-sidebar-primary text-xs font-semibold">
-                    AD
+                    {(name || "?").slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Admin User</span>
+                  <span className="truncate font-semibold">{name}</span>
                   <span className="truncate text-xs text-sidebar-foreground/60">
-                    admin@mahallu.app
+                    {email}
                   </span>
                 </div>
                 <ChevronUp className="ml-auto" />
@@ -213,15 +223,19 @@ export function AppSidebar() {
               >
                 <div className="flex items-center gap-2 px-2 py-1.5">
                   <Badge variant="secondary" className="text-xs">
-                    Super Admin
+                    {t(role === "admin" ? "Admin" : role === "entry" ? "Entry user" : "View only")}
                   </Badge>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem render={<Link href="/settings" />}>
-                  <Settings />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem render={<Link href="/settings" />}>
+                      <Settings />
+                      {t("Settings")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem
                   onClick={async () => {
                     const { signOut } = await import("@/lib/actions/auth");
@@ -229,7 +243,7 @@ export function AppSidebar() {
                   }}
                 >
                   <LogOut />
-                  Sign out
+                  {t("Sign out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

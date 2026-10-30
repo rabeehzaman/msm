@@ -4,10 +4,10 @@ import { db } from "@/db";
 import { members } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { ensureTenant } from "@/lib/queries/auth";
+import { requireAdmin, requireEntry } from "@/lib/auth/guard";
 
 export async function createMember(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
 
   await db.insert(members).values({
     tenantId: tenant.id,
@@ -31,6 +31,7 @@ export async function createMember(formData: FormData) {
 }
 
 export async function deleteMember(id: string) {
+  await requireAdmin();
   await db.delete(members).where(eq(members.id, id));
   revalidatePath("/members");
   revalidatePath("/households");

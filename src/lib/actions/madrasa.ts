@@ -4,10 +4,10 @@ import { db } from "@/db";
 import { students, studentAttendance, exams, classes, teachers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { ensureTenant } from "@/lib/queries/auth";
+import { requireAdmin, requireEntry } from "@/lib/auth/guard";
 
 export async function createStudent(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(students).values({
     tenantId: tenant.id,
     fullName: formData.get("fullName") as string,
@@ -23,13 +23,14 @@ export async function createStudent(formData: FormData) {
 }
 
 export async function deleteStudent(id: string) {
+  await requireAdmin();
   await db.delete(students).where(eq(students.id, id));
   revalidatePath("/madrasa/students");
   return { success: true };
 }
 
 export async function saveAttendance(records: { studentId: string; classId: string; date: string; status: "present" | "absent" | "late" | "excused" }[]) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   for (const r of records) {
     await db.insert(studentAttendance).values({
       tenantId: tenant.id,
@@ -44,7 +45,7 @@ export async function saveAttendance(records: { studentId: string; classId: stri
 }
 
 export async function createExam(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(exams).values({
     tenantId: tenant.id,
     name: formData.get("name") as string,
@@ -59,7 +60,7 @@ export async function createExam(formData: FormData) {
 }
 
 export async function createClass(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(classes).values({
     tenantId: tenant.id,
     name: formData.get("name") as string,
@@ -77,7 +78,7 @@ export async function createClass(formData: FormData) {
 }
 
 export async function createTeacher(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(teachers).values({
     tenantId: tenant.id,
     fullName: formData.get("fullName") as string,

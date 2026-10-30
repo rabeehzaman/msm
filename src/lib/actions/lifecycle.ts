@@ -3,10 +3,10 @@
 import { db } from "@/db";
 import { marriages, deaths, certificates, welfareApplications, events, announcements } from "@/db/schema";
 import { revalidatePath } from "next/cache";
-import { ensureTenant } from "@/lib/queries/auth";
+import { requireEntry } from "@/lib/auth/guard";
 
 export async function registerMarriage(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(marriages).values({
     tenantId: tenant.id,
     brideName: formData.get("brideName") as string,
@@ -28,7 +28,7 @@ export async function registerMarriage(formData: FormData) {
 }
 
 export async function registerDeath(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(deaths).values({
     tenantId: tenant.id,
     deceasedName: formData.get("deceasedName") as string,
@@ -46,7 +46,7 @@ export async function registerDeath(formData: FormData) {
 }
 
 export async function issueCertificate(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(certificates).values({
     tenantId: tenant.id,
     type: formData.get("type") as typeof certificates.$inferInsert.type,
@@ -60,7 +60,7 @@ export async function issueCertificate(formData: FormData) {
 }
 
 export async function submitWelfareApplication(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(welfareApplications).values({
     tenantId: tenant.id,
     applicantName: formData.get("applicantName") as string,
@@ -74,7 +74,7 @@ export async function submitWelfareApplication(formData: FormData) {
 }
 
 export async function createEvent(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(events).values({
     tenantId: tenant.id,
     title: formData.get("title") as string,
@@ -89,7 +89,7 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function createAnnouncement(formData: FormData) {
-  const tenant = await ensureTenant();
+  const { tenant } = await requireEntry();
   await db.insert(announcements).values({
     tenantId: tenant.id,
     title: formData.get("title") as string,

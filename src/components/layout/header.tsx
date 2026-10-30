@@ -18,24 +18,36 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useSyncExternalStore } from "react";
+import { useLang, useT } from "@/lib/i18n/client";
 import { useTheme } from "next-themes";
 import { BrandMark } from "@/components/brand";
 
 function getBreadcrumbs(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
-  return segments.map((segment, index) => ({
-    label: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " "),
-    href: "/" + segments.slice(0, index + 1).join("/"),
-    isLast: index === segments.length - 1,
-  }));
+  return segments
+    .map((segment, index) => ({
+      segment,
+      label: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " "),
+      href: "/" + segments.slice(0, index + 1).join("/"),
+      isLast: index === segments.length - 1,
+    }))
+    .filter((crumb) => !/^[0-9a-f-]{36}$/i.test(crumb.segment));
 }
 
 export function Header() {
   const pathname = usePathname();
   const breadcrumbs = getBreadcrumbs(pathname);
   const { resolvedTheme, setTheme } = useTheme();
+  const router = useRouter();
+  const lang = useLang();
+  const t = useT();
+
+  function toggleLanguage() {
+    document.cookie = `lang=${lang === "ml" ? "en" : "ml"}; path=/; max-age=31536000; samesite=lax`;
+    router.refresh();
+  }
   // Theme is only known on the client; render the moon icon until mounted.
   const mounted = useSyncExternalStore(
     () => () => {},
@@ -73,6 +85,23 @@ export function Header() {
       </Breadcrumb>
 
       <div className="ml-auto flex items-center gap-1 rounded-full border border-white/60 bg-white/50 p-1 shadow-glass backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 rounded-full px-2.5 text-xs font-semibold"
+                onClick={toggleLanguage}
+              />
+            }
+          >
+            <span lang={lang === "ml" ? "en" : "ml"}>{lang === "ml" ? "EN" : "മല"}</span>
+            <span className="sr-only">{t("Change language")}</span>
+          </TooltipTrigger>
+          <TooltipContent>{t("Change language")}</TooltipContent>
+        </Tooltip>
+
         <Tooltip>
           <TooltipTrigger render={<Button variant="ghost" size="icon" className="size-8 rounded-full" />}>
             <Search className="size-4" />

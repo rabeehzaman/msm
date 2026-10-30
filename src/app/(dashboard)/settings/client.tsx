@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, Upload } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 type Tenant = { name: string; address: string | null; phone: string | null; email: string | null };
 
@@ -18,6 +19,17 @@ export function SettingsClient({ tenant }: { tenant: Tenant }) {
       <div>
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">Manage Mahallu configuration and preferences</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Link href="/settings/users" className="glass hover:border-primary/40 rounded-2xl p-4 transition-colors">
+          <p className="font-medium">Users & Access</p>
+          <p className="text-muted-foreground text-sm">Give people a role: Admin, Entry or View only</p>
+        </Link>
+        <Link href="/settings/activity" className="glass hover:border-primary/40 rounded-2xl p-4 transition-colors">
+          <p className="font-medium">Activity Log</p>
+          <p className="text-muted-foreground text-sm">Who added, changed or deleted what, and when</p>
+        </Link>
       </div>
 
       <Tabs defaultValue="general">
