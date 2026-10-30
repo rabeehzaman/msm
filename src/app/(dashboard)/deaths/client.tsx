@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Search } from "lucide-react";
 import { registerDeath } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format";
 
 type Death = {
   id: string;
@@ -121,7 +122,7 @@ export function DeathsClient({
                   <TableRow key={d.id}>
                     <TableCell className="font-mono text-sm">{d.certificateNumber || "-"}</TableCell>
                     <TableCell className="font-medium">{d.deceasedName}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{d.dateOfDeath ? new Date(d.dateOfDeath).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{formatDate(d.dateOfDeath)}</TableCell>
                     <TableCell className="text-sm">{d.causeOfDeath || "-"}</TableCell>
                     <TableCell className="text-sm">{d.janazahTime && d.janazahLocation ? `${d.janazahTime} at ${d.janazahLocation}` : "-"}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{d.informerName || "-"}</TableCell>

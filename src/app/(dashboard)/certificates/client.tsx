@@ -19,6 +19,7 @@ import {
 import { Loader2, Plus, Search } from "lucide-react";
 import { issueCertificate } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format";
 
 type Certificate = {
   id: string;
@@ -170,7 +171,7 @@ export function CertificatesClient({
                       <TableCell><Badge variant="outline">{c.type.replace(/_/g, " ")}</Badge></TableCell>
                       <TableCell className="font-medium">{c.memberName || "-"}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{c.purpose || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{formatDate(c.createdAt)}</TableCell>
                       <TableCell><Badge variant={statusColors[c.status || "requested"] || "outline"}>{(c.status || "requested").replace(/_/g, " ")}</Badge></TableCell>
                     </TableRow>
                   ))}

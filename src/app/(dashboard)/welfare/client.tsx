@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, Search, Heart, Users, IndianRupee, FileCheck } from "lucide-react";
 import { submitWelfareApplication } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format";
 
 type WelfareApplication = {
   id: string;
@@ -108,7 +109,7 @@ export function WelfareClient({
                   <Input name="applicantName" placeholder="Full name" required />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">Amount Requested (Rs.)</label>
+                  <label className="text-sm font-medium">Amount Requested (₹)</label>
                   <Input type="number" name="amountRequested" placeholder="0" />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -136,7 +137,7 @@ export function WelfareClient({
         <Card>
           <CardContent className="flex items-center gap-4">
             <div className="stat-icon"><IndianRupee className="size-5 text-success" /></div>
-            <div><p className="text-muted-foreground text-sm">Total Requested</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalAmount.toLocaleString("en-IN")}</p></div>
+            <div><p className="text-muted-foreground text-sm">Total Requested</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">₹{totalAmount.toLocaleString("en-IN")}</p></div>
           </CardContent>
         </Card>
         <Card>
@@ -192,9 +193,9 @@ export function WelfareClient({
                       <TableCell className="font-medium">{a.applicantName}</TableCell>
                       <TableCell><Badge variant="outline">{(a.scheme || "").replace(/_/g, " ")}</Badge></TableCell>
                       <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate">{a.description || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{a.createdAt ? new Date(a.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{formatDate(a.createdAt)}</TableCell>
                       <TableCell><Badge variant={statusColors[a.status || "submitted"] || "outline"}>{(a.status || "submitted").replace(/_/g, " ")}</Badge></TableCell>
-                      <TableCell className="text-right font-medium">Rs. {Number(a.amountRequested || 0).toLocaleString("en-IN")}</TableCell>
+                      <TableCell className="text-right font-medium">₹{Number(a.amountRequested || 0).toLocaleString("en-IN")}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

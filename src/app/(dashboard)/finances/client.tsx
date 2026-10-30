@@ -25,6 +25,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import Link from "next/link";
+import { formatDate } from "@/lib/format";
 
 type Fund = {
   id: string;
@@ -133,7 +134,7 @@ export function FinancesClient({
             <IndianRupee className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {stats.totalIncome.toLocaleString("en-IN")}</div>
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">₹{stats.totalIncome.toLocaleString("en-IN")}</div>
             <div className="text-muted-foreground text-xs">
               {stats.incomeCount} entries
             </div>
@@ -145,7 +146,7 @@ export function FinancesClient({
             <CreditCard className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
-            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {stats.totalExpenses.toLocaleString("en-IN")}</div>
+            <div className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">₹{stats.totalExpenses.toLocaleString("en-IN")}</div>
             <div className="text-muted-foreground text-xs">
               {stats.expenseCount} entries
             </div>
@@ -158,7 +159,7 @@ export function FinancesClient({
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${netSurplus >= 0 ? "text-success" : "text-destructive"}`}>
-              Rs. {netSurplus.toLocaleString("en-IN")}
+              ₹{netSurplus.toLocaleString("en-IN")}
             </div>
             <p className="text-muted-foreground text-xs">Across all funds</p>
           </CardContent>
@@ -195,7 +196,7 @@ export function FinancesClient({
                     )}
                   </div>
                   <span className="text-xl font-bold">
-                    Rs. {Number(fund.balance || 0).toLocaleString("en-IN")}
+                    ₹{Number(fund.balance || 0).toLocaleString("en-IN")}
                   </span>
                   <span className="text-muted-foreground text-xs capitalize">
                     {fund.type.replace("_", " ")}
@@ -241,7 +242,7 @@ export function FinancesClient({
                   {recentTransactions.map((tx) => (
                     <TableRow key={tx.id}>
                       <TableCell className="text-muted-foreground text-sm">
-                        {tx.date ? new Date(tx.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}
+                        {formatDate(tx.date)}
                       </TableCell>
                       <TableCell className="font-medium">{tx.description}</TableCell>
                       <TableCell>
@@ -250,7 +251,7 @@ export function FinancesClient({
                       <TableCell className="text-muted-foreground text-sm">{tx.method}</TableCell>
                       <TableCell className="text-right font-medium">
                         <span className={tx.type === "income" ? "text-success" : "text-destructive"}>
-                          {tx.type === "income" ? "+" : "-"} Rs. {tx.amount.toLocaleString("en-IN")}
+                          {tx.type === "income" ? "+" : "-"} ₹{tx.amount.toLocaleString("en-IN")}
                         </span>
                       </TableCell>
                     </TableRow>

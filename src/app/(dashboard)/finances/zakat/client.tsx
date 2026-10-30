@@ -22,6 +22,7 @@ import { Plus, Calculator, Loader2 } from "lucide-react";
 import { recordFundPayment } from "@/lib/actions/expenses";
 import { AccountPicker, type AccountOption } from "@/components/money/form";
 import { toast } from "sonner";
+import { formatDate, todayIST } from "@/lib/format";
 
 type IncomeEntry = {
   id: string;
@@ -119,11 +120,11 @@ export function ZakatClient({
                     <Input type="number" placeholder="0" />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">Gold Value (Rs.)</label>
+                    <label className="text-sm font-medium">Gold Value (₹)</label>
                     <Input type="number" placeholder="0" />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">Silver Value (Rs.)</label>
+                    <label className="text-sm font-medium">Silver Value (₹)</label>
                     <Input type="number" placeholder="0" />
                   </div>
                   <div className="flex flex-col gap-2">
@@ -164,7 +165,7 @@ export function ZakatClient({
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium">Date *</label>
-                    <Input type="date" name="date" defaultValue={new Date().toISOString().split("T")[0]} required />
+                    <Input type="date" name="date" defaultValue={todayIST()} required />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium">Description</label>
@@ -187,19 +188,19 @@ export function ZakatClient({
         <Card>
           <CardContent>
             <p className="text-muted-foreground text-sm">Total Collected</p>
-            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalCollected.toLocaleString("en-IN")}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">₹{totalCollected.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
             <p className="text-muted-foreground text-sm">Total Disbursed</p>
-            <p className="text-2xl font-bold text-success">Rs. {totalDisbursed.toLocaleString("en-IN")}</p>
+            <p className="text-2xl font-bold text-success">₹{totalDisbursed.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
             <p className="text-muted-foreground text-sm">Available Balance</p>
-            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {balance.toLocaleString("en-IN")}</p>
+            <p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">₹{balance.toLocaleString("en-IN")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -218,7 +219,7 @@ export function ZakatClient({
               <span className="text-sm font-medium">{totalCollected > 0 ? ((totalDisbursed / totalCollected) * 100).toFixed(1) : 0}%</span>
             </div>
             <Progress value={totalCollected > 0 ? (totalDisbursed / totalCollected) * 100 : 0} className="h-3" />
-            <p className="text-muted-foreground mt-1 text-xs">Rs. {balance.toLocaleString("en-IN")} remaining to be distributed</p>
+            <p className="text-muted-foreground mt-1 text-xs">₹{balance.toLocaleString("en-IN")} remaining to be distributed</p>
           </CardContent>
         </Card>
       )}
@@ -243,8 +244,8 @@ export function ZakatClient({
                     <TableRow key={d.id}>
                       <TableCell className="font-medium">{d.payee || "-"}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{d.description || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{d.date ? new Date(d.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}</TableCell>
-                      <TableCell className="text-right font-medium text-success">Rs. {Number(d.amount).toLocaleString("en-IN")}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{formatDate(d.date)}</TableCell>
+                      <TableCell className="text-right font-medium text-success">₹{Number(d.amount).toLocaleString("en-IN")}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

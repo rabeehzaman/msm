@@ -20,6 +20,7 @@ import { Plus, Loader2 } from "lucide-react";
 import { createExam } from "@/lib/actions/madrasa";
 import { toast } from "sonner";
 import Link from "next/link";
+import { formatDate } from "@/lib/format";
 
 type Exam = {
   id: string;
@@ -187,7 +188,7 @@ export function ExamsClient({
                       <TableCell><Badge variant="outline">{e.className || "All"}</Badge></TableCell>
                       <TableCell><Badge variant="secondary">{(e.type || "test").replace("_", " ")}</Badge></TableCell>
                       <TableCell className="text-muted-foreground text-sm">
-                        {e.date ? new Date(e.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}
+                        {formatDate(e.date)}
                       </TableCell>
                       <TableCell className="text-sm">{e.maxMarks || "-"}</TableCell>
                     </TableRow>

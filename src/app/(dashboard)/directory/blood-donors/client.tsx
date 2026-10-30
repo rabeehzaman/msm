@@ -12,6 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Search, Phone, Droplets, AlertCircle } from "lucide-react";
+import { formatDate } from "@/lib/format";
 
 type Donor = {
   id: string;
@@ -104,7 +105,7 @@ export function BloodDonorsClient({ donors }: { donors: Donor[] }) {
                     <span className="font-medium">{d.name}</span>
                     <Badge variant={d.available ? "default" : "secondary"}>{d.available ? "Available" : "Unavailable"}</Badge>
                   </div>
-                  <p className="text-muted-foreground text-xs">{d.ward ?? "No ward"} | Last: {d.lastDonation ? new Date(d.lastDonation).toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : "Never"}</p>
+                  <p className="text-muted-foreground text-xs">{d.ward ?? "No ward"} | Last: {d.lastDonation ? formatDate(d.lastDonation) : "Never"}</p>
                 </div>
                 <Badge variant="outline" className="font-mono text-sm font-bold">{d.bloodGroup}</Badge>
                 <Button variant="ghost" size="sm" nativeButton={false} render={<a href={d.phone ? `tel:${d.phone}` : undefined} aria-label={`Call ${d.name}`} />}>

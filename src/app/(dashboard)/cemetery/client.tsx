@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/empty-state";
 import { Search, MapPin, Plus } from "lucide-react";
+import { formatDate } from "@/lib/format";
 
 type Plot = {
   id: string;
@@ -108,7 +109,7 @@ export function CemeteryClient({ plots }: { plots: Plot[] }) {
                 <div className="flex size-10 items-center justify-center rounded-lg bg-muted"><MapPin className="text-muted-foreground size-5" /></div>
                 <div className="flex-1">
                   <p className="font-medium">{b.name}</p>
-                  <p className="text-muted-foreground text-xs">{b.date ? new Date(b.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Date not recorded"}</p>
+                  <p className="text-muted-foreground text-xs">{b.date ? formatDate(b.date) : "Date not recorded"}</p>
                 </div>
                 <Badge variant="outline" className="font-mono">{b.plot}</Badge>
               </div>

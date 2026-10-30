@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Plus, Search } from "lucide-react";
 import { registerMarriage } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format";
 
 type Marriage = {
   id: string;
@@ -139,7 +140,7 @@ export function MarriagesClient({
                     <TableCell className="font-mono text-sm">{m.certificateNumber || "-"}</TableCell>
                     <TableCell className="font-medium">{m.brideName}</TableCell>
                     <TableCell className="font-medium">{m.groomName}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{m.nikahDate ? new Date(m.nikahDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-"}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{formatDate(m.nikahDate)}</TableCell>
                     <TableCell className="text-sm">{m.mehrAmount || "-"}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{m.qaziName || "-"}</TableCell>
                     <TableCell><Badge variant={statusColors[m.status || "registered"] || "default"}>{m.status || "registered"}</Badge></TableCell>

@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, MapPin } from "lucide-react";
 import { createEvent } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format";
 
 type Event = {
   id: string;
@@ -148,7 +149,7 @@ export function EventsClient({
                   <div className="flex size-14 flex-col items-center justify-center rounded-lg bg-primary/10 text-center">
                     {e.date ? (
                       <>
-                        <span className="text-primary text-xs font-medium">{new Date(e.date).toLocaleDateString("en-IN", { month: "short" })}</span>
+                        <span className="text-primary text-xs font-medium">{formatDate(e.date)}</span>
                         <span className="text-primary text-xl font-bold">{new Date(e.date).getDate()}</span>
                       </>
                     ) : (

@@ -14,6 +14,7 @@ import {
 import { Loader2, Plus, Search, Bell, Clock } from "lucide-react";
 import { createAnnouncement } from "@/lib/actions/lifecycle";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/format";
 
 type Announcement = {
   id: string;
@@ -139,7 +140,7 @@ export function AnnouncementsClient({
                     <div className="text-muted-foreground mt-1 flex items-center gap-4 text-sm">
                       <span className="flex items-center gap-1">
                         <Clock className="size-3" />
-                        {a.publishedAt ? new Date(a.publishedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : a.createdAt ? new Date(a.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}
+                        {a.publishedAt ? formatDate(a.publishedAt) : formatDate(a.createdAt)}
                       </span>
                       {a.body && <span className="truncate max-w-[400px]">{a.body}</span>}
                     </div>

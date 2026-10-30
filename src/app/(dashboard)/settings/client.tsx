@@ -68,7 +68,7 @@ export function SettingsClient({ tenant }: { tenant: Tenant }) {
             <CardContent className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2"><label className="text-sm font-medium">Fiscal Year Start</label><Select defaultValue="april"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="january">January</SelectItem><SelectItem value="april">April</SelectItem></SelectContent></Select></div>
-                <div className="flex flex-col gap-2"><label className="text-sm font-medium">Currency</label><Input defaultValue="INR (Rs.)" disabled /></div>
+                <div className="flex flex-col gap-2"><label className="text-sm font-medium">Currency</label><Input defaultValue="INR (₹)" disabled /></div>
               </div>
               <Separator />
               <p className="text-sm font-semibold">Subscription Plans</p>

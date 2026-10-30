@@ -18,6 +18,7 @@ import { Plus, Search, Handshake, IndianRupee, TrendingUp, AlertTriangle, Loader
 import { recordFundPayment } from "@/lib/actions/expenses";
 import { AccountPicker, type AccountOption } from "@/components/money/form";
 import { toast } from "sonner";
+import { formatDate, todayIST } from "@/lib/format";
 
 type ExpenseEntry = {
   id: string;
@@ -99,13 +100,13 @@ export function QardHasanClient({
                     <Input name="payee" placeholder="Full name" required />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">Loan Amount (Rs.) *</label>
+                    <label className="text-sm font-medium">Loan Amount (₹) *</label>
                     <Input type="number" name="amount" placeholder="0" required />
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium">Date *</label>
-                  <Input type="date" name="date" defaultValue={new Date().toISOString().split("T")[0]} required />
+                  <Input type="date" name="date" defaultValue={todayIST()} required />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium">Purpose / Details</label>
@@ -128,8 +129,8 @@ export function QardHasanClient({
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardContent className="flex items-center gap-4"><div className="stat-icon stat-icon-lagoon"><Handshake className="size-5 text-blue-600" /></div><div><p className="text-muted-foreground text-sm">Total Loans</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{disbursements.length}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><IndianRupee className="size-5 text-success" /></div><div><p className="text-muted-foreground text-sm">Total Disbursed</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {totalDisbursed.toLocaleString("en-IN")}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><TrendingUp className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Fund Balance</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">Rs. {Number(qardFund?.balance || 0).toLocaleString("en-IN")}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><IndianRupee className="size-5 text-success" /></div><div><p className="text-muted-foreground text-sm">Total Disbursed</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">₹{totalDisbursed.toLocaleString("en-IN")}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><TrendingUp className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Fund Balance</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">₹{Number(qardFund?.balance || 0).toLocaleString("en-IN")}</p></div></CardContent></Card>
         <Card><CardContent className="flex items-center gap-4"><div className="stat-icon"><AlertTriangle className="text-muted-foreground size-5" /></div><div><p className="text-muted-foreground text-sm">Fund Type</p><p className="font-heading text-[1.75rem] leading-tight font-semibold tracking-tight">{qardFund ? "Active" : "Not Set Up"}</p></div></CardContent></Card>
       </div>
 
@@ -160,9 +161,9 @@ export function QardHasanClient({
                     <TableRow key={l.id}>
                       <TableCell className="font-medium">{l.payee || "-"}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{l.description || "-"}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{l.date ? new Date(l.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{formatDate(l.date)}</TableCell>
                       <TableCell><Badge variant="default">{l.status || "disbursed"}</Badge></TableCell>
-                      <TableCell className="text-right font-medium">Rs. {Number(l.amount).toLocaleString("en-IN")}</TableCell>
+                      <TableCell className="text-right font-medium">₹{Number(l.amount).toLocaleString("en-IN")}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

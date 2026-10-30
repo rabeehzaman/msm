@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Users, FileText, Calendar } from "lucide-react";
+import { formatDate } from "@/lib/format";
 
 type Committee = {
   id: string;
@@ -112,7 +113,7 @@ export function GovernanceClient({
                       {meetings.map(m => (
                         <TableRow key={m.id}>
                           <TableCell className="font-medium">{m.title || "Meeting"}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{m.date ? new Date(m.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "-"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{formatDate(m.date)}</TableCell>
                           <TableCell>
                             <Badge variant={m.status === "minutes_approved" ? "default" : "secondary"}>
                               {m.status === "minutes_approved" ? "Approved" : "Draft"}
