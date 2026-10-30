@@ -7,7 +7,7 @@ import { buildings, floors, rentPayments, roomRents, rooms, roomTenancies } from
 import { requireAdmin, requireEntry } from "@/lib/auth/guard";
 import { monthEnd, monthStart, MONTHS } from "@/lib/format";
 import {
-  parseAmount, parseDate, parseId, parseYearMonth, requiredText, run, text, UserError,
+  parseAmount, parseDate, parseId, parseOptionalDate, parseYearMonth, requiredText, run, text, UserError,
 } from "@/lib/money/action";
 import { fundIdByName } from "@/lib/money/funds";
 import { nextReceiptNumber, postLedger, removeLedger, replaceLedger, writeAudit, type Tx } from "@/lib/money/ledger";
@@ -122,6 +122,7 @@ export async function startTenancy(formData: FormData) {
           phone: text(formData.get("phone")),
           shopName: text(formData.get("shopName")),
           startDate,
+          duesFrom: parseOptionalDate(formData.get("duesFrom")),
           notes: text(formData.get("notes")),
           createdBy: actor.userId,
         })
@@ -159,6 +160,7 @@ export async function updateTenancy(formData: FormData) {
           phone: text(formData.get("phone")),
           shopName: text(formData.get("shopName")),
           startDate,
+          duesFrom: parseOptionalDate(formData.get("duesFrom")),
           notes: text(formData.get("notes")),
           updatedBy: actor.userId,
           updatedAt: new Date(),

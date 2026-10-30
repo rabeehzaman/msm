@@ -2,7 +2,7 @@ import { asc, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { buildings, cashAccounts, floors, rentPayments, roomRents, rooms, roomTenancies } from "@/db/schema";
 import { currentYearMonth } from "@/lib/format";
-import { cellStatus, pendingMonths, rentForMonth, roomLabel, tenancyForMonth } from "@/lib/rent/status";
+import { cellStatus, isTracked, pendingMonths, rentForMonth, roomLabel, tenancyForMonth } from "@/lib/rent/status";
 import { ensureTenant } from "./auth";
 
 export async function getRoomFacts() {
@@ -61,7 +61,7 @@ export function monthCell(room: RoomFacts, year: number, month: number, now = cu
   const tenancy = tenancyForMonth(room.tenancies, year, month);
   return {
     month,
-    status: cellStatus(!!payment, !!tenancy, year, month, now),
+    status: cellStatus(!!payment, !!tenancy && isTracked(tenancy, year, month), year, month, now),
     expected: rentForMonth(room.rents, year, month),
     tenancyId: tenancy?.id ?? null,
     tenantName: tenancy?.tenantName ?? null,

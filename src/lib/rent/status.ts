@@ -1,6 +1,12 @@
 import { monthEnd, monthKey, monthStart, shiftMonth } from "@/lib/format";
 
-export type TenancyFact = { id: string; tenantName: string; startDate: string; endDate: string | null };
+export type TenancyFact = {
+  id: string;
+  tenantName: string;
+  startDate: string;
+  endDate: string | null;
+  duesFrom?: string | null;
+};
 export type RentFact = { amount: string; effectiveFrom: string };
 export type CellStatus = "paid" | "due" | "upcoming" | "vacant";
 
@@ -19,6 +25,11 @@ export function rentForMonth(rents: RentFact[], year: number, month: number) {
     .filter((r) => r.effectiveFrom <= end)
     .sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom));
   return Number(applicable[0]?.amount ?? 0);
+}
+
+// Older months are not treated as owed when dues are counted from a later date.
+export function isTracked(tenancy: TenancyFact, year: number, month: number) {
+  return monthEnd(year, month) >= (tenancy.duesFrom ?? tenancy.startDate);
 }
 
 export function cellStatus(
@@ -43,7 +54,7 @@ export function pendingMonths(
   const seen = new Set<string>();
   const result: { year: number; month: number; amount: number; tenancy: TenancyFact }[] = [];
   for (const tenancy of tenancies) {
-    const [startYear, startMonth] = tenancy.startDate.split("-").map(Number);
+    const [startYear, startMonth] = (tenancy.duesFrom ?? tenancy.startDate).split("-").map(Number);
     let cursor = { year: startYear, month: startMonth };
     while (monthKey(cursor.year, cursor.month) <= monthKey(now.year, now.month)) {
       const key = `${cursor.year}-${cursor.month}`;

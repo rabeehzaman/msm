@@ -29,6 +29,7 @@ type Tenancy = {
   shopName: string | null;
   startDate: string;
   endDate: string | null;
+  duesFrom: string | null;
   notes: string | null;
 };
 
@@ -290,7 +291,7 @@ function TenancyDialog({
       <DialogContent className="max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t(tenancy ? "Edit tenant" : "Add tenant")}</DialogTitle>
-          {!tenancy && <DialogDescription>{t("Months before the rent start date are not counted as pending.")}</DialogDescription>}
+          
         </DialogHeader>
         <form action={tenancy ? update.call : create.call} className="flex flex-col gap-4">
           {tenancy ? <input type="hidden" name="id" value={tenancy.id} /> : <input type="hidden" name="roomId" value={roomId} />}
@@ -313,6 +314,9 @@ function TenancyDialog({
             )}
             <Field label={t("Rent start date")}>
               <Input name="startDate" type="date" min={earliest ?? undefined} defaultValue={tenancy?.startDate ?? todayIST()} required />
+            </Field>
+            <Field label={t("Count dues from")} hint={t("Optional. Older months are not shown as pending.")}>
+              <Input name="duesFrom" type="date" defaultValue={tenancy?.duesFrom ?? ""} />
             </Field>
           </div>
           <Field label={t("Note")}>

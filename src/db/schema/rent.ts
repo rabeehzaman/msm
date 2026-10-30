@@ -53,6 +53,7 @@ export const roomTenancies = pgTable("room_tenancies", {
   shopName: text("shop_name"),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
+  duesFrom: date("dues_from"),
   notes: text("notes"),
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),
