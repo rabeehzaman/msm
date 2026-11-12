@@ -80,7 +80,8 @@ export function RentSheet({
   // Warnings shown before saving, so nothing is recorded twice or against a vacant month.
   // The server makes the same checks (paymentSlot) inside the save.
   const slot = paymentSlot(room, ym.year, ym.month, editingId ?? undefined);
-  const vacant = !m.tracked;
+  // A payment already stored on a month stays editable there, even if the tenant's dates changed since.
+  const vacant = !m.tracked && !(editing && editing.year === ym.year && editing.month === ym.month);
   const fixedTaken = !variable && slot.alreadyPaid;
   const variableCovered = variable && slot.alreadyPaid;
   const blocked = vacant || fixedTaken;

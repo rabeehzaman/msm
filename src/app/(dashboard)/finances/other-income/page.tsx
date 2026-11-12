@@ -1,5 +1,5 @@
 import { getActiveAccounts } from "@/lib/queries/accounts";
-import { getActiveFunds, getIncomeHeads, getOtherIncome } from "@/lib/queries/other-income";
+import { getIncomeFunds, getIncomeHeads, getOtherIncome } from "@/lib/queries/other-income";
 import { dateRange } from "@/lib/reports/helpers";
 import { OtherIncomeClient } from "./client";
 
@@ -18,7 +18,7 @@ export default async function OtherIncomePage({
   const [list, heads, funds, accounts] = await Promise.all([
     getOtherIncome({ from, to, headId, q, page }),
     getIncomeHeads(),
-    getActiveFunds(),
+    getIncomeFunds(),
     getActiveAccounts(),
   ]);
   return (

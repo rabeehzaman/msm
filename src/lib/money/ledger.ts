@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import type { db } from "@/db";
 import { auditLogs, cashAccounts, ledgerEntries, receiptCounters } from "@/db/schema";
 import type { Actor } from "@/lib/auth/guard";
@@ -63,7 +63,16 @@ export async function renameLedgerCategory(tx: Tx, tenantId: string, kind: "inco
   await tx
     .update(ledgerEntries)
     .set({ category: to })
-    .where(and(eq(ledgerEntries.tenantId, tenantId), eq(ledgerEntries.kind, kind), eq(ledgerEntries.category, from)));
+    .where(
+      and(
+        eq(ledgerEntries.tenantId, tenantId),
+        eq(ledgerEntries.kind, kind),
+        eq(ledgerEntries.category, from),
+        // Other Income heads rename their own lines (see actions/other-income.ts), so a category
+        // with the same name as a head never relabels them.
+        ne(ledgerEntries.sourceType, "other_income"),
+      ),
+    );
 }
 
 // A hidden account stays allowed for a record that is already on it.

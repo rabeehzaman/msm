@@ -33,7 +33,7 @@ type Entry = {
   accountName: string | null;
 };
 type Head = { id: string; name: string; isActive: boolean; entries: number };
-type Fund = { id: string; name: string };
+type Fund = { id: string; name: string; isActive: boolean };
 type Filter = { from: string; to: string; headId: string | null; q: string; page: number };
 
 const PAGE_SIZE = 50;
@@ -241,7 +241,7 @@ function IncomeDialog({
     fd.set("name", newName);
     addHead.call(fd);
   }
-  const general = funds.find((f) => f.name === "General Fund")?.id ?? funds[0]?.id;
+  const general = funds.find((f) => f.name === "General Fund")?.id ?? funds.find((f) => f.isActive)?.id;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -293,7 +293,9 @@ function IncomeDialog({
             </Field>
             <Field label={t("Fund")}>
               <NativeSelect name="fundId" defaultValue={entry?.fundId ?? general}>
-                {funds.map((f) => (
+                {funds
+                  .filter((f) => f.isActive || f.id === entry?.fundId)
+                  .map((f) => (
                   <option key={f.id} value={f.id}>
                     {t(f.name)}
                   </option>

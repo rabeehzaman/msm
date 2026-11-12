@@ -422,12 +422,18 @@ export async function updateRentPayment(formData: FormData) {
       const moved = year !== old.year || month !== old.month;
       let tenancyId = old.tenancyId;
       let part = old.part;
-      if (moved) {
-        tenancyId = tenantForRentalMonth(room, year, month).id;
-        part = nextPart(room, year, month, force, id);
-      }
-      if (monthRent && rentTypeForMonth(room.rents, year, month) === "variable") {
+      const variable = rentTypeForMonth(room.rents, year, month) === "variable";
+      if (moved) tenancyId = tenantForRentalMonth(room, year, month).id;
+      // The month's rent is saved first, so the "already paid" check below sees the new amount.
+      if (monthRent && variable) {
         await setMonthRent(tx, actor, room, old.roomId, year, month, parseAmount(monthRent, "Rent for this month"));
+      }
+      if (moved) {
+        // Same rule as a new payment: a Variable month needs its rent before money is put against it.
+        if (variable && dueForMonth(room.rents, room.monthRents, year, month) === null) {
+          throw new UserError("Enter the rent for this month first.");
+        }
+        part = nextPart(room, year, month, force, id);
       }
       const [tenancy] = await tx.select().from(roomTenancies).where(eq(roomTenancies.id, tenancyId)).limit(1);
       const receiptNumber = text(formData.get("receiptNumber")) ?? old.receiptNumber;

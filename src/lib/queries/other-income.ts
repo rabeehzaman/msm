@@ -20,12 +20,13 @@ export async function getIncomeHeads() {
     .orderBy(asc(incomeHeads.sortOrder), asc(incomeHeads.name));
 }
 
-export async function getActiveFunds() {
+// All funds with their state: the form offers active ones, plus an entry's own fund if it was hidden later.
+export async function getIncomeFunds() {
   const tenant = await ensureTenant();
   return db
-    .select({ id: funds.id, name: funds.name })
+    .select({ id: funds.id, name: funds.name, isActive: funds.isActive })
     .from(funds)
-    .where(and(eq(funds.tenantId, tenant.id), eq(funds.isActive, true)))
+    .where(eq(funds.tenantId, tenant.id))
     .orderBy(asc(funds.name));
 }
 

@@ -169,7 +169,8 @@ export async function getVariableRentSheet(year: number, month: number) {
   return facts
     .map((room) => {
       const m = roomMonth(room, year, month, now);
-      if (m.type !== "variable" || !m.tenancy) return null;
+      // Only months whose dues are counted can take a rent, so one room cannot make the whole save fail.
+      if (m.type !== "variable" || !m.tenancy || !m.tracked) return null;
       const before = room.monthRents
         .filter((r) => monthKey(r.year, r.month) < monthKey(year, month))
         .sort((a, b) => monthKey(b.year, b.month) - monthKey(a.year, a.month))[0];
