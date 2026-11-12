@@ -1,7 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
-  cashAccounts, classes, feePayments, feeStructures, households, incomeEntries, rentPayments, roomTenancies,
+  cashAccounts, classes, feePayments, feeStructures, households, incomeEntries, incomeHeads, otherIncomeEntries,
+  rentPayments, roomTenancies,
   salaryPayments, staff, students, subscriptionPayments,
 } from "@/db/schema";
 import { FULL_MONTHS, MONTHS } from "@/lib/format";
@@ -182,7 +183,36 @@ async function feeReceipt(id: string): Promise<ReceiptData | null> {
   };
 }
 
+async function otherIncomeReceipt(id: string): Promise<ReceiptData | null> {
+  const tenant = await ensureTenant();
+  const [row] = await db
+    .select({ e: otherIncomeEntries, head: incomeHeads.name, via: cashAccounts.name })
+    .from(otherIncomeEntries)
+    .innerJoin(incomeHeads, eq(otherIncomeEntries.headId, incomeHeads.id))
+    .leftJoin(cashAccounts, eq(otherIncomeEntries.accountId, cashAccounts.id))
+    .where(and(eq(otherIncomeEntries.id, id), eq(otherIncomeEntries.tenantId, tenant.id)))
+    .limit(1);
+  if (!row) return null;
+  const { e, head, via } = row;
+  return {
+    kind: "receipt",
+    title: "Income Receipt",
+    number: e.receiptNumber,
+    date: e.date,
+    partyLabel: "Received from",
+    party: e.receivedFrom || "-",
+    subject: e.bookNumber ? `Book ${e.bookNumber}` : "",
+    lines: [{ label: head, amount: e.amount }],
+    total: e.amount,
+    via,
+    note: e.note,
+    phone: null,
+    backHref: "/finances/other-income",
+  };
+}
+
 const loaders: Record<string, (id: string) => Promise<ReceiptData | null>> = {
+  "other-income": otherIncomeReceipt,
   rent: rentReceipt,
   salary: salarySlip,
   collection: collectionReceipt,

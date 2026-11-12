@@ -20,6 +20,7 @@ import {
   TrendingUp,
   KeyRound,
   HandCoins,
+  Coins,
   CreditCard,
   Banknote,
   Landmark,
@@ -31,6 +32,7 @@ import {
 import { useSession } from "@/lib/auth/session";
 import { currentYearMonth, formatDate, formatMoney, MONTHS } from "@/lib/format";
 import { useT } from "@/lib/i18n/client";
+import { UnsetNote } from "@/components/rent/tags";
 
 type DashboardStats = {
   households: number;
@@ -57,7 +59,14 @@ type Money = {
   totalBalance: number;
   monthIncome: number;
   monthExpense: number;
-  rent: { expected: number; collected: number; pendingThisMonth: number; pendingCount: number; pendingAmount: number };
+  rent: {
+    expected: number;
+    collected: number;
+    pendingThisMonth: number;
+    pendingCount: number;
+    pendingAmount: number;
+    unsetRooms: number;
+  };
   salary: { payable: number; paid: number; pendingCount: number; pendingAmount: number };
   dueBills: { id: string; accountLabel: string; year: number; month: number; amount: string; dueDate: string | null; state: string }[];
   friday: { date: string; amount: number };
@@ -118,6 +127,7 @@ export function DashboardClient({
               {[
                 { label: "Rent", href: "/rent", icon: KeyRound },
                 { label: "Collection", href: "/finances/income", icon: TrendingUp },
+                { label: "Other Income", href: "/finances/other-income", icon: Coins },
                 { label: "Expense", href: "/finances/expenses", icon: CreditCard },
                 { label: "Salary", href: "/salaries", icon: HandCoins },
               ].map((action) => (
@@ -183,17 +193,20 @@ export function DashboardClient({
             </CardContent>
           </Card>
         </Link>
-        <Link href={canEnter ? "/rent" : "/reports/pending-rent"}>
-          <Card className="h-full">
-            <CardContent className="flex flex-col gap-1">
-              <p className="text-sm font-medium text-muted-foreground">{t("Rent pending")}</p>
-              <p className="font-heading text-2xl font-semibold">{formatMoney(money.rent.pendingAmount)}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("{n} months", { n: money.rent.pendingCount })} · {t("This month")}: {formatMoney(money.rent.collected)} / {formatMoney(money.rent.expected)}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+        <div className="flex flex-col gap-2">
+          <Link href={canEnter ? "/rent" : "/reports/pending-rent"} className="flex-1">
+            <Card className="h-full">
+              <CardContent className="flex flex-col gap-1">
+                <p className="text-sm font-medium text-muted-foreground">{t("Rent pending")}</p>
+                <p className="font-heading text-2xl font-semibold">{formatMoney(money.rent.pendingAmount)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("{n} months", { n: money.rent.pendingCount })} · {t("This month")}: {formatMoney(money.rent.collected)} / {formatMoney(money.rent.expected)}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+          {canEnter && money.rent.unsetRooms > 0 && <UnsetNote count={money.rent.unsetRooms} />}
+        </div>
         <Link href={canEnter ? "/salaries" : "/reports/unpaid-salaries"}>
           <Card className="h-full">
             <CardContent className="flex flex-col gap-1">

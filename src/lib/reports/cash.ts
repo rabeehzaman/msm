@@ -6,6 +6,7 @@ import { ensureTenant } from "@/lib/queries/auth";
 import { getMaintenanceLogs } from "@/lib/queries/expenses";
 import { MONTHS } from "@/lib/format";
 import { dateRange, monthEnd, monthStart, round2, sumBy, yearFilter } from "./helpers";
+import { splitIncome } from "@/lib/money/other-income";
 import type { ReportDefinition, ReportRow } from "./types";
 
 export const expenseReports: ReportDefinition[] = [
@@ -232,6 +233,7 @@ export const cashReports: ReportDefinition[] = [
           month: sql<number>`extract(month from ${ledgerEntries.date})::int`,
           kind: ledgerEntries.kind,
           category: ledgerEntries.category,
+          sourceType: ledgerEntries.sourceType,
           total: sql<string>`sum(${ledgerEntries.amount})`,
         })
         .from(ledgerEntries)
@@ -242,7 +244,7 @@ export const cashReports: ReportDefinition[] = [
             lte(ledgerEntries.date, monthEnd(year, 12)),
           ),
         )
-        .groupBy(sql`1`, ledgerEntries.kind, ledgerEntries.category);
+        .groupBy(sql`1`, ledgerEntries.kind, ledgerEntries.category, ledgerEntries.sourceType);
       const income = lines.filter((l) => l.kind === "income");
       const expense = lines.filter((l) => l.kind === "expense");
       const sum = (ls: typeof lines) => round2(ls.reduce((s, l) => s + Number(l.total), 0));
@@ -267,6 +269,7 @@ export const cashReports: ReportDefinition[] = [
         { label: "Surplus / deficit", value: round2(totalIncome - totalExpense) },
       ];
       if (view === "category") {
+        const split = splitIncome(income);
         const group = (ls: typeof lines, type: string): ReportRow[] => {
           const map = new Map<string, number>();
           for (const l of ls) map.set(l.category, (map.get(l.category) ?? 0) + Number(l.total));
@@ -290,7 +293,12 @@ export const cashReports: ReportDefinition[] = [
             { key: "income", label: "Income", kind: "money" },
             { key: "expense", label: "Expense", kind: "money" },
           ],
-          rows: [...group(income, "Income"), ...group(expense, "Expense")],
+          // Other Income is its own group, head by head, after the other income lines.
+          rows: [
+            ...split.regular.map((r) => ({ type: "Income", category: r.category, income: r.amount, expense: null })),
+            ...split.other.map((r) => ({ type: "Other Income", category: r.category, income: r.amount, expense: null })),
+            ...group(expense, "Expense"),
+          ],
           totals: { category: "Total", income: totalIncome, expense: totalExpense },
           summary,
         };

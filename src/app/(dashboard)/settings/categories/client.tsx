@@ -2,27 +2,32 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ConfirmButton } from "@/components/money/confirm-button";
 import { NativeSelect, SaveButton, useAction } from "@/components/money/form";
 import { PageHeader } from "@/components/money/page-header";
 import { saveCollectionCategory } from "@/lib/actions/collections";
 import { saveExpenseCategory } from "@/lib/actions/expenses";
+import { deleteIncomeHead, saveIncomeHead } from "@/lib/actions/other-income";
 import { useT } from "@/lib/i18n/client";
+import type { ActionResult } from "@/lib/money/action";
 
-type Category = { id: string; name: string; isActive: boolean; fundId?: string | null };
+type Category = { id: string; name: string; isActive: boolean; fundId?: string | null; entries?: number };
 type Fund = { id: string; name: string };
-type Save = (formData: FormData) => ReturnType<typeof saveExpenseCategory>;
+type Save = (formData: FormData) => Promise<ActionResult<unknown>>;
 
 export function CategoriesClient({
   expense,
   collection,
+  heads,
   funds,
 }: {
   expense: Category[];
   collection: Category[];
+  heads: Category[];
   funds: Fund[];
 }) {
   return (
@@ -31,12 +36,25 @@ export function CategoriesClient({
       <div className="grid gap-4 md:grid-cols-2">
         <CategoryCard title="Collection categories" items={collection} save={saveCollectionCategory} funds={funds} />
         <CategoryCard title="Expense categories" items={expense} save={saveExpenseCategory} />
+        <CategoryCard title="Other Income heads" items={heads} save={saveIncomeHead} deletable />
       </div>
     </div>
   );
 }
 
-function CategoryCard({ title, items, save, funds }: { title: string; items: Category[]; save: Save; funds?: Fund[] }) {
+function CategoryCard({
+  title,
+  items,
+  save,
+  funds,
+  deletable,
+}: {
+  title: string;
+  items: Category[];
+  save: Save;
+  funds?: Fund[];
+  deletable?: boolean;
+}) {
   const t = useT();
   const [adding, setAdding] = useState(false);
   return (
@@ -53,7 +71,7 @@ function CategoryCard({ title, items, save, funds }: { title: string; items: Cat
       <CardContent className="flex flex-col gap-2">
         {adding && <CategoryRow save={save} funds={funds} onDone={() => setAdding(false)} />}
         {items.map((c) => (
-          <CategoryRow key={c.id} category={c} save={save} funds={funds} />
+          <CategoryRow key={c.id} category={c} save={save} funds={funds} deletable={deletable} />
         ))}
       </CardContent>
     </Card>
@@ -65,11 +83,13 @@ function CategoryRow({
   save,
   funds,
   onDone,
+  deletable,
 }: {
   category?: Category;
   save: Save;
   funds?: Fund[];
   onDone?: () => void;
+  deletable?: boolean;
 }) {
   const t = useT();
   const router = useRouter();
@@ -106,6 +126,26 @@ function CategoryRow({
         </label>
       )}
       <SaveButton pending={action.pending} size="sm" />
+      {/* Only a head with no entries can be deleted; one with entries can only be hidden. */}
+      {deletable && category && category.entries === 0 && <DeleteHead id={category.id} />}
     </form>
+  );
+}
+
+function DeleteHead({ id }: { id: string }) {
+  const t = useT();
+  const router = useRouter();
+  const remove = useAction(deleteIncomeHead, { success: "Deleted", onDone: () => router.refresh() });
+  return (
+    <ConfirmButton
+      title="Delete this head?"
+      description="It has no entries. This is logged."
+      onConfirm={() => remove.call(id)}
+      trigger={
+        <Button type="button" variant="ghost" size="icon" className="size-8" aria-label={t("Delete")} disabled={remove.pending}>
+          <Trash2 className="size-4" />
+        </Button>
+      }
+    />
   );
 }

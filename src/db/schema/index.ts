@@ -13,3 +13,4 @@ export * from "./finance";
 export * from "./madrasa";
 export * from "./lifecycle";
 export * from "./community";
+export * from "./other-income";
