@@ -16,6 +16,7 @@ import { deleteCollection, saveCollection } from "@/lib/actions/collections";
 import { useSession } from "@/lib/auth/session";
 import { formatDate, formatMoney, todayIST } from "@/lib/format";
 import { useT } from "@/lib/i18n/client";
+import { useShowMore } from "@/components/show-more";
 
 type Entry = {
   id: string;
@@ -48,12 +49,13 @@ export function CollectionsClient({
   to: string;
 }) {
   const t = useT();
-  const router = useRouter();
   const { canEnter, isAdmin } = useSession();
   const [editing, setEditing] = useState<Entry | "new" | null>(null);
   const [filter, setFilter] = useState("all");
-  const remove = useAction(deleteCollection, { success: "Entry deleted. Balance corrected.", onDone: () => router.refresh() });
+  // The delete revalidates /finances, and its response already carries the updated list.
+  const remove = useAction(deleteCollection, { success: "Entry deleted. Balance corrected." });
   const shown = entries.filter((e) => filter === "all" || e.category === filter);
+  const page = useShowMore(shown);
 
   return (
     <div className="flex flex-col gap-6">
@@ -112,7 +114,7 @@ export function CollectionsClient({
             <EmptyState message={t("No collections for this selection.")} />
           ) : (
             <ul className="divide-border divide-y">
-              {shown.map((e) => (
+              {page.visible.map((e) => (
                 <li key={e.id} className="flex items-center justify-between gap-3 py-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium">
@@ -154,6 +156,7 @@ export function CollectionsClient({
               ))}
             </ul>
           )}
+          {page.button}
         </CardContent>
       </Card>
 
@@ -186,8 +189,8 @@ function CollectionDialog({
     success: "Collection saved",
     onDone: (id) => {
       onClose();
+      // An edit's response already carries the updated list; a new entry opens its receipt.
       if (!entry && id) router.push(`/receipts/collection/${id}`);
-      else router.refresh();
     },
   });
   return (

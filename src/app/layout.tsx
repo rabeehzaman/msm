@@ -16,15 +16,19 @@ const inter = Inter({
   subsets: ["latin", "latin-ext"],
 });
 
+// Only the optical-size axis is used (font-optical-sizing on page titles). SOFT was never set in
+// CSS, so dropping it keeps the same letters and makes the file smaller.
 const fraunces = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
-  axes: ["opsz", "SOFT"],
+  axes: ["opsz"],
 });
 
+// Used only for a few codes (certificate numbers, blood groups), so not preloaded on every page.
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin"],
+  preload: false,
 });
 
 // Script fallbacks: only downloaded when Malayalam / Arabic glyphs appear.

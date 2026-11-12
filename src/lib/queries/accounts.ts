@@ -7,16 +7,18 @@ const signed = sql<string>`case when ${ledgerEntries.direction} = 'in' then ${le
 
 export async function getAccountsWithBalances() {
   const tenant = await ensureTenant();
-  const accounts = await db
-    .select()
-    .from(cashAccounts)
-    .where(eq(cashAccounts.tenantId, tenant.id))
-    .orderBy(asc(cashAccounts.type), asc(cashAccounts.name));
-  const moved = await db
-    .select({ accountId: ledgerEntries.accountId, total: sql<string>`sum(${signed})` })
-    .from(ledgerEntries)
-    .where(eq(ledgerEntries.tenantId, tenant.id))
-    .groupBy(ledgerEntries.accountId);
+  const [accounts, moved] = await Promise.all([
+    db
+      .select()
+      .from(cashAccounts)
+      .where(eq(cashAccounts.tenantId, tenant.id))
+      .orderBy(asc(cashAccounts.type), asc(cashAccounts.name)),
+    db
+      .select({ accountId: ledgerEntries.accountId, total: sql<string>`sum(${signed})` })
+      .from(ledgerEntries)
+      .where(eq(ledgerEntries.tenantId, tenant.id))
+      .groupBy(ledgerEntries.accountId),
+  ]);
   const movedMap = new Map(moved.map((m) => [m.accountId, Number(m.total)]));
   return accounts.map((a) => ({
     ...a,

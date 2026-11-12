@@ -50,9 +50,12 @@ export async function getMeetings() {
 
 export async function getDashboardStats() {
   const tenant = await ensureTenant();
-  const [householdCount] = await db.select({ count: count() }).from(households).where(eq(households.tenantId, tenant.id));
-  const [memberCount] = await db.select({ count: count() }).from(members).where(eq(members.tenantId, tenant.id));
-  const [studentCount] = await db.select({ count: count() }).from(students).where(eq(students.tenantId, tenant.id));
+  // Three counts at once rather than one after another.
+  const [[householdCount], [memberCount], [studentCount]] = await Promise.all([
+    db.select({ count: count() }).from(households).where(eq(households.tenantId, tenant.id)),
+    db.select({ count: count() }).from(members).where(eq(members.tenantId, tenant.id)),
+    db.select({ count: count() }).from(students).where(eq(students.tenantId, tenant.id)),
+  ]);
 
   return {
     households: Number(householdCount?.count ?? 0),

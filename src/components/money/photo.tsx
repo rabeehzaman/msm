@@ -5,8 +5,14 @@ import { toast } from "sonner";
 import { Camera, ImageIcon, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/lib/i18n/client";
+
+// The Supabase browser library is only needed when a photo is uploaded or opened,
+// so it is fetched then instead of with every page that shows a photo button.
+async function storage() {
+  const { createClient } = await import("@/lib/supabase/client");
+  return createClient().storage;
+}
 
 const BUCKET = "mahallu-files";
 
@@ -39,7 +45,7 @@ export function PhotoField({ folder, label, name = "photoPath" }: { folder: stri
     try {
       const blob = await shrink(file);
       const target = `${folder}/${new Date().getFullYear()}/${crypto.randomUUID()}.jpg`;
-      const { error } = await createClient().storage.from(BUCKET).upload(target, blob, { contentType: blob.type || "image/jpeg" });
+      const { error } = await (await storage()).from(BUCKET).upload(target, blob, { contentType: blob.type || "image/jpeg" });
       if (error) throw error;
       setPath(target);
       setPreview(URL.createObjectURL(blob));
@@ -101,9 +107,8 @@ export function PhotoButton({ path }: { path: string }) {
 
   useEffect(() => {
     if (!open || url) return;
-    createClient()
-      .storage.from(BUCKET)
-      .createSignedUrl(path, 3600)
+    storage()
+      .then((s) => s.from(BUCKET).createSignedUrl(path, 3600))
       .then(({ data, error }) => {
         if (error || !data) toast.error(t("The photo could not be opened."));
         else setUrl(data.signedUrl);

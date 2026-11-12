@@ -205,6 +205,11 @@
   ::selection {
     background: oklch(0.8 0.12 80 / 0.35);
   }
+  /* Malayalam shown while the app is in English (the language button, the greeting) uses the phone's
+     own Malayalam font, so the web font is only downloaded once Malayalam is switched on. */
+  .font-system-ml {
+    font-family: system-ui, sans-serif;
+  }
   :lang(ar), [lang="ar"] {
     font-family: var(--font-naskh), serif;
   }

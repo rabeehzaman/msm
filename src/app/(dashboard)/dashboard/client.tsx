@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useSession } from "@/lib/auth/session";
 import { currentYearMonth, formatDate, formatMoney, MONTHS } from "@/lib/format";
-import { useT } from "@/lib/i18n/client";
+import { useLang, useT } from "@/lib/i18n/client";
 import { UnsetNote } from "@/components/rent/tags";
 
 type DashboardStats = {
@@ -82,6 +82,7 @@ export function DashboardClient({
   money: Money;
 }) {
   const t = useT();
+  const lang = useLang();
   const { canEnter } = useSession();
   const net = financeStats.totalIncome - financeStats.totalExpenses;
   const flowTotal = financeStats.totalIncome + financeStats.totalExpenses;
@@ -113,7 +114,7 @@ export function DashboardClient({
         <div className="flex min-h-[15rem] flex-col justify-between gap-8 p-6 text-white md:min-h-[17rem] md:p-9">
           <div className="max-w-xl">
             <p className="text-sm font-medium tracking-wide text-amber-200">
-              Assalamu Alaikum · <span lang="ml">സ്വാഗതം</span>
+              Assalamu Alaikum · <span lang="ml" className={lang === "ml" ? undefined : "font-system-ml"}>സ്വാഗതം</span>
             </p>
             <h1 className="font-heading mt-2 text-3xl font-semibold tracking-tight md:text-[2.6rem] md:leading-[1.1]">
               {t("Your Mahallu at a glance")}

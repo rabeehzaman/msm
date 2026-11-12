@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useShowMore } from "@/components/show-more";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
@@ -69,6 +70,7 @@ export function HouseholdsClient({
     const matchesWard = wardFilter === "all" || h.wardId === wardFilter;
     return matchesSearch && matchesWard;
   });
+  const page = useShowMore(filtered);
 
   async function handleCreate(formData: FormData) {
     setLoading(true);
@@ -230,7 +232,7 @@ export function HouseholdsClient({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((h) => (
+                  {page.visible.map((h) => (
                     <TableRow key={h.id}>
                       <TableCell className="font-medium">{h.houseNumber}</TableCell>
                       <TableCell className="font-semibold">{h.familyName}</TableCell>
@@ -259,6 +261,7 @@ export function HouseholdsClient({
               </Table>
             </div>
           )}
+          {page.button}
         </CardContent>
       </Card>
 

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Pencil, Plus, Search, Trash2, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import { deleteExpense, saveExpense } from "@/lib/actions/expenses";
 import { useSession } from "@/lib/auth/session";
 import { formatDate, formatMoney, todayIST } from "@/lib/format";
 import { useT } from "@/lib/i18n/client";
+import { useShowMore } from "@/components/show-more";
 
 type Entry = {
   id: string;
@@ -56,12 +56,13 @@ export function ExpensesClient({
   to: string;
 }) {
   const t = useT();
-  const router = useRouter();
   const { canEnter, isAdmin } = useSession();
   const [editing, setEditing] = useState<Entry | "new" | null>(null);
   const [category, setCategory] = useState("all");
-  const remove = useAction(deleteExpense, { success: "Expense deleted. Balance corrected.", onDone: () => router.refresh() });
+  // The delete revalidates /finances, and its response already carries the updated list.
+  const remove = useAction(deleteExpense, { success: "Expense deleted. Balance corrected." });
   const shown = entries.filter((e) => category === "all" || e.category === category);
+  const page = useShowMore(shown);
   const total = shown.reduce((s, e) => s + Number(e.amount), 0);
 
   return (
@@ -117,7 +118,7 @@ export function ExpensesClient({
             <EmptyState message={t("No expenses for this selection.")} />
           ) : (
             <ul className="divide-border divide-y">
-              {shown.map((e) => (
+              {page.visible.map((e) => (
                 <li key={e.id} className="flex items-center justify-between gap-3 py-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{e.payee}</p>
@@ -157,6 +158,7 @@ export function ExpensesClient({
               ))}
             </ul>
           )}
+          {page.button}
         </CardContent>
       </Card>
 
@@ -187,14 +189,8 @@ function ExpenseDialog({
   onClose: () => void;
 }) {
   const t = useT();
-  const router = useRouter();
-  const save = useAction(saveExpense, {
-    success: "Expense saved",
-    onDone: () => {
-      onClose();
-      router.refresh();
-    },
-  });
+  // The save revalidates /finances, and its response already carries the updated list.
+  const save = useAction(saveExpense, { success: "Expense saved", onDone: onClose });
   const general = funds.find((f) => f.name === "General Fund")?.id;
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>

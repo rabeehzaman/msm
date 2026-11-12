@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useShowMore } from "@/components/show-more";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
@@ -83,6 +84,7 @@ export function MembersClient({
     const matchesStatus = statusFilter === "all" || m.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+  const page = useShowMore(filtered);
 
   async function handleCreate(formData: FormData) {
     setLoading(true);
@@ -273,7 +275,7 @@ export function MembersClient({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((m) => (
+                  {page.visible.map((m) => (
                     <TableRow key={m.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -302,6 +304,7 @@ export function MembersClient({
               </Table>
             </div>
           )}
+          {page.button}
         </CardContent>
       </Card>
 

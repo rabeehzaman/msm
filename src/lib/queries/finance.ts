@@ -4,8 +4,8 @@ import { and, eq, desc, inArray, sql } from "drizzle-orm";
 import { ensureTenant } from "./auth";
 
 // Fund balances are worked out from the ledger; the stored funds.balance is never updated.
-async function withLedgerBalances<T extends { id: string; balance: string }>(tenantId: string, rows: T[]) {
-  const moved = await db
+function fundMovements(tenantId: string) {
+  return db
     .select({
       fundId: ledgerEntries.fundId,
       total: sql<string>`sum(case when ${ledgerEntries.direction} = 'in' then ${ledgerEntries.amount} else -${ledgerEntries.amount} end)`,
@@ -13,20 +13,26 @@ async function withLedgerBalances<T extends { id: string; balance: string }>(ten
     .from(ledgerEntries)
     .where(eq(ledgerEntries.tenantId, tenantId))
     .groupBy(ledgerEntries.fundId);
+}
+
+function withLedgerBalances<T extends { id: string; balance: string }>(
+  rows: T[],
+  moved: Awaited<ReturnType<typeof fundMovements>>,
+) {
   const totals = new Map(moved.map((m) => [m.fundId, m.total]));
   return rows.map((f) => ({ ...f, balance: totals.get(f.id) ?? "0" }));
 }
 
 export async function getFunds() {
   const tenant = await ensureTenant();
-  const existingFunds = await db
-    .select()
-    .from(funds)
-    .where(eq(funds.tenantId, tenant.id))
-    .orderBy(funds.name);
+  // The funds and their movements are read together rather than one after the other.
+  const [existingFunds, moved] = await Promise.all([
+    db.select().from(funds).where(eq(funds.tenantId, tenant.id)).orderBy(funds.name),
+    fundMovements(tenant.id),
+  ]);
 
   if (existingFunds.length > 0) {
-    return withLedgerBalances(tenant.id, existingFunds);
+    return withLedgerBalances(existingFunds, moved);
   }
 
   const defaultFunds = [
@@ -122,18 +128,21 @@ export async function getFridayCollections() {
 
 export async function getFinanceDashboardStats() {
   const tenant = await ensureTenant();
-  const totals = await db
-    .select({
-      kind: ledgerEntries.kind,
-      total: sql<string>`sum(${ledgerEntries.amount})`,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(ledgerEntries)
-    .where(and(eq(ledgerEntries.tenantId, tenant.id), inArray(ledgerEntries.kind, ["income", "expense"])))
-    .groupBy(ledgerEntries.kind);
+  // Totals are summed in the database and read alongside the fund balances.
+  const [totals, fundBalances] = await Promise.all([
+    db
+      .select({
+        kind: ledgerEntries.kind,
+        total: sql<string>`sum(${ledgerEntries.amount})`,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(ledgerEntries)
+      .where(and(eq(ledgerEntries.tenantId, tenant.id), inArray(ledgerEntries.kind, ["income", "expense"])))
+      .groupBy(ledgerEntries.kind),
+    getFunds(),
+  ]);
   const income = totals.find((t) => t.kind === "income");
   const expense = totals.find((t) => t.kind === "expense");
-  const fundBalances = await getFunds();
 
   return {
     totalIncome: Number(income?.total ?? 0),

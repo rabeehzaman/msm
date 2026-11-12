@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/db";
 import { tenants } from "@/db/schema";
@@ -15,7 +16,8 @@ export async function getDefaultTenant() {
   return result[0] ?? null;
 }
 
-export async function ensureTenant() {
+// Memoised per request: every query on a page asks for it, and it only needs one round trip.
+export const ensureTenant = cache(async () => {
   let tenant = await getDefaultTenant();
   if (!tenant) {
     const [newTenant] = await db
@@ -28,4 +30,4 @@ export async function ensureTenant() {
     tenant = newTenant;
   }
   return tenant;
-}
+});

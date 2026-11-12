@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Loader2, Banknote, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -99,11 +99,20 @@ export function useAction<A extends unknown[], R = undefined>(
   const t = useT();
   const [pending, startTransition] = useTransition();
   const [lastError, setLastError] = useState<string | null>(null);
+  // Set at once on the first tap, before React re-renders, so a quick double tap cannot save twice.
+  const busy = useRef(false);
 
   function call(...args: A) {
+    if (busy.current) return;
+    busy.current = true;
     setLastError(null);
     startTransition(async () => {
-      const result = await action(...args);
+      let result: ActionResult<R>;
+      try {
+        result = await action(...args);
+      } finally {
+        busy.current = false;
+      }
       if (result.ok) {
         if (options?.success) toast.success(t(options.success));
         options?.onDone?.(result.data);

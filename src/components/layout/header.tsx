@@ -96,7 +96,9 @@ export function Header() {
               />
             }
           >
-            <span lang={lang === "ml" ? "en" : "ml"}>{lang === "ml" ? "EN" : "മല"}</span>
+            <span lang={lang === "ml" ? "en" : "ml"} className={lang === "ml" ? undefined : "font-system-ml"}>
+              {lang === "ml" ? "EN" : "മല"}
+            </span>
             <span className="sr-only">{t("Change language")}</span>
           </TooltipTrigger>
           <TooltipContent>{t("Change language")}</TooltipContent>
