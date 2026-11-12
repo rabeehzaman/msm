@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, numeric, date, integer, unique } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, numeric, date, integer, unique, uniqueIndex } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants";
 import { cashAccounts } from "./accounts";
 
@@ -67,8 +67,10 @@ export const roomRents = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     roomId: uuid("room_id").notNull().references(() => rooms.id, { onDelete: "restrict" }),
+    // For a Variable row this is only the usual / approximate rent (0 = none).
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     effectiveFrom: date("effective_from").notNull(),
+    rentType: text("rent_type").$type<"fixed" | "variable">().default("fixed").notNull(),
     createdBy: uuid("created_by"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -84,6 +86,8 @@ export const rentPayments = pgTable(
     tenancyId: uuid("tenancy_id").notNull().references(() => roomTenancies.id, { onDelete: "restrict" }),
     year: integer("year").notNull(),
     month: integer("month").notNull(),
+    // A Variable month can be paid in parts; a Fixed month only ever has part 1.
+    part: integer("part").default(1).notNull(),
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     paidDate: date("paid_date").notNull(),
     accountId: uuid("account_id").notNull().references(() => cashAccounts.id, { onDelete: "restrict" }),
@@ -94,5 +98,23 @@ export const rentPayments = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [unique("rent_payments_room_id_year_month_key").on(t.roomId, t.year, t.month)],
+  (t) => [uniqueIndex("rent_payments_room_month_part_key").on(t.roomId, t.year, t.month, t.part)],
+);
+
+// Each month's rent for a Variable room (migration 0008).
+export const roomMonthRents = pgTable(
+  "room_month_rents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+    roomId: uuid("room_id").notNull().references(() => rooms.id, { onDelete: "restrict" }),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+    createdBy: uuid("created_by"),
+    updatedBy: uuid("updated_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [unique("room_month_rents_room_id_year_month_key").on(t.roomId, t.year, t.month)],
 );

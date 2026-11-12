@@ -1,10 +1,10 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, asc, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { rentPayments } from "@/db/schema";
+import { cashAccounts, rentPayments, roomTenancies } from "@/db/schema";
 import { ensureTenant } from "@/lib/queries/auth";
 import { getRoomFacts, roomPending } from "@/lib/queries/rent";
 import { MONTHS } from "@/lib/format";
-import { sumBy, yearFilter } from "./helpers";
+import { dateRange, sumBy, yearFilter } from "./helpers";
 import type { ReportDefinition, ReportRow } from "./types";
 
 const monthName = (year: number, month: number) => `${MONTHS[month - 1]} ${year}`;
@@ -67,7 +67,7 @@ export const rentReports: ReportDefinition[] = [
         },
       ];
       const columns = [
-        { key: "month", label: "Month" },
+        { key: "month", label: "Rental Month" },
         { key: "status", label: "Status", translate: true },
         { key: "paidDate", label: "Payment date", kind: "date" as const },
         { key: "account", label: "Paid via" },
@@ -158,5 +158,59 @@ export const rentReports: ReportDefinition[] = [
       };
     },
   },
+  {
+    slug: "rent-received",
+    title: "Rent received",
+    description: "Every rent payment by payment date, with the Rental Month it pays for",
+    group: "Rent",
+    build: async (params) => {
+      const tenant = await ensureTenant();
+      const { from, to, filters } = dateRange(params, 2);
+      const [facts, lines] = await Promise.all([
+        getRoomFacts(),
+        db
+          .select({
+            paidDate: rentPayments.paidDate,
+            year: rentPayments.year,
+            month: rentPayments.month,
+            roomId: rentPayments.roomId,
+            tenant: roomTenancies.tenantName,
+            receipt: rentPayments.receiptNumber,
+            via: cashAccounts.name,
+            amount: rentPayments.amount,
+          })
+          .from(rentPayments)
+          .innerJoin(roomTenancies, eq(rentPayments.tenancyId, roomTenancies.id))
+          .leftJoin(cashAccounts, eq(rentPayments.accountId, cashAccounts.id))
+          .where(and(eq(rentPayments.tenantId, tenant.id), gte(rentPayments.paidDate, from), lte(rentPayments.paidDate, to)))
+          .orderBy(asc(rentPayments.paidDate), asc(rentPayments.createdAt)),
+      ]);
+      const labels = new Map(facts.map((r) => [r.id, r.label]));
+      const rows: ReportRow[] = lines.map((l) => ({
+        paidDate: l.paidDate,
+        rentalMonth: monthName(l.year, l.month),
+        room: labels.get(l.roomId) ?? "",
+        tenant: l.tenant,
+        receipt: l.receipt,
+        via: l.via,
+        amount: Number(l.amount),
+      }));
+      return {
+        slug: "rent-received",
+        title: "Rent received",
+        filters,
+        columns: [
+          { key: "paidDate", label: "Payment date", kind: "date" },
+          { key: "rentalMonth", label: "Rental Month" },
+          { key: "room", label: "Room" },
+          { key: "tenant", label: "Tenant" },
+          { key: "receipt", label: "Receipt No." },
+          { key: "via", label: "Received via" },
+          { key: "amount", label: "Amount", kind: "money" },
+        ],
+        rows,
+        totals: { paidDate: "", room: "Total", amount: sumBy(rows, "amount") },
+      };
+    },
+  },
 ];
-

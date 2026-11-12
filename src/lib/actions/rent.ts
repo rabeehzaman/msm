@@ -1,17 +1,19 @@
 "use server";
 
-import { and, desc, eq, isNull, lte, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { buildings, floors, rentPayments, roomRents, rooms, roomTenancies } from "@/db/schema";
-import { requireAdmin, requireEntry } from "@/lib/auth/guard";
-import { monthEnd, monthStart, MONTHS } from "@/lib/format";
+import { buildings, floors, rentPayments, roomMonthRents, roomRents, rooms, roomTenancies } from "@/db/schema";
+import { requireAdmin, requireEntry, type Actor } from "@/lib/auth/guard";
+import { formatDate, monthStart, MONTHS } from "@/lib/format";
 import {
-  parseAmount, parseDate, parseId, parseOptionalDate, parseYearMonth, requiredText, run, text, UserError,
+  parseAmount, parseDate, parseId, parseOptionalAmount, parseOptionalDate, parseYearMonth, requiredText, run, text, UserError,
 } from "@/lib/money/action";
 import { fundIdByName } from "@/lib/money/funds";
 import { nextReceiptNumber, postLedger, removeLedger, replaceLedger, writeAudit, type Tx } from "@/lib/money/ledger";
-import { roomLabel, tenancyForMonth } from "@/lib/rent/status";
+import {
+  dueForMonth, isTracked, paymentSlot, rentTypeForMonth, roomLabel, tenancyForMonth, type RentType,
+} from "@/lib/rent/status";
 
 function refresh() {
   revalidatePath("/rent", "layout");
@@ -96,13 +98,25 @@ function firstOfMonth(date: string) {
   return `${date.slice(0, 7)}-01`;
 }
 
+const periodName = (year: number, month: number) => `${MONTHS[month - 1]} ${year}`;
+
+// Fixed needs a monthly rent. Variable only takes an optional usual / approximate rent.
+function rentTerm(formData: FormData) {
+  const rentType: RentType = formData.get("rentType") === "variable" ? "variable" : "fixed";
+  const amount =
+    rentType === "fixed"
+      ? parseAmount(formData.get("rent"), "Monthly rent")
+      : parseOptionalAmount(formData.get("rent"), "Usual rent");
+  return { rentType, amount };
+}
+
 // Starts a tenant in a vacant room, and sets the rent from their first month.
 export async function startTenancy(formData: FormData) {
   return run(async () => {
     const { actor } = await requireAdmin();
     const roomId = parseId(formData.get("roomId"), "a room");
     const startDate = parseDate(formData.get("startDate"));
-    const amount = parseAmount(formData.get("rent"), "Monthly rent");
+    const { rentType, amount } = rentTerm(formData);
     await db.transaction(async (tx) => {
       const [overlap] = await tx
         .select({ id: roomTenancies.id, endDate: roomTenancies.endDate })
@@ -127,18 +141,20 @@ export async function startTenancy(formData: FormData) {
           createdBy: actor.userId,
         })
         .returning();
-      await setRent(tx, actor.tenantId, actor.userId, roomId, amount, firstOfMonth(startDate));
-      await writeAudit(tx, actor, "create", "room_tenancies", row.id, null, { ...row, rent: amount });
+      await setRent(tx, actor.tenantId, actor.userId, roomId, amount, rentType, firstOfMonth(startDate));
+      await writeAudit(tx, actor, "create", "room_tenancies", row.id, null, { ...row, rent: amount, rentType });
     });
     refresh();
   }, "This room already has a tenant.");
 }
 
-async function setRent(tx: Tx, tenantId: string, userId: string, roomId: string, amount: string, effectiveFrom: string) {
+async function setRent(
+  tx: Tx, tenantId: string, userId: string, roomId: string, amount: string, rentType: RentType, effectiveFrom: string,
+) {
   await tx
     .insert(roomRents)
-    .values({ tenantId, roomId, amount, effectiveFrom, createdBy: userId })
-    .onConflictDoUpdate({ target: [roomRents.roomId, roomRents.effectiveFrom], set: { amount } });
+    .values({ tenantId, roomId, amount, rentType, effectiveFrom, createdBy: userId })
+    .onConflictDoUpdate({ target: [roomRents.roomId, roomRents.effectiveFrom], set: { amount, rentType } });
 }
 
 export async function updateTenancy(formData: FormData) {
@@ -209,12 +225,13 @@ export async function endTenancy(formData: FormData) {
   });
 }
 
-// New rent from the chosen month. Earlier months keep the old rent.
+// New rent, or a switch between Fixed and Variable, from the chosen month. Earlier months keep
+// their old rent, type, month amounts and payments.
 export async function changeRent(formData: FormData) {
   return run(async () => {
     const { actor } = await requireAdmin();
     const roomId = parseId(formData.get("roomId"), "a room");
-    const amount = parseAmount(formData.get("rent"), "Monthly rent");
+    const { rentType, amount } = rentTerm(formData);
     const { year, month } = parseYearMonth(formData.get("year"), formData.get("month"));
     const effectiveFrom = monthStart(year, month);
     await db.transaction(async (tx) => {
@@ -224,8 +241,8 @@ export async function changeRent(formData: FormData) {
         .where(and(eq(rooms.id, roomId), eq(rooms.tenantId, actor.tenantId)))
         .limit(1);
       if (!room) throw new UserError("That room no longer exists.");
-      await setRent(tx, actor.tenantId, actor.userId, roomId, amount, effectiveFrom);
-      await writeAudit(tx, actor, "update", "room_rents", null, null, { roomId, amount, effectiveFrom });
+      await setRent(tx, actor.tenantId, actor.userId, roomId, amount, rentType, effectiveFrom);
+      await writeAudit(tx, actor, "update", "room_rents", null, null, { roomId, amount, rentType, effectiveFrom });
     });
     refresh();
   });
@@ -233,42 +250,112 @@ export async function changeRent(formData: FormData) {
 
 // --- Rent payments ---
 
-async function roomName(tx: Tx, tenantId: string, roomId: string) {
+// Locks the room so two people saving the same room's rent at once take turns, then loads what the
+// checks need. Payments are always recorded against the Rental Month, never the payment date.
+async function lockedRoom(tx: Tx, tenantId: string, roomId: string) {
   const [row] = await tx
     .select({ room: rooms.name, floor: floors.name, building: buildings.name })
     .from(rooms)
     .innerJoin(floors, eq(rooms.floorId, floors.id))
     .innerJoin(buildings, eq(floors.buildingId, buildings.id))
     .where(and(eq(rooms.id, roomId), eq(rooms.tenantId, tenantId)))
+    .for("update", { of: rooms })
     .limit(1);
   if (!row) throw new UserError("That room no longer exists.");
-  return roomLabel(row.building, row.floor, row.room);
+  const tenancies = await tx.select().from(roomTenancies).where(eq(roomTenancies.roomId, roomId));
+  const rents = await tx
+    .select({ amount: roomRents.amount, effectiveFrom: roomRents.effectiveFrom, rentType: roomRents.rentType })
+    .from(roomRents)
+    .where(eq(roomRents.roomId, roomId));
+  const monthRents = await tx
+    .select({ year: roomMonthRents.year, month: roomMonthRents.month, amount: roomMonthRents.amount })
+    .from(roomMonthRents)
+    .where(eq(roomMonthRents.roomId, roomId));
+  const payments = await tx
+    .select({ id: rentPayments.id, year: rentPayments.year, month: rentPayments.month, part: rentPayments.part, amount: rentPayments.amount })
+    .from(rentPayments)
+    .where(eq(rentPayments.roomId, roomId));
+  return { label: roomLabel(row.building, row.floor, row.room), tenancies, rents, monthRents, payments };
 }
 
-// Ticks a month paid: saves the payment and adds it to Cash/Bank in one step.
+type LockedRoom = Awaited<ReturnType<typeof lockedRoom>>;
+
+// The tenant a Rental Month belongs to. A vacant month, or one before the tenant's dues start, is refused.
+function tenantForRentalMonth(room: LockedRoom, year: number, month: number) {
+  const tenancy = tenancyForMonth(room.tenancies, year, month);
+  if (!tenancy) {
+    throw new UserError(`This room had no tenant in ${periodName(year, month)}. Choose a month when the room was let.`);
+  }
+  if (!isTracked(tenancy, year, month)) {
+    throw new UserError(
+      `Rent for ${tenancy.tenantName} is counted from ${formatDate(tenancy.duesFrom ?? tenancy.startDate)}. Choose a later month.`,
+    );
+  }
+  return tenancy;
+}
+
+// Stops a month being paid twice by mistake (see paymentSlot).
+function nextPart(room: LockedRoom, year: number, month: number, force: boolean, exceptId?: string) {
+  const slot = paymentSlot(room, year, month, exceptId);
+  if (slot.alreadyPaid && !(slot.canOverride && force)) {
+    throw new UserError(`Rent for ${periodName(year, month)} is already paid for this room.`, slot.canOverride);
+  }
+  return slot.part;
+}
+
+// Saves a Variable month's own rent. Entering one is data entry; changing one already set is for admins.
+async function setMonthRent(tx: Tx, actor: Actor, room: LockedRoom, roomId: string, year: number, month: number, amount: string) {
+  if (rentTypeForMonth(room.rents, year, month) !== "variable") {
+    throw new UserError(`This room has a fixed rent in ${periodName(year, month)}.`);
+  }
+  tenantForRentalMonth(room, year, month);
+  const existing = room.monthRents.find((r) => r.year === year && r.month === month);
+  if (existing && Number(existing.amount) === Number(amount)) return;
+  if (existing && actor.role !== "admin") {
+    throw new UserError("Only an admin can change a month's rent that is already entered.");
+  }
+  await tx
+    .insert(roomMonthRents)
+    .values({ tenantId: actor.tenantId, roomId, year, month, amount, createdBy: actor.userId })
+    .onConflictDoUpdate({
+      target: [roomMonthRents.roomId, roomMonthRents.year, roomMonthRents.month],
+      set: { amount, updatedBy: actor.userId, updatedAt: new Date() },
+    });
+  await writeAudit(tx, actor, existing ? "update" : "create", "room_month_rents", null, existing ?? null, { roomId, year, month, amount });
+  if (existing) existing.amount = amount;
+  else room.monthRents.push({ year, month, amount });
+}
+
+// Saves a payment for the chosen Rental Month and adds it to Cash/Bank in one step. For a Variable
+// room the month's rent can be saved with it, or on its own when no amount is received yet.
 export async function payRent(formData: FormData) {
   return run(async () => {
     const { actor } = await requireEntry();
     const roomId = parseId(formData.get("roomId"), "a room");
     const { year, month } = parseYearMonth(formData.get("year"), formData.get("month"));
-    const amount = parseAmount(formData.get("amount"));
-    const paidDate = parseDate(formData.get("paidDate"));
-    const accountId = parseId(formData.get("accountId"), "Cash or Bank");
-    const note = text(formData.get("note"));
+    const amountText = text(formData.get("amount"));
+    const monthRent = text(formData.get("monthRent"));
+    const force = formData.get("force") === "1";
 
     const id = await db.transaction(async (tx) => {
-      const label = await roomName(tx, actor.tenantId, roomId);
-      const tenancies = await tx
-        .select()
-        .from(roomTenancies)
-        .where(
-          and(
-            eq(roomTenancies.roomId, roomId),
-            lte(roomTenancies.startDate, monthEnd(year, month)),
-          ),
-        );
-      const tenancy = tenancyForMonth(tenancies, year, month);
-      if (!tenancy) throw new UserError("This room has no tenant for that month.");
+      const room = await lockedRoom(tx, actor.tenantId, roomId);
+      const tenancy = tenantForRentalMonth(room, year, month);
+      const variable = rentTypeForMonth(room.rents, year, month) === "variable";
+      if (variable && monthRent) {
+        await setMonthRent(tx, actor, room, roomId, year, month, parseAmount(monthRent, "Rent for this month"));
+      }
+      if (variable && !amountText) {
+        if (!monthRent) throw new UserError("Enter the rent for this month, or an amount received.");
+        return null;
+      }
+      const amount = parseAmount(amountText);
+      if (variable && dueForMonth(room.rents, room.monthRents, year, month) === null) {
+        throw new UserError("Enter the rent for this month first.");
+      }
+      const paidDate = parseDate(formData.get("paidDate"));
+      const accountId = parseId(formData.get("accountId"), "Cash or Bank");
+      const note = text(formData.get("note"));
+      const part = nextPart(room, year, month, force);
       const receiptNumber = text(formData.get("receiptNumber")) ?? (await nextReceiptNumber(tx, actor.tenantId, "RENT"));
       const [row] = await tx
         .insert(rentPayments)
@@ -278,6 +365,7 @@ export async function payRent(formData: FormData) {
           tenancyId: tenancy.id,
           year,
           month,
+          part,
           amount,
           paidDate,
           accountId,
@@ -298,7 +386,7 @@ export async function payRent(formData: FormData) {
         fundId: await fundIdByName(tx, actor.tenantId, "General Fund"),
         party: tenancy.tenantName,
         receiptNumber,
-        note: `${label}, ${MONTHS[month - 1]} ${year}`,
+        note: `${room.label}, ${periodName(year, month)}`,
       });
       await writeAudit(tx, actor, "create", "rent_payments", row.id, null, row);
       return row.id;
@@ -308,6 +396,7 @@ export async function payRent(formData: FormData) {
   }, "This month is already marked as paid.");
 }
 
+// Edits a payment. Changing its Rental Month moves the green mark to the new month.
 export async function updateRentPayment(formData: FormData) {
   return run(async () => {
     const { actor } = await requireAdmin();
@@ -316,6 +405,8 @@ export async function updateRentPayment(formData: FormData) {
     const paidDate = parseDate(formData.get("paidDate"));
     const accountId = parseId(formData.get("accountId"), "Cash or Bank");
     const note = text(formData.get("note"));
+    const monthRent = text(formData.get("monthRent"));
+    const force = formData.get("force") === "1";
     await db.transaction(async (tx) => {
       const [old] = await tx
         .select()
@@ -324,12 +415,28 @@ export async function updateRentPayment(formData: FormData) {
         .for("update")
         .limit(1);
       if (!old) throw new UserError("That payment no longer exists.");
-      const label = await roomName(tx, actor.tenantId, old.roomId);
-      const [tenancy] = await tx.select().from(roomTenancies).where(eq(roomTenancies.id, old.tenancyId)).limit(1);
+      const { year, month } = formData.get("year")
+        ? parseYearMonth(formData.get("year"), formData.get("month"))
+        : { year: old.year, month: old.month };
+      const room = await lockedRoom(tx, actor.tenantId, old.roomId);
+      const moved = year !== old.year || month !== old.month;
+      let tenancyId = old.tenancyId;
+      let part = old.part;
+      if (moved) {
+        tenancyId = tenantForRentalMonth(room, year, month).id;
+        part = nextPart(room, year, month, force, id);
+      }
+      if (monthRent && rentTypeForMonth(room.rents, year, month) === "variable") {
+        await setMonthRent(tx, actor, room, old.roomId, year, month, parseAmount(monthRent, "Rent for this month"));
+      }
+      const [tenancy] = await tx.select().from(roomTenancies).where(eq(roomTenancies.id, tenancyId)).limit(1);
       const receiptNumber = text(formData.get("receiptNumber")) ?? old.receiptNumber;
       const [row] = await tx
         .update(rentPayments)
-        .set({ amount, paidDate, accountId, receiptNumber, note, updatedBy: actor.userId, updatedAt: new Date() })
+        .set({
+          year, month, part, tenancyId, amount, paidDate, accountId, receiptNumber, note,
+          updatedBy: actor.userId, updatedAt: new Date(),
+        })
         .where(eq(rentPayments.id, id))
         .returning();
       await replaceLedger(tx, actor, {
@@ -344,15 +451,15 @@ export async function updateRentPayment(formData: FormData) {
         fundId: await fundIdByName(tx, actor.tenantId, "General Fund"),
         party: tenancy?.tenantName,
         receiptNumber,
-        note: `${label}, ${MONTHS[old.month - 1]} ${old.year}`,
+        note: `${room.label}, ${periodName(year, month)}`,
       });
       await writeAudit(tx, actor, "update", "rent_payments", id, old, row);
     });
     refresh();
-  });
+  }, "That month is already marked as paid.");
 }
 
-// Un-ticks a paid month and takes the amount back out of Cash/Bank.
+// Un-ticks a payment and takes the amount back out of Cash/Bank.
 export async function deleteRentPayment(id: string) {
   return run(async () => {
     const { actor } = await requireAdmin();
@@ -369,5 +476,31 @@ export async function deleteRentPayment(id: string) {
       await writeAudit(tx, actor, "delete", "rent_payments", id, old, null);
     });
     refresh();
+  });
+}
+
+// "Set Variable Rents": one month's rent for many Variable rooms in one save.
+export async function saveVariableRents(formData: FormData) {
+  return run(async () => {
+    const { actor } = await requireEntry();
+    const { year, month } = parseYearMonth(formData.get("year"), formData.get("month"));
+    const entries = formData
+      .getAll("roomId")
+      .map((v) => ({ roomId: parseId(v, "a room"), value: text(formData.get(`rent:${String(v)}`)) }))
+      .filter((e) => e.value);
+    if (entries.length === 0) throw new UserError("Enter at least one month's rent.");
+    await db.transaction(async (tx) => {
+      for (const e of entries) {
+        const room = await lockedRoom(tx, actor.tenantId, e.roomId);
+        try {
+          await setMonthRent(tx, actor, room, e.roomId, year, month, parseAmount(e.value, "Rent"));
+        } catch (err) {
+          if (err instanceof UserError) throw new UserError(`${room.label}: ${err.message}`);
+          throw err;
+        }
+      }
+    });
+    refresh();
+    return entries.length;
   });
 }

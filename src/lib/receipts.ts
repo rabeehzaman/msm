@@ -4,7 +4,7 @@ import {
   cashAccounts, classes, feePayments, feeStructures, households, incomeEntries, rentPayments, roomTenancies,
   salaryPayments, staff, students, subscriptionPayments,
 } from "@/db/schema";
-import { MONTHS } from "@/lib/format";
+import { FULL_MONTHS, MONTHS } from "@/lib/format";
 import { ensureTenant } from "@/lib/queries/auth";
 import { getRoomDetail } from "@/lib/queries/rent";
 
@@ -38,6 +38,7 @@ async function rentReceipt(id: string): Promise<ReceiptData | null> {
   if (!row) return null;
   const room = await getRoomDetail(row.payment.roomId);
   const period = `${MONTHS[row.payment.month - 1]} ${row.payment.year}`;
+  const fullPeriod = `${FULL_MONTHS[row.payment.month - 1]} ${row.payment.year}`;
   return {
     kind: "receipt",
     title: "Rent Receipt",
@@ -46,7 +47,8 @@ async function rentReceipt(id: string): Promise<ReceiptData | null> {
     partyLabel: "Received from",
     party: [row.tenancy.tenantName, row.tenancy.shopName].filter(Boolean).join(", "),
     subject: `${room?.label ?? ""}, ${period}`,
-    lines: [{ label: `Rent for ${period}`, amount: row.payment.amount }],
+    // What the rent is for comes from the Rental Month, not the payment date.
+    lines: [{ label: `Rent for ${fullPeriod} – ${(room?.label ?? "").replace(/ – /g, " ")}`, amount: row.payment.amount }],
     total: row.payment.amount,
     via: row.via,
     note: row.payment.note,

@@ -15,6 +15,7 @@ import { saveBuilding, saveFloor, saveRoom } from "@/lib/actions/rent";
 import { useSession } from "@/lib/auth/session";
 import { formatMoney } from "@/lib/format";
 import { useT } from "@/lib/i18n/client";
+import { VariableTag } from "@/components/rent/tags";
 
 type Tree = {
   id: string;
@@ -22,7 +23,14 @@ type Tree = {
   floors: {
     id: string;
     name: string;
-    rooms: { id: string; name: string; tenantName: string | null; shopName: string | null; rent: number | null }[];
+    rooms: {
+      id: string;
+      name: string;
+      tenantName: string | null;
+      shopName: string | null;
+      rent: number | null;
+      rentType: "fixed" | "variable";
+    }[];
   }[];
 }[];
 
@@ -84,7 +92,10 @@ export function RoomsClient({ tree }: { tree: Tree }) {
                       className="hover:border-primary/40 flex items-center justify-between gap-2 rounded-xl border p-3 transition-colors"
                     >
                       <span className="min-w-0">
-                        <span className="block font-medium">{room.name}</span>
+                        <span className="flex items-center gap-1.5 font-medium">
+                          {room.name}
+                          {room.rentType === "variable" && <VariableTag />}
+                        </span>
                         <span className="text-muted-foreground block truncate text-xs">
                           {room.tenantName
                             ? [room.tenantName, room.shopName].filter(Boolean).join(" · ")
@@ -92,7 +103,9 @@ export function RoomsClient({ tree }: { tree: Tree }) {
                         </span>
                       </span>
                       <span className="flex shrink-0 items-center gap-1.5">
-                        {room.tenantName ? (
+                        {room.tenantName && room.rentType === "variable" ? (
+                          <Badge variant="outline">{t("Monthly")}</Badge>
+                        ) : room.tenantName ? (
                           <Badge>{formatMoney(room.rent)}</Badge>
                         ) : (
                           <Badge variant="secondary">{t("Vacant")}</Badge>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getActiveAccounts } from "@/lib/queries/accounts";
-import { getRoomDetail, monthCell } from "@/lib/queries/rent";
+import { getRoomDetail } from "@/lib/queries/rent";
 import { currentYearMonth } from "@/lib/format";
 import { RoomClient } from "./client";
 
@@ -20,6 +20,5 @@ export default async function RoomPage({
   if (!room) notFound();
   const now = currentYearMonth();
   const year = Number(query.year) >= 2000 && Number(query.year) <= 2100 ? Number(query.year) : now.year;
-  const months = Array.from({ length: 12 }, (_, i) => monthCell(room, year, i + 1, now));
-  return <RoomClient room={room} months={months} year={year} currentYear={now.year} accounts={accounts} />;
+  return <RoomClient room={room} initialYear={year} now={now} accounts={accounts} />;
 }

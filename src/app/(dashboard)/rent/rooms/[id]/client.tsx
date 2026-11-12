@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, DoorClosed, IndianRupee, Pencil, Phone, UserPlus } from "lucide-react";
+import { ArrowLeft, DoorClosed, IndianRupee, Pencil, Phone, ReceiptIndianRupee, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,12 +14,13 @@ import { EmptyState } from "@/components/empty-state";
 import { Field, NativeSelect, SaveButton, useAction, type AccountOption } from "@/components/money/form";
 import { PageHeader } from "@/components/money/page-header";
 import { cellClass } from "@/components/rent/cell";
-import { RentSheet, type RentPayment, type SheetTarget } from "@/components/rent/rent-sheets";
+import { RentSheet, type SheetRoom, type SheetTarget } from "@/components/rent/rent-sheets";
+import { VariableTag } from "@/components/rent/tags";
 import { changeRent, endTenancy, saveRoom, startTenancy, updateTenancy } from "@/lib/actions/rent";
 import { useSession } from "@/lib/auth/session";
-import { currentYearMonth, formatDate, formatMoney, MONTHS, todayIST } from "@/lib/format";
+import { formatDate, formatMoney, MONTHS, todayIST } from "@/lib/format";
 import { useT } from "@/lib/i18n/client";
-import type { CellStatus } from "@/lib/rent/status";
+import { currentRentType, defaultRentalMonth, roomMonth, type YearMonth } from "@/lib/rent/status";
 
 type Tenancy = {
   id: string;
@@ -33,66 +33,68 @@ type Tenancy = {
   notes: string | null;
 };
 
-type Room = {
-  id: string;
+type Room = Omit<SheetRoom, "tenancies" | "rents"> & {
   name: string;
   notes: string | null;
-  label: string;
   tenancies: Tenancy[];
-  rents: { id: string; amount: string; effectiveFrom: string }[];
-};
-
-type Cell = {
-  month: number;
-  status: CellStatus;
-  expected: number;
-  tenantName: string | null;
-  payment: RentPayment | null;
+  rents: { id: string; amount: string; effectiveFrom: string; rentType: string }[];
 };
 
 type Dialogs = "start" | "edit" | "end" | "rent" | "room" | null;
 
 export function RoomClient({
   room,
-  months,
-  year,
-  currentYear,
+  initialYear,
+  now,
   accounts,
 }: {
   room: Room;
-  months: Cell[];
-  year: number;
-  currentYear: number;
+  initialYear: number;
+  now: YearMonth;
   accounts: AccountOption[];
 }) {
   const t = useT();
-  const router = useRouter();
   const { isAdmin, canEnter } = useSession();
   const [dialog, setDialog] = useState<Dialogs>(null);
   const [target, setTarget] = useState<SheetTarget | null>(null);
+  const [year, setYear] = useState(initialYear);
   const open = room.tenancies.find((x) => !x.endDate);
   const lastEnd = room.tenancies.find((x) => x.endDate)?.endDate;
+  const rentType = currentRentType(room.rents, now);
+  const everVariable = room.rents.some((r) => r.rentType === "variable");
+  // Worked out on the phone from the room's facts, so the year switch needs no new request.
+  const months = useMemo(() => Array.from({ length: 12 }, (_, i) => roomMonth(room, year, i + 1, now)), [room, year, now]);
 
-  function openCell(cell: Cell) {
-    if (cell.status === "vacant") {
+  function changeYear(value: number) {
+    setYear(value);
+    window.history.replaceState(null, "", `/rent/rooms/${room.id}?year=${value}`);
+  }
+
+  function openCell(cell: (typeof months)[number]) {
+    if (cell.status === "vacant" && cell.paidCount === 0) {
       toast.info(t("This room has no tenant for that month."));
       return;
     }
     if (!canEnter) return;
-    setTarget({
-      roomId: room.id,
-      roomLabel: room.label,
-      tenantName: cell.tenantName,
-      year,
-      month: cell.month,
-      expected: cell.expected,
-      payment: cell.payment,
-    });
+    setTarget({ room, year, month: cell.month });
+  }
+
+  // Not opened from a month: start on the oldest month still owed, else this month.
+  function recordRent() {
+    const start = defaultRentalMonth(room, now);
+    setTarget({ room, year: start.year, month: start.month });
   }
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={room.label}>
+        {rentType === "variable" && <VariableTag />}
+        {canEnter && open && (
+          <Button onClick={recordRent}>
+            <ReceiptIndianRupee className="size-4" />
+            {t("Record rent")}
+          </Button>
+        )}
         <Button variant="outline" render={<Link href="/rent" />}>
           <ArrowLeft className="size-4" />
           {t("Rent")}
@@ -169,9 +171,9 @@ export function RoomClient({
                 aria-label={t("Year")}
                 className="w-28"
                 value={year}
-                onChange={(e) => router.push(`/rent/rooms/${room.id}?year=${e.target.value}`)}
+                onChange={(e) => changeYear(Number(e.target.value))}
               >
-                {Array.from({ length: 8 }, (_, i) => currentYear + 1 - i).map((y) => (
+                {Array.from({ length: 8 }, (_, i) => now.year + 1 - i).map((y) => (
                   <option key={y} value={y}>
                     {y}
                   </option>
@@ -189,17 +191,7 @@ export function RoomClient({
                   className={`flex min-h-20 flex-col rounded-xl p-2.5 text-left transition-transform active:scale-[0.98] ${cellClass[cell.status]}`}
                 >
                   <span className="text-sm font-semibold">{t(MONTHS[cell.month - 1])}</span>
-                  {cell.payment ? (
-                    <span className="mt-auto text-xs leading-tight">
-                      {formatMoney(cell.payment.amount)}
-                      <br />
-                      {formatDate(cell.payment.paidDate)}
-                      <br />
-                      {cell.payment.accountName}
-                    </span>
-                  ) : cell.status === "due" || cell.status === "upcoming" ? (
-                    <span className="mt-auto text-xs">{formatMoney(cell.expected)}</span>
-                  ) : null}
+                  <MonthDetail room={room} cell={cell} />
                 </button>
               ))}
             </div>
@@ -220,7 +212,16 @@ export function RoomClient({
                 {room.rents.map((r) => (
                   <li key={r.id} className="flex justify-between py-2">
                     <span>{t("From {month}", { month: `${t(MONTHS[Number(r.effectiveFrom.slice(5, 7)) - 1])} ${r.effectiveFrom.slice(0, 4)}` })}</span>
-                    <span className="font-medium">{formatMoney(r.amount)}</span>
+                    {r.rentType === "variable" ? (
+                      <span className="font-medium">
+                        {t("Variable")}
+                        {Number(r.amount) > 0 && (
+                          <span className="text-muted-foreground font-normal"> · {t("usual")} {formatMoney(r.amount)}</span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="font-medium">{formatMoney(r.amount)}</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -253,22 +254,126 @@ export function RoomClient({
         </Card>
       </div>
 
-      {target && <RentSheet target={target} accounts={accounts} onClose={() => setTarget(null)} />}
+      {everVariable && (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {t("Month by month")} · {year}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="table-shell overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-muted-foreground text-left text-xs">
+                  <th className="py-2 font-medium">{t("Rental Month")}</th>
+                  <th className="py-2 text-right font-medium">{t("Rent")}</th>
+                  <th className="py-2 text-right font-medium">{t("Paid")}</th>
+                  <th className="py-2 text-right font-medium">{t("Balance")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-border divide-y">
+                {months
+                  .filter((c) => c.tenancy)
+                  .map((c) => (
+                    <tr key={c.month}>
+                      <td className="py-2">
+                        {t(MONTHS[c.month - 1])} {year}
+                        {c.type === "variable" && <span className="text-muted-foreground text-xs"> · {t("Variable")}</span>}
+                      </td>
+                      <td className="py-2 text-right tabular-nums">{c.due === null ? t("Amount not set") : formatMoney(c.due)}</td>
+                      <td className="py-2 text-right tabular-nums">{formatMoney(c.paidTotal)}</td>
+                      <td className="py-2 text-right tabular-nums">{c.due === null ? "-" : formatMoney(c.balance)}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      )}
+
+      {target && <RentSheet target={target} accounts={accounts} now={now} onClose={() => setTarget(null)} />}
       {dialog === "start" && <TenancyDialog roomId={room.id} earliest={lastEnd} onClose={() => setDialog(null)} />}
       {dialog === "edit" && open && <TenancyDialog tenancy={open} roomId={room.id} onClose={() => setDialog(null)} />}
       {dialog === "end" && open && <EndDialog tenancy={open} onClose={() => setDialog(null)} />}
-      {dialog === "rent" && <RentDialog roomId={room.id} current={room.rents[0]?.amount} onClose={() => setDialog(null)} />}
+      {dialog === "rent" && (
+        <RentDialog roomId={room.id} current={room.rents[0]} now={now} onClose={() => setDialog(null)} />
+      )}
       {dialog === "room" && <RoomDialog room={room} onClose={() => setDialog(null)} />}
     </div>
   );
 }
 
+// Rent actions revalidate /rent, and the save's own response carries the new page, so no second reload.
 function useDone(onClose: () => void) {
-  const router = useRouter();
-  return () => {
-    onClose();
-    router.refresh();
-  };
+  return onClose;
+}
+
+function MonthDetail({ room, cell }: { room: Room; cell: ReturnType<typeof roomMonth> }) {
+  const t = useT();
+  const own = room.payments.filter((p) => p.year === cell.year && p.month === cell.month);
+  const last = own[own.length - 1];
+  if (cell.status === "unset") return <span className="mt-auto text-xs">? {t("Amount not set")}</span>;
+  if (last) {
+    return (
+      <span className="mt-auto text-xs leading-tight">
+        {formatMoney(cell.paidTotal)}
+        <br />
+        {formatDate(last.paidDate)}
+        <br />
+        {cell.status === "partial" ? `${t("Balance")} ${formatMoney(cell.balance)}` : last.accountName}
+      </span>
+    );
+  }
+  if ((cell.status === "due" || cell.status === "upcoming") && cell.due !== null) {
+    return <span className="mt-auto text-xs">{formatMoney(cell.due)}</span>;
+  }
+  return null;
+}
+
+// Rent Type: Fixed works as before; Variable makes the monthly rent an optional suggestion only.
+function RentTypeFields({ defaultType = "fixed", defaultRent }: { defaultType?: string; defaultRent?: string }) {
+  const t = useT();
+  const [type, setType] = useState(defaultType === "variable" ? "variable" : "fixed");
+  return (
+    <>
+      <fieldset className="flex flex-col gap-1.5 sm:col-span-2">
+        <legend className="mb-1.5 text-sm font-medium">{t("Rent Type")}</legend>
+        <div className="grid grid-cols-2 gap-2">
+          {(["fixed", "variable"] as const).map((value) => (
+            <label
+              key={value}
+              className="has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary flex min-h-11 cursor-pointer items-center rounded-xl border border-input bg-white/50 px-3 py-2 text-sm font-medium transition-colors dark:bg-white/5"
+            >
+              <input
+                type="radio"
+                name="rentType"
+                value={value}
+                checked={type === value}
+                onChange={() => setType(value)}
+                className="sr-only"
+              />
+              {t(value === "fixed" ? "Fixed rent" : "Variable rent (changes every month)")}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <Field
+        label={t(type === "fixed" ? "Monthly rent (₹)" : "Usual / approximate rent (₹)")}
+        hint={type === "variable" ? t("Optional. Only a suggestion, never the amount due.") : undefined}
+      >
+        <Input
+          key={type}
+          name="rent"
+          type="number"
+          step="0.01"
+          min={type === "fixed" ? "0.01" : "0"}
+          inputMode="decimal"
+          defaultValue={defaultRent && Number(defaultRent) > 0 ? defaultRent : undefined}
+          required={type === "fixed"}
+        />
+      </Field>
+    </>
+  );
 }
 
 function TenancyDialog({
@@ -307,11 +412,7 @@ function TenancyDialog({
             </Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {!tenancy && (
-              <Field label={t("Monthly rent (₹)")}>
-                <Input name="rent" type="number" step="0.01" min="0.01" inputMode="decimal" required />
-              </Field>
-            )}
+            {!tenancy && <RentTypeFields />}
             <Field label={t("Rent start date")}>
               <Input name="startDate" type="date" min={earliest ?? undefined} defaultValue={tenancy?.startDate ?? todayIST()} required />
             </Field>
@@ -353,22 +454,31 @@ function EndDialog({ tenancy, onClose }: { tenancy: Tenancy; onClose: () => void
   );
 }
 
-function RentDialog({ roomId, current, onClose }: { roomId: string; current?: string; onClose: () => void }) {
+function RentDialog({
+  roomId,
+  current,
+  now,
+  onClose,
+}: {
+  roomId: string;
+  current?: { amount: string; rentType: string };
+  now: YearMonth;
+  onClose: () => void;
+}) {
   const t = useT();
-  const now = currentYearMonth();
   const change = useAction(changeRent, { success: "Rent changed", onDone: useDone(onClose) });
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("Change rent")}</DialogTitle>
           <DialogDescription>{t("Past months stay at the old rent. The new rent applies from the month you choose.")}</DialogDescription>
         </DialogHeader>
         <form onSubmit={change.submit} className="flex flex-col gap-4">
           <input type="hidden" name="roomId" value={roomId} />
-          <Field label={t("New monthly rent (₹)")}>
-            <Input name="rent" type="number" step="0.01" min="0.01" inputMode="decimal" defaultValue={current} required />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <RentTypeFields defaultType={current?.rentType} defaultRent={current?.amount} />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label={t("From month")}>
               <NativeSelect name="month" defaultValue={now.month}>

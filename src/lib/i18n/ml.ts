@@ -625,4 +625,14 @@ export const ml: Record<string, string> = {
   "This entry has no cash or bank line, so it cannot be edited.": "ഈ എൻട്രിക്ക് ക്യാഷ്/ബാങ്ക് വരിയില്ല, അതിനാൽ തിരുത്താനാവില്ല.",
   "This date is before the account's opening date. Change the date, or the account's opening date and balance.": "ഈ തീയതി അക്കൗണ്ടിന്റെ തുടങ്ങുന്ന തീയതിക്ക് മുമ്പാണ്. തീയതി മാറ്റുക, അല്ലെങ്കിൽ അക്കൗണ്ടിന്റെ തുടങ്ങുന്ന തീയതിയും ബാക്കിയും മാറ്റുക.",
   "This account still holds money. Transfer it out before hiding the account.": "ഈ അക്കൗണ്ടിൽ ഇപ്പോഴും പണമുണ്ട്. മറയ്ക്കുന്നതിന് മുമ്പ് അത് മാറ്റുക.",
+
+  // Rishad, 12 Nov 2026: labels exactly as given in the specs. Other new text shows in English
+  // until Malayalam wording is agreed.
+  "Rental Month": "വാടക മാസം",
+  "Rent Type": "വാടക തരം",
+  "Fixed rent": "നിശ്ചിത വാടക",
+  "Variable rent (changes every month)": "മാസം തോറും മാറുന്ന വാടക",
+  "Other Income": "മറ്റ് വരുമാനം",
+  "Hall / Auditorium hire": "ഹാൾ വാടക",
+  Auction: "ലേലം",
 };
