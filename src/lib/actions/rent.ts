@@ -12,7 +12,7 @@ import {
 import { fundIdByName } from "@/lib/money/funds";
 import { nextReceiptNumber, postLedger, removeLedger, replaceLedger, writeAudit, type Tx } from "@/lib/money/ledger";
 import {
-  dueForMonth, isTracked, paymentSlot, rentTypeForMonth, roomLabel, tenancyForMonth, type RentType,
+  claimPart, dueForMonth, isTracked, paymentSlot, rentTypeForMonth, roomLabel, tenancyForMonth, type RentType,
 } from "@/lib/rent/status";
 
 function refresh() {
@@ -294,13 +294,13 @@ function tenantForRentalMonth(room: LockedRoom, year: number, month: number) {
   return tenancy;
 }
 
-// Stops a month being paid twice by mistake (see paymentSlot).
+// The next free part number for the Rental Month (max part + 1). Runs with the room row locked, so two
+// people saving the same month at once take turns and never get the same part. Once the month's rent
+// is already covered, it asks "Save anyway?" first (see paymentSlot), for Fixed and Variable alike.
 function nextPart(room: LockedRoom, year: number, month: number, force: boolean, exceptId?: string) {
-  const slot = paymentSlot(room, year, month, exceptId);
-  if (slot.alreadyPaid && !(slot.canOverride && force)) {
-    throw new UserError(`Rent for ${periodName(year, month)} is already paid for this room.`, slot.canOverride);
-  }
-  return slot.part;
+  const claim = claimPart(paymentSlot(room, year, month, exceptId), force);
+  if (!claim.ok) throw new UserError(`Rent for ${periodName(year, month)} is already paid for this room.`, claim.needsConfirm);
+  return claim.part;
 }
 
 // Saves a Variable month's own rent. Entering one is data entry; changing one already set is for admins.

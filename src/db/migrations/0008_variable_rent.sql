@@ -28,9 +28,9 @@ CREATE TABLE room_month_rents (
 CREATE INDEX room_month_rents_tenant_idx ON room_month_rents (tenant_id, year, month);
 ALTER TABLE room_month_rents ENABLE ROW LEVEL SECURITY;
 
--- 3. A Variable month can be paid in parts (₹3,000 then ₹1,500).
---    Every existing row becomes part 1, so the new unique key holds them exactly as the old one did,
---    and a Fixed month (always part 1) can still only be paid once.
+-- 3. A month can be paid in parts (₹3,000 then ₹1,500), Fixed or Variable (13 Nov 2026: all rooms).
+--    Every existing row becomes part 1, so the new unique key holds them exactly as the old one did.
+--    The app gives each extra payment the next part (max + 1) with the room row locked.
 ALTER TABLE rent_payments ADD COLUMN part integer NOT NULL DEFAULT 1 CHECK (part >= 1);
 CREATE UNIQUE INDEX rent_payments_room_month_part_key ON rent_payments (room_id, year, month, part);
 -- The only non-additive step: the old one-payment-per-month key is replaced by the key above.
@@ -38,7 +38,8 @@ ALTER TABLE rent_payments DROP CONSTRAINT rent_payments_room_id_year_month_key;
 
 COMMIT;
 
--- Rollback (only if no Variable room has been used yet):
+-- Rollback (only if no Variable room has been used yet and no month has more than one payment,
+-- i.e. `select count(*) from rent_payments where part <> 1;` returns 0):
 -- BEGIN;
 -- ALTER TABLE rent_payments ADD CONSTRAINT rent_payments_room_id_year_month_key UNIQUE (room_id, year, month);
 -- DROP INDEX rent_payments_room_month_part_key;

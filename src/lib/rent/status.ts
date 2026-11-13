@@ -13,7 +13,8 @@ export type RentFact = { amount: string; effectiveFrom: string; rentType?: strin
 // A Variable room's rent for one month.
 export type MonthRentFact = { year: number; month: number; amount: string };
 export type PaymentFact = { year: number; month: number; amount: string };
-// "partial" and "unset" only happen for Variable rooms. Fixed rooms show exactly what they did before.
+// "unset" only happens for Variable rooms. Any room can be "partial": a month paid in parts that do not
+// cover its rent yet.
 export type CellStatus = "paid" | "partial" | "due" | "upcoming" | "vacant" | "unset";
 export type YearMonth = { year: number; month: number };
 
@@ -80,7 +81,7 @@ export function paidForMonth(payments: PaymentFact[], year: number, month: numbe
   return { count: own.length, total: own.reduce((s, p) => toCents(Number(p.amount)) + s, 0) / 100 };
 }
 
-// Fixed rooms: unchanged from before (any payment = paid).
+// A month with no payment: vacant, upcoming or due (the same for Fixed as before parts existed).
 export function cellStatus(
   isPaid: boolean,
   hasTenancy: boolean,
@@ -104,20 +105,21 @@ export function monthStatus(input: {
   now: YearMonth;
 }): CellStatus {
   const { type, due, paidCount, paidTotal, tracked, year, month, now } = input;
-  if (type === "fixed") return cellStatus(paidCount > 0, tracked, year, month, now);
+  // Fixed and Variable alike: Paid once the parts cover the month's rent, Partially paid before that.
   if (paidCount > 0) {
     if (due === null || toCents(paidTotal) >= toCents(due)) return "paid";
     return "partial";
   }
+  if (type === "fixed") return cellStatus(false, tracked, year, month, now);
   if (!tracked) return "vacant";
   if (monthKey(year, month) > monthKey(now.year, now.month)) return "upcoming";
   return due === null ? "unset" : "due";
 }
 
-// Still owed for a month: Fixed = the rent when unpaid; Variable = rent minus what was paid.
-export function balanceForMonth(type: RentType, due: number | null, paidCount: number, paidTotal: number) {
+// Still owed for a month: the rent minus every part paid so far, never below 0.
+// A Variable month whose rent is not entered yet owes nothing.
+export function balanceForMonth(due: number | null, paidTotal: number) {
   if (due === null) return 0;
-  if (type === "fixed") return paidCount > 0 ? 0 : due;
   return Math.max(0, toCents(due) - toCents(paidTotal)) / 100;
 }
 
@@ -144,13 +146,14 @@ export function roomMonth(room: RoomMonthFacts, year: number, month: number, now
     due,
     paidCount: paid.count,
     paidTotal: paid.total,
-    balance: balanceForMonth(type, due, paid.count, paid.total),
+    balance: balanceForMonth(due, paid.total),
     status: monthStatus({ type, due, paidCount: paid.count, paidTotal: paid.total, tracked, year, month, now }),
   };
 }
 
 // Every month still owed from each tenancy's start up to the current month.
-// A Variable month counts only once its rent is entered, and only for the unpaid balance.
+// A month counts for its unpaid balance (rent minus every part paid). A Variable month counts only
+// once its rent is entered.
 export function pendingMonths(room: RoomMonthFacts, now: YearMonth) {
   const seen = new Set<string>();
   const result: { year: number; month: number; amount: number; tenancy: TenancyFact }[] = [];
@@ -163,8 +166,8 @@ export function pendingMonths(room: RoomMonthFacts, now: YearMonth) {
       if (covering?.id === tenancy.id && !seen.has(key)) {
         seen.add(key);
         const m = roomMonth(room, cursor.year, cursor.month, now);
-        // Fixed keeps the old rule exactly: any unpaid month counts, even at ₹0.
-        const owed = m.type === "fixed" ? m.paidCount === 0 : m.balance > 0;
+        // A Fixed month with no payment at all still counts, even at ₹0, as before.
+        const owed = m.balance > 0 || (m.type === "fixed" && m.paidCount === 0);
         if (owed) result.push({ ...cursor, amount: m.balance, tenancy });
       }
       cursor = shiftMonth(cursor.year, cursor.month, 1);
@@ -181,8 +184,8 @@ export function defaultRentalMonth(room: RoomMonthFacts, now: YearMonth): YearMo
 }
 
 // Where a new (or moved) payment for a Rental Month would go, and whether it would pay the month twice.
-// Fixed: one payment per month, so a second is refused. Variable: parts until the rent is covered,
-// then a warning the person can confirm.
+// Fixed and Variable alike: the next part number for that month, and once the rent is covered by
+// the other parts a warning the person can confirm ("Save anyway?").
 export function paymentSlot(
   room: Pick<RoomMonthFacts, "rents" | "monthRents"> & { payments: (PaymentFact & { id: string; part: number })[] },
   year: number,
@@ -191,11 +194,28 @@ export function paymentSlot(
 ) {
   const others = room.payments.filter((p) => p.year === year && p.month === month && p.id !== exceptId);
   const type = rentTypeForMonth(room.rents, year, month);
-  if (type === "fixed") return { type, part: 1, alreadyPaid: others.length > 0, canOverride: false };
   const due = dueForMonth(room.rents, room.monthRents, year, month);
   const paid = paidForMonth(others, year, month).total;
   const covered = others.length > 0 && (due === null || toCents(paid) >= toCents(due));
   return { type, part: Math.max(0, ...others.map((p) => p.part)) + 1, alreadyPaid: covered, canOverride: true };
+}
+
+// The server's decision for a new or moved payment: its part number, or "already paid" when the month
+// is covered and the person has not confirmed "Save anyway?" yet.
+export function claimPart(slot: ReturnType<typeof paymentSlot>, force: boolean) {
+  if (slot.alreadyPaid && !(slot.canOverride && force)) return { ok: false as const, needsConfirm: slot.canOverride };
+  return { ok: true as const, part: slot.part };
+}
+
+// What a month adds to "Expected this month". Never less than what was actually paid, and a month
+// paid in parts still expects its full rent, so the unpaid balance shows as pending.
+export function expectedForMonth(m: Pick<ReturnType<typeof roomMonth>, "type" | "due" | "paidCount" | "paidTotal" | "tracked" | "status">) {
+  if (m.type === "fixed") {
+    if (m.paidCount > 0) return m.tracked ? Math.max(m.due ?? 0, m.paidTotal) : m.paidTotal;
+    return m.status === "due" ? (m.due ?? 0) : 0;
+  }
+  if (m.tracked || m.paidCount > 0) return Math.max(m.due ?? 0, m.paidTotal);
+  return 0;
 }
 
 export function roomLabel(building: string, floor: string, room: string) {

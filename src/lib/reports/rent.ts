@@ -88,12 +88,14 @@ export const rentReports: ReportDefinition[] = [
           paid: Number(p.amount),
           due: null,
         }));
+      // A month paid in parts shows each part above, then one row for what is still owed.
+      const paidMonths = new Set(paidRows.map((r) => r.sort));
       const pendingRows = roomPending(selected.room)
         .filter((p) => p.tenancy.id === selected.id)
         .map((p) => ({
           sort: p.year * 100 + p.month,
           month: monthName(p.year, p.month),
-          status: "Due",
+          status: paidMonths.has(p.year * 100 + p.month) ? "Partially paid" : "Due",
           paidDate: null,
           account: null,
           receipt: null,

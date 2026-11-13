@@ -64,6 +64,8 @@ export function RoomClient({
   const everVariable = room.rents.some((r) => r.rentType === "variable");
   // Worked out on the phone from the room's facts, so the year switch needs no new request.
   const months = useMemo(() => Array.from({ length: 12 }, (_, i) => roomMonth(room, year, i + 1, now)), [room, year, now]);
+  // Rent / Paid / Balance per month, for rooms that were ever Variable or have a month paid in parts this year.
+  const showMonthByMonth = everVariable || months.some((c) => c.paidCount > 1 || c.status === "partial");
 
   function changeYear(value: number) {
     setYear(value);
@@ -254,7 +256,7 @@ export function RoomClient({
         </Card>
       </div>
 
-      {everVariable && (
+      {showMonthByMonth && (
         <Card>
           <CardHeader>
             <CardTitle>

@@ -125,12 +125,8 @@ export function RentClient({
               <Legend className="bg-emerald-500" label={t("Paid")} />
               <Legend className="bg-red-500" label={t("Due")} />
               <Legend className="bg-muted-foreground/25" label={t("Upcoming or vacant")} />
-              {hasVariable && (
-                <>
-                  <Legend className="bg-amber-500" label={t("Partially paid")} />
-                  <Legend className="bg-amber-100 ring-1 ring-amber-300" label={t("Amount not set")} />
-                </>
-              )}
+              <Legend className="bg-amber-500" label={t("Partially paid")} />
+              {hasVariable && <Legend className="bg-amber-100 ring-1 ring-amber-300" label={t("Amount not set")} />}
             </div>
           </div>
 

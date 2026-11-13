@@ -6,7 +6,7 @@ import {
 } from "@/db/schema";
 import { currentYearMonth, monthKey } from "@/lib/format";
 import {
-  currentRentType, pendingMonths, rentForMonth, roomLabel, roomMonth, type YearMonth,
+  currentRentType, expectedForMonth, pendingMonths, rentForMonth, roomLabel, roomMonth, type YearMonth,
 } from "@/lib/rent/status";
 import { ensureTenant } from "./auth";
 
@@ -138,14 +138,8 @@ export async function getRentSummary() {
   for (const room of facts) {
     const m = roomMonth(room, now.year, now.month, now);
     collected += m.paidTotal;
-    if (m.type === "fixed") {
-      // Same as before: a paid month counts what was paid, an unpaid due month its rent.
-      if (m.paidCount > 0) expected += m.paidTotal;
-      else if (m.status === "due") expected += m.due ?? 0;
-    } else if (m.tracked || m.paidCount > 0) {
-      expected += Math.max(m.due ?? 0, m.paidTotal);
-      if (m.status === "unset") unsetRooms += 1;
-    }
+    expected += expectedForMonth(m);
+    if (m.status === "unset") unsetRooms += 1;
     for (const p of pendingMonths(room, now)) {
       pendingCount += 1;
       pendingAmount += p.amount;

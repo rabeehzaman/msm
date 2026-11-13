@@ -1,7 +1,7 @@
 import type { CellStatus } from "@/lib/rent/status";
 
 // Green paid, red due, grey upcoming or vacant. Salary grids use the same colours.
-// Variable rooms add amber "Partially paid" and a pale amber "Amount not set" with a "?".
+// Amber "Partially paid" (any room paid in parts) and, for Variable rooms, a pale amber "Amount not set" with a "?".
 export const cellClass: Record<CellStatus, string> = {
   paid: "bg-emerald-500 text-white",
   partial: "bg-amber-500 text-white",

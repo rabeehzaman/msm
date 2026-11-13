@@ -61,8 +61,9 @@ export function RentSheet({
     if (target.paymentId) return target.paymentId;
     const own = room.payments.filter((p) => p.year === target.year && p.month === target.month);
     const opened = roomMonth(room, target.year, target.month, now);
-    // A Fixed month holds one payment, so tapping a paid month opens it, as before.
-    return opened.type === "fixed" && own.length > 0 ? own[0].id : null;
+    // An admin tapping a Fixed month paid in one payment opens that payment, as before. Otherwise the
+    // popup lists the parts paid so far and takes a new payment (the balance, or an extra one).
+    return isAdmin && opened.type === "fixed" && opened.status === "paid" && own.length === 1 ? own[0].id : null;
   });
   // The save itself sends the new page back with it, so there is no second reload.
   const pay = useAction(payRent, { success: "Rent saved", onDone: onClose });
@@ -80,11 +81,13 @@ export function RentSheet({
   // Warnings shown before saving, so nothing is recorded twice or against a vacant month.
   // The server makes the same checks (paymentSlot) inside the save.
   const slot = paymentSlot(room, ym.year, ym.month, editingId ?? undefined);
+  const onOwnMonth = !!editing && editing.year === ym.year && editing.month === ym.month;
   // A payment already stored on a month stays editable there, even if the tenant's dates changed since.
-  const vacant = !m.tracked && !(editing && editing.year === ym.year && editing.month === ym.month);
-  const fixedTaken = !variable && slot.alreadyPaid;
-  const variableCovered = variable && slot.alreadyPaid;
-  const blocked = vacant || fixedTaken;
+  const vacant = !m.tracked && !onOwnMonth;
+  // The month's rent is already covered by other payments: saving asks "Save anyway?" (server too).
+  // Editing a payment in place adds nothing, so it is only warned about when moving to such a month.
+  const covered = slot.alreadyPaid && !onOwnMonth;
+  const blocked = vacant;
 
   const years = useMemo(() => {
     const starts = room.tenancies.map((x) => Number(x.startDate.slice(0, 4)));
@@ -93,15 +96,8 @@ export function RentSheet({
     return Array.from({ length: last - first + 1 }, (_, i) => last - i);
   }, [room.tenancies, now.year, ym.year]);
 
-  const amountDefault = editing
-    ? editing.amount
-    : variable
-      ? m.balance > 0
-        ? String(m.balance)
-        : ""
-      : m.due
-        ? String(m.due)
-        : "";
+  // A new payment starts at what is still owed: the full rent, or the balance after earlier parts.
+  const amountDefault = editing ? editing.amount : m.balance > 0 ? String(m.balance) : "";
   const fieldKey = `${ym.year}-${ym.month}-${editingId ?? "new"}`;
 
   return (
@@ -123,7 +119,7 @@ export function RentSheet({
                   {p.accountName ? ` · ${p.accountName}` : ""}
                 </span>
                 <span className="flex gap-1">
-                  {isAdmin && variable && p.id !== editingId && (
+                  {isAdmin && p.id !== editingId && (
                     <Button variant="ghost" size="sm" onClick={() => setEditingId(p.id)}>
                       <Pencil className="size-3.5" />
                       {t("Edit")}
@@ -185,18 +181,21 @@ export function RentSheet({
                 {t("This room has no tenant for {month}. Choose a month when the room had a tenant.", { month: period })}
               </Notice>
             )}
-            {!vacant && fixedTaken && (
+            {!vacant && covered && (
               <Notice>
                 {t("Rent for {month} is already paid for this room.", { month: period })}{" "}
-                {isAdmin && !editing && (
-                  <button type="button" className="font-medium underline" onClick={() => setEditingId(others[0].id)}>
+                {isAdmin && !editing && others.length > 0 && (
+                  <button type="button" className="font-medium underline" onClick={() => setEditingId(others[others.length - 1].id)}>
                     {t("Open that payment")}
                   </button>
                 )}
               </Notice>
             )}
-            {!vacant && variableCovered && !editing && (
-              <Notice>{t("Rent for {month} is already paid for this room.", { month: period })}</Notice>
+            {!vacant && !variable && m.paidCount > 0 && (
+              <p className="text-muted-foreground text-xs">
+                {t("Rent")} {formatMoney(m.due ?? 0)} · {t("Paid")} {formatMoney(m.paidTotal)} · {t("Balance")}{" "}
+                {formatMoney(m.balance)}
+              </p>
             )}
 
             {variable && !vacant && (
@@ -265,7 +264,7 @@ export function RentSheet({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex flex-wrap gap-2">
                 <SaveButton pending={pay.pending || update.pending} disabled={pay.pending || update.pending || blocked} />
-                {editing && variable && (
+                {editing && (
                   <Button type="button" variant="outline" onClick={() => setEditingId(null)}>
                     {t("New payment")}
                   </Button>
