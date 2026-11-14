@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { ramadanAllowances, salaryPayments, staff } from "@/db/schema";
 import { requireAdmin, requireEntry } from "@/lib/auth/guard";
-import { MONTHS } from "@/lib/format";
+import { MONTHS, todayIST } from "@/lib/format";
+import { checkSalaryMonth, problemText, type SalaryKind } from "@/lib/salary/calc";
 import {
   parseAmount, parseDate, parseId, parseOptionalAmount, parseOptionalDate, parseYearMonth, requiredText, run, text, UserError,
 } from "@/lib/money/action";
@@ -37,13 +38,20 @@ export async function saveStaff(formData: FormData) {
       cleaningMode: (modeValue === "included" || modeValue === "separate" ? modeValue : "none") as "none" | "included" | "separate",
       notes: text(formData.get("notes")),
     };
+    // Only sent for someone inactive: the day they became inactive, which closes later Salary Months.
+    const inactiveFrom = formData.has("inactiveFrom") ? parseOptionalDate(formData.get("inactiveFrom")) : undefined;
     await db.transaction(async (tx) => {
       if (id) {
         const [old] = await tx.select().from(staff).where(and(eq(staff.id, id), eq(staff.tenantId, actor.tenantId))).for("update").limit(1);
         if (!old) throw new UserError("That staff member no longer exists.");
         const [row] = await tx
           .update(staff)
-          .set({ ...values, updatedBy: actor.userId, updatedAt: new Date() })
+          .set({
+            ...values,
+            ...(inactiveFrom !== undefined && !old.isActive ? { inactiveFrom } : {}),
+            updatedBy: actor.userId,
+            updatedAt: new Date(),
+          })
           .where(eq(staff.id, id))
           .returning();
         await writeAudit(tx, actor, "update", "staff", id, old, row);
@@ -62,11 +70,12 @@ export async function setStaffActive(id: string, isActive: boolean) {
     await db.transaction(async (tx) => {
       const [row] = await tx
         .update(staff)
-        .set({ isActive, updatedBy: actor.userId, updatedAt: new Date() })
+        // Salary Months after the month they were marked inactive are refused; earlier ones stay open.
+        .set({ isActive, inactiveFrom: isActive ? null : todayIST(), updatedBy: actor.userId, updatedAt: new Date() })
         .where(and(eq(staff.id, id), eq(staff.tenantId, actor.tenantId)))
         .returning({ id: staff.id });
       if (!row) throw new UserError("That staff member no longer exists.");
-      await writeAudit(tx, actor, "update", "staff", id, null, { isActive });
+      await writeAudit(tx, actor, "update", "staff", id, null, { isActive, inactiveFrom: isActive ? null : todayIST() });
     });
     refresh();
   });
@@ -111,6 +120,47 @@ const ledgerFor = async (
   note: `${MONTHS[month - 1]} ${year}`,
 });
 
+// The staff member (locked) and their payments for one Salary Month, checked the same way the popup
+// checks it: not before the dues start, not after they were marked inactive, not paid twice.
+async function assertSalaryMonth(
+  tx: Tx,
+  tenantId: string,
+  staffId: string,
+  kind: SalaryKind,
+  year: number,
+  month: number,
+  editing?: { id: string; year: number; month: number },
+) {
+  const [person] = await tx
+    .select()
+    .from(staff)
+    .where(and(eq(staff.id, staffId), eq(staff.tenantId, tenantId)))
+    .for("update")
+    .limit(1);
+  if (!person) throw new UserError("That staff member no longer exists.");
+  const payments = await tx
+    .select({
+      id: salaryPayments.id,
+      year: salaryPayments.year,
+      month: salaryPayments.month,
+      kind: salaryPayments.kind,
+      amount: salaryPayments.amount,
+      paidDate: salaryPayments.paidDate,
+    })
+    .from(salaryPayments)
+    .where(
+      and(
+        eq(salaryPayments.staffId, staffId),
+        eq(salaryPayments.kind, kind),
+        eq(salaryPayments.year, year),
+        eq(salaryPayments.month, month),
+      ),
+    );
+  const problem = checkSalaryMonth({ ...person, allowances: [], payments }, kind, year, month, editing);
+  if (problem?.blocking) throw new UserError(problemText(problem));
+  return person;
+}
+
 export async function paySalary(formData: FormData) {
   return run(async () => {
     const { actor } = await requireEntry();
@@ -121,12 +171,8 @@ export async function paySalary(formData: FormData) {
     const paidDate = parseDate(formData.get("paidDate"));
     const accountId = parseId(formData.get("accountId"), "Cash or Bank");
     await db.transaction(async (tx) => {
-      const [person] = await tx
-        .select({ name: staff.name })
-        .from(staff)
-        .where(and(eq(staff.id, staffId), eq(staff.tenantId, actor.tenantId)))
-        .limit(1);
-      if (!person) throw new UserError("That staff member no longer exists.");
+      // year + month is the Salary Month chosen in the popup; the grid marks that month, not paidDate.
+      const person = await assertSalaryMonth(tx, actor.tenantId, staffId, kind, year, month);
       const [row] = await tx
         .insert(salaryPayments)
         .values({
@@ -150,6 +196,7 @@ export async function paySalary(formData: FormData) {
   }, "This month is already marked as paid.");
 }
 
+// Edits a payment. Changing its Salary Month moves the green mark from the old month to the new one.
 export async function updateSalaryPayment(formData: FormData) {
   return run(async () => {
     const { actor } = await requireAdmin();
@@ -166,9 +213,18 @@ export async function updateSalaryPayment(formData: FormData) {
         .for("update", { of: salaryPayments })
         .limit(1);
       if (!old) throw new UserError("That payment no longer exists.");
+      const p = old.payment;
+      // An older screen may not send the month: the payment then stays on its own month.
+      const { year, month } = formData.has("month")
+        ? parseYearMonth(formData.get("year"), formData.get("month"))
+        : { year: p.year, month: p.month };
+      const kind: SalaryKind = p.kind === "cleaning" ? "cleaning" : "salary";
+      await assertSalaryMonth(tx, actor.tenantId, p.staffId, kind, year, month, { id, year: p.year, month: p.month });
       const [row] = await tx
         .update(salaryPayments)
         .set({
+          year,
+          month,
           ...lines,
           otherNote: text(formData.get("otherNote")),
           paidDate,
@@ -179,12 +235,12 @@ export async function updateSalaryPayment(formData: FormData) {
         })
         .where(eq(salaryPayments.id, id))
         .returning();
-      const p = old.payment;
-      await replaceLedger(tx, actor, await ledgerFor(tx, actor.tenantId, id, old.name, p.kind, p.year, p.month, accountId, paidDate, lines.amount));
+      // The cash line keeps the payment date; its note follows the (possibly new) Salary Month.
+      await replaceLedger(tx, actor, await ledgerFor(tx, actor.tenantId, id, old.name, p.kind, year, month, accountId, paidDate, lines.amount));
       await writeAudit(tx, actor, "update", "salary_payments", id, p, row);
     });
     refresh();
-  });
+  }, "This month is already marked as paid.");
 }
 
 export async function deleteSalaryPayment(id: string) {

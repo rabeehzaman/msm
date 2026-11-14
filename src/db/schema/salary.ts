@@ -16,6 +16,8 @@ export const staff = pgTable("staff", {
   joiningDate: date("joining_date").notNull(),
   duesFrom: date("dues_from"),
   isActive: boolean("is_active").default(true).notNull(),
+  // The day they were marked inactive (migration 0010). Salary Months after that month are refused.
+  inactiveFrom: date("inactive_from"),
   cleaningFee: numeric("cleaning_fee", { precision: 12, scale: 2 }).default("0").notNull(),
   cleaningMode: cleaningFeeModeEnum("cleaning_mode").default("none").notNull(),
   notes: text("notes"),
@@ -31,6 +33,7 @@ export const salaryPayments = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
     staffId: uuid("staff_id").notNull().references(() => staff.id, { onDelete: "restrict" }),
+    // year + month is the Salary Month: the month this salary is for. paidDate is when it was paid.
     year: integer("year").notNull(),
     month: integer("month").notNull(),
     kind: text("kind").default("salary").notNull(),

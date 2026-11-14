@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Plus } from "lucide-react";
+import { HandCoins, Pencil, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,32 +10,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/empty-state";
-import { Field, NativeSelect, SaveButton, useAction } from "@/components/money/form";
+import { Field, NativeSelect, SaveButton, useAction, type AccountOption } from "@/components/money/form";
 import { PageHeader } from "@/components/money/page-header";
+import { payableLines, SalarySheet, type SalarySheetTarget, type SheetPerson } from "@/components/salary/salary-sheet";
 import { saveStaff, setStaffActive } from "@/lib/actions/salary";
 import { useSession } from "@/lib/auth/session";
 import { formatDate, formatMoney, todayIST } from "@/lib/format";
 import { useT } from "@/lib/i18n/client";
-import { staffRoleLabel } from "@/lib/salary/calc";
+import { staffRoleLabel, type YearMonth } from "@/lib/salary/calc";
 
-type Person = {
-  id: string;
-  name: string;
+type Person = SheetPerson & {
   role: "ustadh" | "cleaning" | "other";
   phone: string | null;
-  monthlySalary: string;
-  joiningDate: string;
-  duesFrom: string | null;
-  isActive: boolean;
-  cleaningFee: string;
-  cleaningMode: "none" | "included" | "separate";
   notes: string | null;
 };
 
-export function StaffClient({ people }: { people: Person[] }) {
+export function StaffClient({ people, accounts, now }: { people: Person[]; accounts: AccountOption[]; now: YearMonth }) {
   const t = useT();
-  const { isAdmin } = useSession();
+  const router = useRouter();
+  const { isAdmin, canEnter } = useSession();
   const [editing, setEditing] = useState<Person | "new" | null>(null);
+  const [paying, setPaying] = useState<SalarySheetTarget | null>(null);
   const toggle = useAction(setStaffActive);
 
   return (
@@ -76,17 +71,29 @@ export function StaffClient({ people }: { people: Person[] }) {
                 )}
                 <p className="text-muted-foreground text-xs">
                   {t("Joined")} {formatDate(p.joiningDate)}
+                  {!p.isActive && p.inactiveFrom ? ` · ${t("Inactive from")} ${formatDate(p.inactiveFrom)}` : ""}
                   {p.phone ? ` · ${p.phone}` : ""}
                 </p>
-                {isAdmin && (
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(p)}>
-                      <Pencil className="size-3.5" />
-                      {t("Edit")}
-                    </Button>
-                    <Button variant="ghost" size="sm" disabled={toggle.pending} onClick={() => toggle.call(p.id, !p.isActive)}>
-                      {t(p.isActive ? "Mark inactive" : "Mark active")}
-                    </Button>
+                {(isAdmin || canEnter) && (
+                  <div className="flex flex-wrap gap-1">
+                    {canEnter && payableLines([p]).length > 0 && (
+                      // Opens on this person's oldest unpaid Salary Month, else this month.
+                      <Button variant="outline" size="sm" onClick={() => setPaying({ lines: payableLines([p]) })}>
+                        <HandCoins className="size-3.5" />
+                        {t("Pay salary")}
+                      </Button>
+                    )}
+                    {isAdmin && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => setEditing(p)}>
+                          <Pencil className="size-3.5" />
+                          {t("Edit")}
+                        </Button>
+                        <Button variant="ghost" size="sm" disabled={toggle.pending} onClick={() => toggle.call(p.id, !p.isActive)}>
+                          {t(p.isActive ? "Mark inactive" : "Mark active")}
+                        </Button>
+                      </>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -95,6 +102,16 @@ export function StaffClient({ people }: { people: Person[] }) {
         </div>
       )}
       {editing && <StaffDialog person={editing === "new" ? null : editing} onClose={() => setEditing(null)} />}
+      {paying && (
+        <SalarySheet
+          target={paying}
+          people={people}
+          accounts={accounts}
+          now={now}
+          onClose={() => setPaying(null)}
+          onSaved={() => router.refresh()}
+        />
+      )}
     </div>
   );
 }
@@ -142,6 +159,14 @@ function StaffDialog({ person, onClose }: { person: Person | null; onClose: () =
           <Field label={t("Count dues from")} hint={t("Optional. Older months are not shown as pending.")}>
             <Input name="duesFrom" type="date" defaultValue={person?.duesFrom ?? ""} />
           </Field>
+          {person && !person.isActive && (
+            <Field
+              label={t("Inactive from")}
+              hint={t("Salary can be paid up to this month. Later months are closed.")}
+            >
+              <Input name="inactiveFrom" type="date" defaultValue={person.inactiveFrom ?? ""} />
+            </Field>
+          )}
           <Field label={t("Cleaning fee")}>
             <NativeSelect name="cleaningMode" value={mode} onChange={(e) => setMode(e.target.value as typeof mode)}>
               <option value="none">{t("No cleaning fee")}</option>

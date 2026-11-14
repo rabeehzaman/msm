@@ -42,7 +42,8 @@ export const salaryReports: ReportDefinition[] = [
         .where(and(eq(salaryPayments.tenantId, tenant.id), eq(salaryPayments.year, year), eq(salaryPayments.month, month)));
       const rows: ReportRow[] = payments.map(({ p, name, role, via }) => ({
         name,
-        role: staffRoleLabel[role],
+        role: p.kind === "cleaning" ? "Cleaning fee" : staffRoleLabel[role],
+        salaryMonth: `${MONTHS[p.month - 1]} ${p.year}`,
         basic: Number(p.basic),
         cleaning: Number(p.cleaning),
         ramadan: Number(p.ramadan),
@@ -54,11 +55,13 @@ export const salaryReports: ReportDefinition[] = [
       return {
         slug: "salary-register",
         title: "Monthly salary register",
+        // The month and year chosen here are the Salary Month, whatever day each salary was paid.
         subtitle: `${MONTHS[month - 1]} ${year}`,
         filters: [monthF, yearF],
         columns: [
           { key: "name", label: "Name" },
           { key: "role", label: "Role", translate: true },
+          { key: "salaryMonth", label: "Salary Month" },
           ...lineColumns,
           { key: "paidDate", label: "Payment date", kind: "date" },
           { key: "via", label: "Paid via" },
@@ -77,16 +80,18 @@ export const salaryReports: ReportDefinition[] = [
       const people = await getStaffFacts();
       const person = people.find((p) => p.id === params.staff) ?? people[0];
       const columns: ReportColumn[] = [
-        { key: "month", label: "Month" },
+        { key: "month", label: "Salary Month" },
+        { key: "line", label: "Type", translate: true },
         ...lineColumns,
         { key: "paidDate", label: "Payment date", kind: "date" },
         { key: "via", label: "Paid via" },
       ];
       if (!person) return { slug: "staff-history", title: "Staff-wise payment history", filters: [], columns, rows: [] };
       const rows: ReportRow[] = [...person.payments]
-        .sort((a, b) => a.year * 100 + a.month - (b.year * 100 + b.month))
+        .sort((a, b) => a.year * 100 + a.month - (b.year * 100 + b.month) || a.kind.localeCompare(b.kind))
         .map((p) => ({
           month: `${MONTHS[p.month - 1]} ${p.year}`,
+          line: p.kind === "cleaning" ? "Cleaning fee" : "Salary",
           basic: Number(p.basic),
           cleaning: Number(p.cleaning),
           ramadan: Number(p.ramadan),
@@ -141,7 +146,7 @@ export const salaryReports: ReportDefinition[] = [
         columns: [
           { key: "name", label: "Name" },
           { key: "line", label: "Type", translate: true },
-          { key: "month", label: "Month" },
+          { key: "month", label: "Salary Month" },
           { key: "amount", label: "Amount", kind: "money" },
         ],
         rows,

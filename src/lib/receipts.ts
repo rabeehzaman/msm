@@ -82,7 +82,8 @@ async function salarySlip(id: string): Promise<ReceiptData | null> {
     date: p.paidDate,
     partyLabel: "Paid to",
     party: person.name,
-    subject: `${MONTHS[p.month - 1]} ${p.year}`,
+    // What the salary is for comes from the Salary Month; the date above is the payment date.
+    subject: `${p.kind === "cleaning" ? "Cleaning fee" : "Salary"} for ${FULL_MONTHS[p.month - 1]} ${p.year} – ${person.name}`,
     lines,
     total: p.amount,
     via,

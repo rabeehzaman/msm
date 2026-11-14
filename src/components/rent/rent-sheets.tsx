@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { CircleAlert, Pencil, Printer, Trash2 } from "lucide-react";
+import { Pencil, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ConfirmButton } from "@/components/money/confirm-button";
+import { Notice } from "@/components/money/notice";
 import { AccountPicker, Field, NativeSelect, SaveButton, useAction, type AccountOption } from "@/components/money/form";
 import { deleteRentPayment, payRent, updateRentPayment } from "@/lib/actions/rent";
 import { useSession } from "@/lib/auth/session";
@@ -289,19 +290,5 @@ export function RentSheet({
         ) : null}
       </DialogContent>
     </Dialog>
-  );
-}
-
-function Notice({ tone = "warning", children }: { tone?: "warning" | "error"; children: React.ReactNode }) {
-  return (
-    <p
-      role="alert"
-      className={`flex items-start gap-2 rounded-xl p-3 text-sm ${
-        tone === "error" ? "bg-destructive/10 text-destructive" : "bg-amber-500/10 text-amber-800 dark:text-amber-300"
-      }`}
-    >
-      <CircleAlert className="mt-0.5 size-4 shrink-0" />
-      <span>{children}</span>
-    </p>
   );
 }

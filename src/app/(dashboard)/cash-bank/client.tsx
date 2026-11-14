@@ -150,6 +150,12 @@ export function CashBankClient({ accounts, recent }: { accounts: Account[]; rece
                         {t("Rental Month")}: {l.note.split(", ").pop()}
                       </p>
                     )}
+                    {l.sourceType === "salary" && l.note && (
+                      // Salary lines carry their Salary Month; the date below is the payment date.
+                      <p className="text-muted-foreground truncate text-xs">
+                        {t("Salary Month")}: {l.note}
+                      </p>
+                    )}
                     <p className="text-muted-foreground truncate text-xs">
                       {formatDate(l.date)} · {accountName.get(l.accountId)}
                       {l.createdByName ? ` · ${l.createdByName}` : ""}

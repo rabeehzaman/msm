@@ -211,9 +211,13 @@ export function DashboardClient({
         <Link href={canEnter ? "/salaries" : "/reports/unpaid-salaries"}>
           <Card className="h-full">
             <CardContent className="flex flex-col gap-1">
-              <p className="text-sm font-medium text-muted-foreground">{t("Salaries pending this month")}</p>
+              {/* By Salary Month: a February salary paid in November clears February, not November. */}
+              <p className="text-sm font-medium text-muted-foreground">{t("Salaries pending")}</p>
               <p className="font-heading text-2xl font-semibold">{formatMoney(money.salary.pendingAmount)}</p>
-              <p className="text-xs text-muted-foreground">{t("{n} unpaid", { n: money.salary.pendingCount })}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("{n} months", { n: money.salary.pendingCount })} · {t("This month")}: {formatMoney(money.salary.paid)} /{" "}
+                {formatMoney(money.salary.payable)}
+              </p>
             </CardContent>
           </Card>
         </Link>

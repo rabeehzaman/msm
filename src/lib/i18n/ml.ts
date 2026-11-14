@@ -635,4 +635,9 @@ export const ml: Record<string, string> = {
   "Other Income": "മറ്റ് വരുമാനം",
   "Hall / Auditorium hire": "ഹാൾ വാടക",
   Auction: "ലേലം",
+
+  // Rishad, 14 Nov 2026: "Salary Month" label exactly as given in the spec. "Salaries pending" follows
+  // the existing "Rent pending" wording. Other new text shows in English until Malayalam is agreed.
+  "Salary Month": "ശമ്പള മാസം",
+  "Salaries pending": "ശമ്പള കുടിശ്ശിക",
 };
