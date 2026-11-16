@@ -681,7 +681,6 @@ export const ml: Record<string, string> = {
   "Qard Hasan given": "നൽകിയ ഖർദ് ഹസൻ",
   "Qard Hasan repaid": "തിരിച്ചടച്ച ഖർദ് ഹസൻ",
   "Collections by category": "വിഭാഗം തിരിച്ചുള്ള പിരിവ്",
-  "Expenses by category": "വിഭാഗം തിരിച്ചുള്ള ചെലവ്",
   "Financial Summary": "സാമ്പത്തിക സംഗ്രഹം",
   "Income vs Expenses in this period": "ഈ കാലയളവിലെ വരവും ചെലവും",
   "Open finances": "സാമ്പത്തികം തുറക്കുക",
