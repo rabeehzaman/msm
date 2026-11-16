@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Lock, Mail } from "lucide-react";
+import { PERIOD_COOKIE } from "@/lib/period";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -33,6 +34,8 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
+      // A fresh login starts the Dashboard at This Month.
+      document.cookie = `${PERIOD_COOKIE}=; path=/; max-age=0; samesite=lax`;
       router.push("/dashboard");
       router.refresh();
     }
